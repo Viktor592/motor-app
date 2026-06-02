@@ -1,0 +1,279 @@
+// МОТОР — Prisma Schema
+// Соответствует документации: Раздел 03 — База данных
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ══════════════════════════════════════
+// ПОЛЬЗОВАТЕЛИ И РОЛИ
+// ══════════════════════════════════════
+
+enum UserRole {
+  CLIENT
+  MASTER
+  RECEPTIONIST
+  ADMIN
+}
+
+model User {
+  id           String   @id @default(uuid())
+  phone        String   @unique
+  phoneMasked  String
+  name         String
+  email        String?
+  passwordHash String   @default("")
+  role         UserRole @default(CLIENT)
+  pushToken    String?
+  isActive     Boolean  @default(true)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  // OTP авторизация
+  otpCode      String?
+  otpExpiresAt DateTime?
+  otpAttempts  Int      @default(0)
+
+  vehicles     Vehicle[]
+  orders       Order[]   @relation("ClientOrders")
+  staffOrders  Order[]   @relation("StaffOrders")
+  slots        CalendarSlot[]
+
+  @@index([phone])
+  @@index([role])
+  @@index([createdAt])
+  @@map("users")
+}
+
+// ══════════════════════════════════════
+// АВТОМОБИЛИ
+// ══════════════════════════════════════
+
+model Vehicle {
+  id        String  @id @default(uuid())
+  clientId  String
+  client    User    @relation(fields: [clientId], references: [id])
+  brand     String
+  model     String
+  year      Int
+  mileage   Int?
+  vinHash   String?   // VIN зашифрован
+  plateNum  String?
+  createdAt DateTime @default(now())
+
+  orders    Order[]
+
+  @@index([clientId])
+  @@map("vehicles")
+}
+
+// ══════════════════════════════════════
+// СПЕЦИАЛИСТЫ (ПОСТЫ)
+// ══════════════════════════════════════
+
+enum SpecialistType {
+  MECHANIC       // Автослесарь
+  ELECTRICIAN    // Автоэлектрик
+  DIAGNOSTICS    // Диагност
+}
+
+model Post {
+  id    String         @id @default(uuid())
+  name  String         // "Пост #1 — Слесарный"
+  type  SpecialistType
+  isActive Boolean     @default(true)
+
+  slots CalendarSlot[]
+
+  @@map("posts")
+}
+
+// ══════════════════════════════════════
+// КАЛЕНДАРЬ
+// ══════════════════════════════════════
+
+model CalendarSlot {
+  id        String   @id @default(uuid())
+  postId    String
+  post      Post     @relation(fields: [postId], references: [id])
+  masterId  String?
+  master    User?    @relation(fields: [masterId], references: [id])
+  startAt   DateTime
+  endAt     DateTime
+  isBooked  Boolean  @default(false)
+  order     Order?
+
+  @@index([postId])
+  @@index([startAt])
+  @@map("calendar_slots")
+}
+
+// ══════════════════════════════════════
+// ЗАКАЗ-НАРЯДЫ (центральная таблица)
+// ══════════════════════════════════════
+
+enum OrderStatus {
+  NEW           // Новый
+  ASSESSED      // Оценён
+  CONFIRMED     // Подтверждён клиентом
+  IN_PROGRESS   // В работе
+  READY         // Готов
+  CLOSED        // Закрыт / Оплачен
+  CANCELLED     // Отменён
+}
+
+enum SpecialistTypeOrder {
+  MECHANIC
+  ELECTRICIAN
+  DIAGNOSTICS
+}
+
+model Order {
+  id              String      @id @default(uuid())
+  orderNumber     String      @unique // ЗН-2025-XXXX
+  clientId        String
+  client          User        @relation("ClientOrders", fields: [clientId], references: [id])
+  vehicleId       String
+  vehicle         Vehicle     @relation(fields: [vehicleId], references: [id])
+  staffId         String?
+  staff           User?       @relation("StaffOrders", fields: [staffId], references: [id])
+  slotId          String?     @unique
+  slot            CalendarSlot? @relation(fields: [slotId], references: [id])
+  specialistType  SpecialistTypeOrder
+  complaintRaw    String       // Текст жалобы клиента
+  complaintParsed Json?        // AI-структурированный JSON
+  aiDiagResult    Json?        // Гипотезы и вероятности
+  status          OrderStatus  @default(NEW)
+  totalRetail     Decimal?     @db.Decimal(12, 2) // Розничная — клиент видит
+  totalCost       Decimal?     @db.Decimal(12, 2) // Закупочная — конфиденциально
+  paymentId       String?
+  paidAt          DateTime?
+  createdAt       DateTime     @default(now())
+  updatedAt       DateTime     @updatedAt
+
+  items           OrderItem[]
+  messages        ChatMessage[]
+
+  @@index([clientId])
+  @@index([staffId])
+  @@index([status])
+  @@index([createdAt])
+  @@index([orderNumber])
+  @@map("orders")
+}
+
+// ══════════════════════════════════════
+// ПОЗИЦИИ ЗАКАЗА
+// ══════════════════════════════════════
+
+enum OrderItemType {
+  WORK
+  PART
+}
+
+model OrderItem {
+  id          String        @id @default(uuid())
+  orderId     String
+  order       Order         @relation(fields: [orderId], references: [id])
+  type        OrderItemType
+  name        String
+  article     String?
+  qty         Int           @default(1)
+  costPrice   Decimal       @db.Decimal(12, 2) // Закупочная — конфиденциально
+  retailPrice Decimal       @db.Decimal(12, 2) // Розничная
+  markup      Int           // Процент наценки
+
+  @@index([orderId])
+  @@map("order_items")
+}
+
+// ══════════════════════════════════════
+// ЗАПЧАСТИ
+// ══════════════════════════════════════
+
+enum PartCategory {
+  OIL_FILTERS    // Масло и фильтры
+  OEM            // Оригинал OEM
+  AFTERMARKET    // Аналоги
+  BRAKES         // Тормоза
+  BODY           // Кузов
+  CHEMICALS      // Химия, расходники
+}
+
+model Part {
+  id          String      @id @default(uuid())
+  article     String      @unique
+  name        String
+  category    PartCategory
+  isOriginal  Boolean     @default(false)
+  oemNumber   String?
+  localStock  Int         @default(0)
+  localCost   Decimal?    @db.Decimal(12, 2)
+  weightKg    Decimal?    @db.Decimal(8, 3)
+  cacheUpdAt  DateTime?
+  createdAt   DateTime    @default(now())
+
+  @@index([article])
+  @@index([category])
+  @@map("parts")
+}
+
+// ══════════════════════════════════════
+// ПРАВИЛА ЦЕНООБРАЗОВАНИЯ
+// ══════════════════════════════════════
+
+model PriceRule {
+  id          String      @id @default(uuid())
+  category    PartCategory @unique
+  markupPct   Int         // Процент наценки
+  updatedAt   DateTime    @updatedAt
+  updatedBy   String?     // userId администратора
+
+  @@map("price_rules")
+}
+
+// ══════════════════════════════════════
+// ЧАТ С AI-АГЕНТОМ
+// ══════════════════════════════════════
+
+enum MessageRole {
+  USER
+  ASSISTANT
+  SYSTEM
+}
+
+model ChatMessage {
+  id        String      @id @default(uuid())
+  orderId   String?
+  order     Order?      @relation(fields: [orderId], references: [id])
+  userId    String
+  role      MessageRole
+  content   String      @db.Text
+  createdAt DateTime    @default(now())
+
+  @@index([orderId])
+  @@index([userId])
+  @@map("chat_messages")
+}
+
+// ══════════════════════════════════════
+// АУДИТ-ЖУРНАЛ ЦЕН
+// ══════════════════════════════════════
+
+model PriceAuditLog {
+  id          String   @id @default(uuid())
+  orderId     String?
+  itemName    String
+  costPrice   Decimal  @db.Decimal(12, 2)
+  retailPrice Decimal  @db.Decimal(12, 2)
+  markupPct   Int
+  performedBy String
+  createdAt   DateTime @default(now())
+
+  @@map("price_audit_log")
+}

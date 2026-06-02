@@ -1,0 +1,46 @@
+/* МОТОР Web — Global Styles */
+@import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Barlow+Condensed:wght@400;600;700;900&family=Barlow:wght@400;500;600&family=JetBrains+Mono:wght@400;700&display=swap');
+
+:root {
+  --void:    #060608;
+  --void2:   #0c0c0f;
+  --plate:   #111115;
+  --plate2:  #16161b;
+  --cage:    #1e1e25;
+  --wire:    #2a2a35;
+  --ore:     #ff6200;
+  --ore2:    #ff8c38;
+  --ore-d:   rgba(255,98,0,.12);
+  --teal:    #00e5c4;
+  --teal-d:  rgba(0,229,196,.1);
+  --gold:    #ffc600;
+  --blue:    #3db8ff;
+  --blue-d:  rgba(61,184,255,.08);
+  --green:   #3ddc68;
+  --green-d: rgba(61,220,104,.1);
+  --red:     #ff3b3b;
+  --chalk:   #f0f0f5;
+  --ash:     #c8c8d8;
+  --dust:    #6a6a80;
+  --soot:    #3a3a4a;
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+html, body {
+  background: var(--void);
+  color: var(--ash);
+  font-family: 'Barlow', system-ui, sans-serif;
+  min-height: 100vh;
+}
+
+#root { min-height: 100vh; display: flex; flex-direction: column; }
+
+/* Scrollbar */
+::-webkit-scrollbar { width: 4px; }
+::-webkit-scrollbar-track { background: var(--void2); }
+::-webkit-scrollbar-thumb { background: var(--wire); border-radius: 2px; }
+::-webkit-scrollbar-thumb:hover { background: var(--ore); }
+
+/* Utils */
+.sr-only { position: absolute; left: -9999px; }

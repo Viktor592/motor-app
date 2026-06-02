@@ -1,0 +1,19 @@
+{
+  "name": "motor-app",
+  "version": "1.0.0",
+  "private": true,
+  "workspaces": [
+    "packages/*"
+  ],
+  "scripts": {
+    "android": "yarn workspace @motor/mobile android",
+    "ios": "yarn workspace @motor/mobile ios",
+    "web": "yarn workspace @motor/web dev",
+    "start:mobile": "yarn workspace @motor/mobile start",
+    "lint": "yarn workspaces run lint",
+    "ts": "yarn workspaces run ts"
+  },
+  "devDependencies": {
+    "typescript": "^5.3.3"
+  }
+}
