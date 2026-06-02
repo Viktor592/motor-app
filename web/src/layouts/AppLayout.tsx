@@ -24,6 +24,7 @@ const NAV_STAFF = [
 
 const NAV_ADMIN = [
   { to: '/admin',             icon: '⚙',  label: 'Панель'     },
+  { to: '/settings',          icon: '🔧', label: 'Настройки'  },
   { to: '/analytics/pnl',    icon: '📊', label: 'P&L'        },
   { to: '/exec/orders',      icon: '📋', label: 'Канбан'     },
   { to: '/orders',           icon: '📂', label: 'Заказы'     },

@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { api } from '../services/api';
+import { Link } from 'react-router-dom';
 import s from './AdminPage.module.css';
 
 interface PriceRule { id: string; category: string; markupPct: number; updatedAt: string; }
@@ -103,6 +104,9 @@ export default function AdminPage() {
         ))}
       </div>
 
+      <div style={{marginBottom:16}}>
+        <Link to='/settings' style={{color:'var(--dust)',fontSize:13,textDecoration:'none'}}>⚙ Настройки сервиса →</Link>
+      </div>
       {loading && <div className={s.loading}>Загрузка…</div>}
 
       {/* Stats */}

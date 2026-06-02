@@ -23,6 +23,7 @@ import AdminPage           from './pages/AdminPage';
 import PnlPage            from './pages/PnlPage';
 import MasterAnalyticsPage from './pages/MasterAnalyticsPage';
 import OnboardingPage      from './pages/OnboardingPage';
+import SettingsPage        from './pages/SettingsPage';
 
 function OnboardingGuard() {
   const navigate = useNavigate();
@@ -51,7 +52,8 @@ export default function App() {
       <OnboardingGuard />
       <Routes>
         {/* Онбординг */}
-        <Route path='/setup' element={<OnboardingPage />} />
+        <Route path='/setup'    element={<OnboardingPage />} />
+        <Route path='/settings' element={<SettingsPage />} />
 
         {/* Auth */}
         <Route element={<AuthLayout />}>
