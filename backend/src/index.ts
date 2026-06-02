@@ -21,6 +21,7 @@ import { settingsRouter }   from './routes/settings';
 import { exportRouter }   from './routes/export';
 import { initSocket }        from './services/socket';
 import { initTelegramBot }   from './services/telegram';
+import { startScheduler }    from './services/scheduler';
 import { errorHandler } from './middleware/errorHandler';
 import { rateLimiter } from './middleware/rateLimiter';
 
@@ -76,6 +77,7 @@ app.use(errorHandler);
 const PORT = process.env.PORT || 3000;
 httpServer.listen(PORT, () => {
   initTelegramBot().catch(console.error);
+  startScheduler();
   console.log(`\n🔧 МОТОР API запущен на порту ${PORT}`);
   console.log(`   http://localhost:${PORT}/health\n`);
 });
