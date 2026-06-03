@@ -218,6 +218,9 @@ model Part {
   cacheUpdAt  DateTime?
   createdAt   DateTime    @default(now())
 
+  movements    StockMovement[]
+  reservations StockReservation[]
+
   @@index([article])
   @@index([category])
   @@map("parts")
@@ -276,4 +279,118 @@ model PriceAuditLog {
   createdAt   DateTime @default(now())
 
   @@map("price_audit_log")
+}
+
+// ══════════════════════════════════════
+// ИТЕРАЦИЯ 10 — СКЛАД И ЗАПЧАСТИ
+// ══════════════════════════════════════
+
+// Движение склада
+enum StockMovementType {
+  IN          // Приход (от поставщика)
+  OUT         // Расход (в заказ)
+  RESERVE     // Резерв под заказ
+  UNRESERVE   // Снятие резерва
+  ADJUSTMENT  // Инвентаризация
+}
+
+model StockMovement {
+  id          String              @id @default(uuid())
+  partId      String
+  part        Part                @relation(fields: [partId], references: [id])
+  type        StockMovementType
+  qty         Int                 // > 0 приход, < 0 расход
+  orderId     String?             // Если связан с заказом
+  supplierId  String?
+  supplier    Supplier?           @relation(fields: [supplierId], references: [id])
+  costPrice   Decimal?            @db.Decimal(12, 2)
+  comment     String?
+  performedBy String              // userId
+  createdAt   DateTime            @default(now())
+
+  @@index([partId])
+  @@index([orderId])
+  @@index([createdAt])
+  @@map("stock_movements")
+}
+
+// Резервирование запчастей под заказы
+model StockReservation {
+  id        String   @id @default(uuid())
+  partId    String
+  part      Part     @relation(fields: [partId], references: [id])
+  orderId   String
+  qty       Int
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+
+  @@index([partId])
+  @@index([orderId])
+  @@map("stock_reservations")
+}
+
+// Поставщики
+enum SupplierType {
+  EXIST       // Exist.ru API
+  AUTODOC     // Autodoc.ru API
+  MANUAL      // Ручной ввод
+}
+
+model Supplier {
+  id         String       @id @default(uuid())
+  name       String
+  type       SupplierType @default(MANUAL)
+  apiKey     String?
+  apiUrl     String?
+  phone      String?
+  email      String?
+  isActive   Boolean      @default(true)
+  createdAt  DateTime     @default(now())
+
+  movements  StockMovement[]
+  orders     SupplierOrder[]
+
+  @@map("suppliers")
+}
+
+// Заказы поставщикам
+enum SupplierOrderStatus {
+  DRAFT       // Черновик
+  SENT        // Отправлен
+  CONFIRMED   // Подтверждён
+  DELIVERED   // Доставлен
+  CANCELLED   // Отменён
+}
+
+model SupplierOrder {
+  id          String              @id @default(uuid())
+  supplierId  String
+  supplier    Supplier            @relation(fields: [supplierId], references: [id])
+  status      SupplierOrderStatus @default(DRAFT)
+  totalCost   Decimal?            @db.Decimal(12, 2)
+  comment     String?
+  createdBy   String
+  createdAt   DateTime            @default(now())
+  updatedAt   DateTime            @updatedAt
+
+  items       SupplierOrderItem[]
+
+  @@index([supplierId])
+  @@index([status])
+  @@map("supplier_orders")
+}
+
+model SupplierOrderItem {
+  id              String        @id @default(uuid())
+  supplierOrderId String
+  supplierOrder   SupplierOrder @relation(fields: [supplierOrderId], references: [id])
+  partId          String?
+  article         String
+  name            String
+  qty             Int
+  costPrice       Decimal       @db.Decimal(12, 2)
+  isReceived      Boolean       @default(false)
+
+  @@index([supplierOrderId])
+  @@map("supplier_order_items")
 }

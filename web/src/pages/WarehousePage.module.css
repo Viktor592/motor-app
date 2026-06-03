@@ -1,0 +1,88 @@
+.page { padding: 24px; max-width: 1200px; margin: 0 auto; }
+
+.header { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 16px; margin-bottom: 24px; }
+.title  { font-size: 1.5rem; font-weight: 700; margin: 0; }
+
+.tabs       { display: flex; gap: 4px; background: var(--surface-1); border-radius: 10px; padding: 4px; }
+.tab        { padding: 8px 16px; border: none; border-radius: 8px; cursor: pointer; background: transparent; font-size: 0.875rem; color: var(--text-2); transition: all .15s; }
+.tabActive  { background: var(--surface-0); color: var(--text-1); font-weight: 600; box-shadow: 0 1px 4px rgba(0,0,0,.1); }
+
+.section { background: var(--surface-0); border-radius: 12px; border: 1px solid var(--border); overflow: hidden; }
+
+.toolbar    { display: flex; align-items: center; gap: 12px; padding: 16px; border-bottom: 1px solid var(--border); }
+.search     { flex: 1; max-width: 340px; padding: 8px 12px; border: 1px solid var(--border); border-radius: 8px; font-size: 0.875rem; background: var(--surface-1); color: var(--text-1); }
+.total      { color: var(--text-2); font-size: 0.875rem; }
+
+.table      { width: 100%; border-collapse: collapse; font-size: 0.875rem; }
+.table th   { text-align: left; padding: 10px 14px; border-bottom: 2px solid var(--border); color: var(--text-2); font-weight: 600; font-size: 0.8rem; text-transform: uppercase; letter-spacing: .04em; }
+.table td   { padding: 10px 14px; border-bottom: 1px solid var(--border); }
+.table tr:last-child td { border-bottom: none; }
+.table tr:hover td { background: var(--surface-1); }
+
+.tableInner    { width: 100%; border-collapse: collapse; font-size: 0.8rem; background: var(--surface-1); }
+.tableInner th { padding: 8px 12px; border-bottom: 1px solid var(--border); color: var(--text-2); }
+.tableInner td { padding: 8px 12px; border-bottom: 1px solid var(--border); }
+.received td   { opacity: .6; }
+
+.rowDanger  { background: rgba(220,38,38,.04); }
+.rowWarn    { background: rgba(217,119,6,.04); }
+
+.center { text-align: center; }
+.badge  { background: var(--surface-1); border: 1px solid var(--border); border-radius: 6px; padding: 2px 8px; font-size: 0.75rem; white-space: nowrap; }
+
+.zero     { color: #dc2626; font-weight: 700; }
+.low      { color: #d97706; font-weight: 600; }
+.reserved { color: #7c3aed; font-weight: 600; }
+
+.pagination { display: flex; align-items: center; gap: 12px; padding: 12px 16px; justify-content: flex-end; }
+.pagination button { padding: 6px 14px; border: 1px solid var(--border); border-radius: 6px; cursor: pointer; background: var(--surface-0); color: var(--text-1); font-size: 0.875rem; }
+.pagination button:disabled { opacity: .4; cursor: default; }
+
+.loading { padding: 40px; text-align: center; color: var(--text-2); }
+.empty   { padding: 40px; text-align: center; color: var(--text-2); }
+
+/* Low stock */
+.autoOrderBar   { display: flex; align-items: center; gap: 12px; padding: 16px; border-bottom: 1px solid var(--border); flex-wrap: wrap; }
+.lowStockTitle  { font-weight: 600; flex: 1; min-width: 200px; color: #d97706; }
+.select         { padding: 8px 12px; border: 1px solid var(--border); border-radius: 8px; background: var(--surface-1); color: var(--text-1); font-size: 0.875rem; }
+
+/* Supplier orders */
+.orderList    { display: flex; flex-direction: column; }
+.orderCard    { border-bottom: 1px solid var(--border); }
+.orderCard:last-child { border-bottom: none; }
+.orderHead    { display: flex; align-items: center; justify-content: space-between; padding: 14px 16px; cursor: pointer; transition: background .1s; }
+.orderHead:hover { background: var(--surface-1); }
+
+.orderSupplier { font-weight: 600; margin-right: 12px; }
+.orderDate     { color: var(--text-2); font-size: 0.8rem; margin-right: 8px; }
+.orderComment  { color: var(--text-2); font-size: 0.8rem; font-style: italic; }
+
+.orderRight       { display: flex; align-items: center; gap: 10px; }
+.orderTotal       { font-weight: 700; font-size: 1rem; }
+.statusBadge      { padding: 3px 10px; border-radius: 20px; font-size: 0.75rem; font-weight: 600; color: #fff; }
+.statusActions    { display: flex; gap: 6px; }
+
+/* Supplier grid */
+.supplierGrid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 16px; padding: 20px; }
+.supplierCard { display: flex; align-items: center; gap: 14px; padding: 16px; border: 1px solid var(--border); border-radius: 12px; background: var(--surface-1); }
+.supplierIcon { font-size: 2rem; }
+.supplierName { font-weight: 600; }
+.supplierType { font-size: 0.75rem; color: var(--text-2); }
+.statusDot    { width: 10px; height: 10px; border-radius: 50%; margin-left: auto; }
+.dotActive    { background: #22c55e; }
+.dotOff       { background: #9ca3af; }
+
+/* Buttons */
+.btnPrimary   { padding: 8px 18px; background: var(--accent); color: #fff; border: none; border-radius: 8px; cursor: pointer; font-size: 0.875rem; font-weight: 600; }
+.btnSecondary { padding: 8px 18px; background: var(--surface-1); color: var(--text-1); border: 1px solid var(--border); border-radius: 8px; cursor: pointer; font-size: 0.875rem; }
+.btnSm        { padding: 4px 10px; background: var(--surface-1); color: var(--text-1); border: 1px solid var(--border); border-radius: 6px; cursor: pointer; font-size: 0.78rem; white-space: nowrap; }
+.btnDanger    { padding: 4px 10px; background: #fee2e2; color: #dc2626; border: 1px solid #fca5a5; border-radius: 6px; cursor: pointer; font-size: 0.78rem; }
+
+/* Modal */
+.overlay      { position: fixed; inset: 0; background: rgba(0,0,0,.45); display: flex; align-items: center; justify-content: center; z-index: 50; }
+.modal        { background: var(--surface-0); border-radius: 16px; padding: 28px; width: 380px; max-width: 95vw; box-shadow: 0 20px 60px rgba(0,0,0,.2); }
+.modalTitle   { font-size: 1.1rem; font-weight: 700; margin: 0 0 6px; }
+.modalSub     { color: var(--text-2); font-size: 0.875rem; margin: 0 0 20px; }
+.label        { display: block; font-size: 0.8rem; font-weight: 600; color: var(--text-2); margin-bottom: 6px; }
+.input        { display: block; width: 100%; padding: 8px 12px; border: 1px solid var(--border); border-radius: 8px; font-size: 0.875rem; background: var(--surface-1); color: var(--text-1); margin-bottom: 16px; box-sizing: border-box; }
+.modalActions { display: flex; gap: 10px; justify-content: flex-end; margin-top: 8px; }
