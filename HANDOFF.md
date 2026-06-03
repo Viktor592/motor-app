@@ -6,7 +6,8 @@
 ## 📦 Проект
 
 **Название:** МОТОР — AI-экосистема автосервиса  
-**GitHub:** https://github.com/Viktor592/motor-app (приватный)  
+**GitHub:** https://github.com/Viktor592/motor-app (приватный ✅ запушен)
+**Последний коммит:** `e3f4e76`  
 **Архив:** motor-app-v7.zip (последняя версия)  
 **Итерация:** 9 из 14 завершена
 
@@ -144,25 +145,21 @@ make db-seed
 
 ## 📋 GitHub — статус
 
-**Репозиторий:** нужно создать на github.com  
-**Токен нужен:** классический (не fine-grained) с правом `repo`
+**Репозиторий:** ✅ https://github.com/Viktor592/motor-app  
+**Статус:** ✅ Репо создан и запушен
 
-**Создать репо:**
-1. github.com/new → `motor-app` → Private → Create (без README)
-2. Дать Claude ссылку `https://github.com/Viktor592/motor-app.git`
+**Что есть на GitHub:**
+- 4 коммита в `main`
+- 7 Issues с дорожной картой (итерации 10-14 + CI/CD + PWA)
+- 4 Milestones (v1.0 → v2.0)
+- Labels: backend, mobile, web, ai, integration, devops
+- Topics: react-native, nodejs, ai, auto-service, groq-api, telegram-bot
 
-**Запушить (выполнить локально):**
+**Для продолжения в новой сессии:**
 ```bash
+git clone https://github.com/Viktor592/motor-app
 cd motor-app
-git remote add origin https://ТОКЕН@github.com/Viktor592/motor-app.git
-git push -u origin main
-```
-
-**Git история уже готова — 3 коммита:**
-```
-0b47f72 feat: scheduler daily report + push script
-b121461 feat: SettingsPage + Telegram bot + Excel export
-5342914 🚀 Initial commit — МОТОР v1.0
+# Или просто использовать motor-app-final.zip
 ```
 
 ---
