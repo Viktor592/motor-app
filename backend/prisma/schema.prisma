@@ -394,3 +394,82 @@ model SupplierOrderItem {
   @@index([supplierOrderId])
   @@map("supplier_order_items")
 }
+
+// ══════════════════════════════════════
+// ИТЕРАЦИЯ 11 — ФИНАНСЫ
+// ══════════════════════════════════════
+
+// Кассовая смена
+enum ShiftStatus {
+  OPEN
+  CLOSED
+}
+
+model CashShift {
+  id            String      @id @default(uuid())
+  openedBy      String      // userId
+  closedBy      String?
+  status        ShiftStatus @default(OPEN)
+  openCash      Decimal     @db.Decimal(12, 2) @default(0) // Остаток на начало
+  closeCash     Decimal?    @db.Decimal(12, 2)             // Остаток на конец
+  expectedCash  Decimal?    @db.Decimal(12, 2)             // По системе
+  diffCash      Decimal?    @db.Decimal(12, 2)             // Расхождение
+  openedAt      DateTime    @default(now())
+  closedAt      DateTime?
+  comment       String?
+
+  transactions  CashTransaction[]
+
+  @@index([status])
+  @@index([openedAt])
+  @@map("cash_shifts")
+}
+
+// Тип транзакции
+enum TransactionType {
+  INCOME_CASH      // Приход наличными
+  INCOME_CARD      // Приход безналом / СБП
+  EXPENSE          // Расход
+  WITHDRAWAL       // Изъятие из кассы
+  DEPOSIT          // Внесение в кассу
+}
+
+// Категория расхода
+enum ExpenseCategory {
+  SALARY           // Зарплата
+  RENT             // Аренда
+  PARTS_PURCHASE   // Закупка запчастей
+  UTILITIES        // Коммунальные
+  MARKETING        // Реклама
+  EQUIPMENT        // Оборудование
+  OTHER            // Прочее
+}
+
+model CashTransaction {
+  id          String           @id @default(uuid())
+  shiftId     String
+  shift       CashShift        @relation(fields: [shiftId], references: [id])
+  type        TransactionType
+  category    ExpenseCategory?
+  amount      Decimal          @db.Decimal(12, 2)
+  orderId     String?          // Если привязан к заказу
+  description String?
+  performedBy String
+  createdAt   DateTime         @default(now())
+
+  @@index([shiftId])
+  @@index([type])
+  @@index([createdAt])
+  @@map("cash_transactions")
+}
+
+// Плановые расходы (бюджет)
+model ExpenseBudget {
+  id        String          @id @default(uuid())
+  category  ExpenseCategory @unique
+  monthlyAmount Decimal     @db.Decimal(12, 2)
+  updatedAt DateTime        @updatedAt
+  updatedBy String?
+
+  @@map("expense_budgets")
+}
