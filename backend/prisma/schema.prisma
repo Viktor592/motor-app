@@ -510,3 +510,63 @@ model Booking {
   @@index([clientPhone])
   @@map("bookings")
 }
+
+// ══════════════════════════════════════
+// ИТЕРАЦИИ 13-15
+// ══════════════════════════════════════
+
+// Бонусная программа — транзакции баллов
+enum LoyaltyTxType {
+  EARN       // Начисление за визит
+  REDEEM     // Списание при оплате
+  REFERRAL   // Реферальный бонус
+  PROMO      // Промо-начисление
+  EXPIRE     // Сгорание баллов
+}
+
+model LoyaltyTransaction {
+  id          String        @id @default(uuid())
+  userId      String
+  type        LoyaltyTxType
+  points      Int           // > 0 начисление, < 0 списание
+  orderId     String?
+  description String?
+  expiresAt   DateTime?
+  createdAt   DateTime      @default(now())
+
+  @@index([userId])
+  @@index([orderId])
+  @@map("loyalty_transactions")
+}
+
+// Реферальная программа
+model Referral {
+  id          String   @id @default(uuid())
+  referrerId  String   // кто привёл
+  refereeId   String   // кого привёл
+  bonusPoints Int      @default(500)
+  isPaid      Boolean  @default(false)
+  createdAt   DateTime @default(now())
+
+  @@unique([refereeId])
+  @@index([referrerId])
+  @@map("referrals")
+}
+
+// Напоминания о ТО
+model ToReminder {
+  id          String   @id @default(uuid())
+  vehicleId   String
+  userId      String
+  type        String   // oil_change | tire_rotation | inspection | etc
+  dueDate     DateTime
+  dueMileage  Int?
+  isSent      Boolean  @default(false)
+  sentAt      DateTime?
+  createdAt   DateTime @default(now())
+
+  @@index([vehicleId])
+  @@index([dueDate])
+  @@index([isSent])
+  @@map("to_reminders")
+}

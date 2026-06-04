@@ -27,6 +27,7 @@ const NAV_ADMIN = [
   { to: '/warehouse',         icon: '📦', label: 'Склад'      },
   { to: '/finance',           icon: '💰', label: 'Финансы'    },
   { to: '/bookings',          icon: '📅', label: 'Записи'     },
+  { to: '/report',            icon: '📈', label: 'Отчёты'    },
   { to: '/settings',          icon: '🔧', label: 'Настройки'  },
   { to: '/analytics/pnl',    icon: '📊', label: 'P&L'        },
   { to: '/exec/orders',      icon: '📋', label: 'Канбан'     },

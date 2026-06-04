@@ -185,14 +185,14 @@ analyticsRouter.get('/pnl', authenticate, authorize('ADMIN'), async (req, res, n
 });
 
 // ── Хелперы ───────────────────────────────────────────────────────────────────
-function getPeriodStart(period: string): Date {
+function getPeriodStart(period: string, multiplier = 1): Date {
   const d = new Date();
   switch (period) {
-    case 'week':    d.setDate(d.getDate() - 7);    break;
-    case 'month':   d.setMonth(d.getMonth() - 1);  break;
-    case 'quarter': d.setMonth(d.getMonth() - 3);  break;
-    case 'year':    d.setFullYear(d.getFullYear() - 1); break;
-    default:        d.setMonth(d.getMonth() - 1);
+    case 'week':    d.setDate(d.getDate() - 7 * multiplier);        break;
+    case 'month':   d.setMonth(d.getMonth() - 1 * multiplier);      break;
+    case 'quarter': d.setMonth(d.getMonth() - 3 * multiplier);      break;
+    case 'year':    d.setFullYear(d.getFullYear() - 1 * multiplier); break;
+    default:        d.setMonth(d.getMonth() - 1 * multiplier);
   }
   return d;
 }
@@ -205,3 +205,147 @@ function getMonday(date: Date): Date {
   d.setHours(0, 0, 0, 0);
   return d;
 }
+
+// ══════════════════════════════════════
+// ИТЕРАЦИЯ 13 — РАСШИРЕННАЯ АНАЛИТИКА
+// ══════════════════════════════════════
+
+// GET /api/v1/analytics/report?period=month — сводный отчёт
+analyticsRouter.get('/report', authenticate, authorize('ADMIN'), async (req, res, next) => {
+  try {
+    const period = (req.query.period as string) || 'month';
+    const from   = getPeriodStart(period);
+    const prevFrom = getPeriodStart(period, 2); // предыдущий период
+
+    const [closedOrders, prevOrders, masters, transactions] = await Promise.all([
+      prisma.order.findMany({
+        where: { status: 'CLOSED', paidAt: { gte: from } },
+        include: { items: true, staff: { select: { name: true } } },
+      }),
+      prisma.order.findMany({
+        where: { status: 'CLOSED', paidAt: { gte: prevFrom, lt: from } },
+        include: { items: true },
+      }),
+      prisma.user.findMany({
+        where: { role: 'MASTER' },
+        select: { id: true, name: true },
+      }),
+      prisma.cashTransaction.findMany({
+        where: { createdAt: { gte: from }, type: 'EXPENSE' },
+      }),
+    ]);
+
+    // --- Текущий период ---
+    const revenue    = closedOrders.reduce((s, o) => s + Number(o.totalRetail ?? 0), 0);
+    const cogs       = closedOrders.reduce((s, o) => s + Number(o.totalCost   ?? 0), 0);
+    const expenses   = transactions.reduce((s, t) => s + Number(t.amount), 0);
+    const netProfit  = revenue - cogs - expenses;
+    const avgCheck   = closedOrders.length > 0 ? Math.round(revenue / closedOrders.length) : 0;
+
+    // --- Предыдущий период ---
+    const prevRevenue = prevOrders.reduce((s, o) => s + Number(o.totalRetail ?? 0), 0);
+    const growthPct   = prevRevenue > 0 ? Math.round((revenue - prevRevenue) / prevRevenue * 100) : null;
+
+    // --- Топ услуги ---
+    const serviceMap: Record<string, { count: number; revenue: number }> = {};
+    closedOrders.forEach(o => {
+      o.items.forEach(item => {
+        if (item.type !== 'WORK') return;
+        const cur = serviceMap[item.name] ?? { count: 0, revenue: 0 };
+        cur.count++;
+        cur.revenue += item.retailPrice * item.qty;
+        serviceMap[item.name] = cur;
+      });
+    });
+    const topServices = Object.entries(serviceMap)
+      .map(([name, v]) => ({ name, ...v, revenue: Math.round(v.revenue) }))
+      .sort((a, b) => b.revenue - a.revenue)
+      .slice(0, 10);
+
+    // --- Топ мастера ---
+    const masterMap: Record<string, { name: string; orders: number; revenue: number }> = {};
+    closedOrders.forEach(o => {
+      if (!o.staffId) return;
+      const masterName = o.staff?.name ?? 'Неизвестно';
+      const cur = masterMap[o.staffId] ?? { name: masterName, orders: 0, revenue: 0 };
+      cur.orders++;
+      cur.revenue += Number(o.totalRetail ?? 0);
+      masterMap[o.staffId] = cur;
+    });
+    const topMasters = Object.entries(masterMap)
+      .map(([id, v]) => ({ id, ...v, revenue: Math.round(v.revenue), avgCheck: v.orders > 0 ? Math.round(v.revenue / v.orders) : 0 }))
+      .sort((a, b) => b.revenue - a.revenue);
+
+    // --- Загрузка по дням недели ---
+    const weekdayMap = new Array(7).fill(0).map(() => ({ orders: 0, revenue: 0 }));
+    closedOrders.forEach(o => {
+      const day = new Date(o.paidAt ?? o.updatedAt).getDay();
+      weekdayMap[day].orders++;
+      weekdayMap[day].revenue += Number(o.totalRetail ?? 0);
+    });
+    const weekdays = ['Вс','Пн','Вт','Ср','Чт','Пт','Сб'];
+    const byWeekday = weekdayMap.map((v, i) => ({ day: weekdays[i], ...v, revenue: Math.round(v.revenue) }));
+
+    // --- Динамика по дням ---
+    const dailyMap = new Map<string, { orders: number; revenue: number }>();
+    closedOrders.forEach(o => {
+      const day = new Date(o.paidAt ?? o.updatedAt).toISOString().slice(0, 10);
+      const cur = dailyMap.get(day) ?? { orders: 0, revenue: 0 };
+      cur.orders++;
+      cur.revenue += Number(o.totalRetail ?? 0);
+      dailyMap.set(day, cur);
+    });
+    const daily = Array.from(dailyMap.entries())
+      .map(([date, v]) => ({ date, orders: v.orders, revenue: Math.round(v.revenue) }))
+      .sort((a, b) => a.date.localeCompare(b.date));
+
+    res.json({
+      period,
+      summary: {
+        revenue:      Math.round(revenue),
+        cogs:         Math.round(cogs),
+        expenses:     Math.round(expenses),
+        netProfit:    Math.round(netProfit),
+        grossMarginPct: revenue > 0 ? Math.round((revenue - cogs) / revenue * 100) : 0,
+        netMarginPct:   revenue > 0 ? Math.round(netProfit / revenue * 100) : 0,
+        totalOrders:  closedOrders.length,
+        avgCheck,
+        growthPct,
+        prevRevenue:  Math.round(prevRevenue),
+      },
+      topServices,
+      topMasters,
+      byWeekday,
+      daily,
+    });
+  } catch (e) { next(e); }
+});
+
+// GET /api/v1/analytics/kpi — KPI для дашборда (сегодня)
+analyticsRouter.get('/kpi', authenticate, authorize('ADMIN', 'RECEPTIONIST'), async (req, res, next) => {
+  try {
+    const todayStart = new Date(); todayStart.setHours(0,0,0,0);
+    const weekStart  = getPeriodStart('week');
+    const monthStart = getPeriodStart('month');
+
+    const [todayOrders, weekOrders, monthOrders, activeOrders, pendingBookings, openShift] = await Promise.all([
+      prisma.order.findMany({ where: { status: 'CLOSED', paidAt: { gte: todayStart } }, select: { totalRetail: true } }),
+      prisma.order.findMany({ where: { status: 'CLOSED', paidAt: { gte: weekStart  } }, select: { totalRetail: true } }),
+      prisma.order.findMany({ where: { status: 'CLOSED', paidAt: { gte: monthStart } }, select: { totalRetail: true } }),
+      prisma.order.count({ where: { status: { in: ['PENDING','IN_PROGRESS','WAITING_PARTS','QUALITY_CHECK','DONE'] } } }),
+      prisma.booking.count({ where: { status: 'PENDING' } }),
+      prisma.cashShift.findFirst({ where: { status: 'OPEN' } }),
+    ]);
+
+    const sum = (orders: { totalRetail: any }[]) => Math.round(orders.reduce((s, o) => s + Number(o.totalRetail ?? 0), 0));
+
+    res.json({
+      today:   { orders: todayOrders.length, revenue: sum(todayOrders) },
+      week:    { orders: weekOrders.length,  revenue: sum(weekOrders)  },
+      month:   { orders: monthOrders.length, revenue: sum(monthOrders) },
+      active:  activeOrders,
+      pendingBookings,
+      shiftOpen: !!openShift,
+    });
+  } catch (e) { next(e); }
+});

@@ -5,6 +5,7 @@
 
 import { prisma } from '../utils/prisma';
 import { sendTelegramMessage } from './telegram';
+import { processDueReminders } from '../routes/loyalty';
 
 export function startScheduler(): void {
   // Проверка каждую минуту — простой cron без BullMQ
@@ -64,6 +65,9 @@ async function sendDailyReport(): Promise<void> {
     where: { role: 'ADMIN', pushToken: { startsWith: 'tg:' } },
     select: { pushToken: true },
   });
+
+  // Напоминания о ТО
+  await processDueReminders().catch(e => console.error('[Scheduler] reminders:', e));
 
   for (const admin of admins) {
     const chatId = admin.pushToken!.slice(3);
