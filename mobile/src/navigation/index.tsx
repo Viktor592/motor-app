@@ -26,7 +26,11 @@ import ProfileScreen from '../screens/shared/ProfileScreen';
 // Exec
 import ExecDashboardScreen      from '../screens/exec/ExecDashboardScreen';
 import MasterAnalyticsScreen   from '../screens/exec/MasterAnalyticsScreen';
-import ExecOrderScreen     from '../screens/exec/ExecOrderScreen';
+import ExecOrderScreen          from '../screens/exec/ExecOrderScreen';
+
+// Master
+import MasterHomeScreen  from '../screens/master/MasterHomeScreen';
+import MasterOrderScreen from '../screens/master/MasterOrderScreen';
 
 export type RootStackParamList = {
   Auth:        undefined;
@@ -84,7 +88,8 @@ function ExecTabNavigator() {
         tabBarLabelStyle: { fontSize: 10, fontWeight: '700' },
       }}
     >
-      <ExecTab.Screen name="Analytics" component={MasterAnalyticsScreen} options={{ tabBarLabel: 'Аналитика' }} />
+      <ExecTab.Screen name="MasterHome" component={MasterHomeScreen} options={{ tabBarLabel: "Главная" }} />
+      <ExecTab.Screen name="Analytics" component={MasterAnalyticsScreen} options={{ tabBarLabel: "Аналитика" }} />
       <ExecTab.Screen name="Dashboard" component={ExecDashboardScreen} options={{ tabBarLabel: 'Заказы'  }} />
       <ExecTab.Screen name="Chat"      component={ChatScreen}          options={{ tabBarLabel: 'AI-чат'  }} />
       <ExecTab.Screen name="Profile"   component={ProfileScreen}       options={{ tabBarLabel: 'Профиль' }} />
@@ -130,6 +135,7 @@ export default function RootNavigator() {
             <Root.Screen name="ExecTabs"    component={ExecTabNavigator} />
             <Root.Screen name="OrderDetail" component={ExecOrderScreen}  />
             <Root.Screen name="Chat"        component={ChatScreen}       />
+            <Root.Screen name="MasterOrder" component={MasterOrderScreen} />
           </>
         ) : (
           <Root.Screen name="Auth" component={AuthNavigator} />

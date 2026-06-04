@@ -26,6 +26,7 @@ import OnboardingPage      from './pages/OnboardingPage';
 import SettingsPage        from './pages/SettingsPage';
 import WarehousePage      from './pages/WarehousePage';
 import FinancePage        from './pages/FinancePage';
+import BookingsPage       from './pages/BookingsPage';
 
 function OnboardingGuard() {
   const navigate = useNavigate();
@@ -58,6 +59,7 @@ export default function App() {
         <Route path='/settings' element={<SettingsPage />} />
         <Route path='/warehouse' element={<WarehousePage />} />
         <Route path='/finance' element={<FinancePage />} />
+        <Route path='/bookings' element={<BookingsPage />} />
 
         {/* Auth */}
         <Route element={<AuthLayout />}>

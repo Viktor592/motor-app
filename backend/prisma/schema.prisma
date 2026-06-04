@@ -473,3 +473,40 @@ model ExpenseBudget {
 
   @@map("expense_budgets")
 }
+
+// ══════════════════════════════════════
+// ИТЕРАЦИЯ 12 — ОНЛАЙН-ЗАПИСЬ
+// ══════════════════════════════════════
+
+enum BookingStatus {
+  PENDING     // Ожидает подтверждения
+  CONFIRMED   // Подтверждена
+  COMPLETED   // Завершена (конвертирована в заказ)
+  CANCELLED   // Отменена
+  NO_SHOW     // Не явился
+}
+
+model Booking {
+  id               String        @id @default(uuid())
+  clientName       String
+  clientPhone      String
+  userId           String?       // Если клиент зарегистрирован
+  serviceType      String
+  description      String?
+  vehicleMake      String?
+  vehicleModel     String?
+  vehiclePlate     String?
+  scheduledAt      DateTime
+  durationMin      Int           @default(60)
+  status           BookingStatus @default(PENDING)
+  masterId         String?
+  source           String        @default("WIDGET") // WIDGET | MOBILE | MANUAL
+  convertedOrderId String?
+  createdAt        DateTime      @default(now())
+  updatedAt        DateTime      @updatedAt
+
+  @@index([scheduledAt])
+  @@index([status])
+  @@index([clientPhone])
+  @@map("bookings")
+}
