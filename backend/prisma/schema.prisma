@@ -623,3 +623,107 @@ model SyncLog {
   @@index([createdAt])
   @@map("sync_logs")
 }
+
+// ══════════════════════════════════════
+// ИТЕРАЦИЯ 18 — МУЛЬТИТЕНАНТНОСТЬ SaaS
+// ══════════════════════════════════════
+
+// Тариф
+enum PlanType {
+  STARTER    // 990 ₽/мес — 1 мастер
+  PRO        // 2990 ₽/мес — до 5 мастеров
+  BUSINESS   // 4990 ₽/мес — без лимитов
+  TRIAL      // Бесплатный 14 дней
+}
+
+enum TenantStatus {
+  ACTIVE
+  SUSPENDED   // неоплата
+  TRIAL
+  CANCELLED
+}
+
+// Тенант — один автосервис
+model Tenant {
+  id           String       @id @default(uuid())
+  slug         String       @unique  // motor-spb, avtomaster-msk
+  name         String                // "Автосервис Победа"
+  domain       String?      @unique  // победа-авто.рф (кастомный домен)
+  plan         PlanType     @default(TRIAL)
+  status       TenantStatus @default(TRIAL)
+  trialEndsAt  DateTime?
+  paidUntil    DateTime?
+  // Брендинг
+  logoUrl      String?
+  primaryColor String?      @default("#ff6200")
+  // Контакт владельца
+  ownerEmail   String       @unique
+  ownerPhone   String?
+  // Настройки
+  timezone     String       @default("Europe/Moscow")
+  currency     String       @default("RUB")
+  createdAt    DateTime     @default(now())
+  updatedAt    DateTime     @updatedAt
+
+  users        TenantUser[]
+  subscription Subscription?
+
+  @@index([slug])
+  @@index([status])
+  @@map("tenants")
+}
+
+// Привязка пользователя к тенанту
+model TenantUser {
+  id        String   @id @default(uuid())
+  tenantId  String
+  tenant    Tenant   @relation(fields: [tenantId], references: [id])
+  userId    String
+  role      String   @default("STAFF")
+  createdAt DateTime @default(now())
+
+  @@unique([tenantId, userId])
+  @@index([tenantId])
+  @@index([userId])
+  @@map("tenant_users")
+}
+
+// Подписка / биллинг
+enum SubStatus {
+  ACTIVE
+  PAST_DUE   // просрочена
+  CANCELLED
+}
+
+model Subscription {
+  id              String    @id @default(uuid())
+  tenantId        String    @unique
+  tenant          Tenant    @relation(fields: [tenantId], references: [id])
+  plan            PlanType
+  status          SubStatus @default(ACTIVE)
+  priceRub        Int
+  // ЮKassa
+  yukassaSubId    String?   @unique
+  currentPeriodEnd DateTime?
+  cancelAtEnd     Boolean   @default(false)
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  payments        Payment[]
+  @@map("subscriptions")
+}
+
+// История платежей
+model Payment {
+  id             String       @id @default(uuid())
+  subscriptionId String
+  subscription   Subscription @relation(fields: [subscriptionId], references: [id])
+  amountRub      Int
+  status         String       // succeeded | pending | cancelled
+  yukassaId      String?      @unique
+  paidAt         DateTime?
+  createdAt      DateTime     @default(now())
+
+  @@index([subscriptionId])
+  @@map("payments")
+}
