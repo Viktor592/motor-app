@@ -1,0 +1,37 @@
+name: Nightly Backup
+
+on:
+  schedule:
+    - cron: '0 2 * * *'
+  workflow_dispatch:
+
+jobs:
+  backup:
+    name: PostgreSQL backup
+    runs-on: ubuntu-latest
+    steps:
+      - name: Backup database
+        uses: appleboy/ssh-action@v1
+        with:
+          host:     ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USER }}
+          key:      ${{ secrets.SSH_KEY }}
+          script: |
+            set -e
+            DATE=$(date +%Y-%m-%d_%H-%M)
+            FILE="motor_backup_${DATE}.sql.gz"
+            docker exec motor_postgres pg_dump -U motor motor_db | gzip > /tmp/${FILE}
+            if command -v aws &>/dev/null; then
+              aws s3 cp /tmp/${FILE} s3://${{ secrets.S3_BUCKET }}/backups/${FILE} \
+                --endpoint-url ${{ secrets.S3_ENDPOINT }}
+            fi
+            rm /tmp/${FILE}
+            echo "Backup done: ${FILE}"
+
+      - name: Notify on failure
+        if: failure()
+        uses: appleboy/telegram-action@v0.1.1
+        with:
+          to:      ${{ secrets.TELEGRAM_CHAT_ID }}
+          token:   ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          message: "⚠️ МОТОР — ночной бэкап упал!"
