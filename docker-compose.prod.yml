@@ -1,0 +1,204 @@
+version: '3.9'
+
+# ── Production Docker Compose ────────────────────────────────
+# Использование:
+#   cp .env.production.example .env
+#   docker compose -f docker-compose.prod.yml up -d
+#
+# Перед первым запуском:
+#   docker compose -f docker-compose.prod.yml run --rm certbot
+# ─────────────────────────────────────────────────────────────
+
+services:
+
+  # ── PostgreSQL ──────────────────────────────────────────────
+  postgres:
+    image: postgres:16-alpine
+    container_name: motor_postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB:       ${POSTGRES_DB:-motor_db}
+      POSTGRES_USER:     ${POSTGRES_USER:-motor}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./scripts/postgres-init.sql:/docker-entrypoint-initdb.d/init.sql:ro
+    networks: [motor_net]
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-motor}"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+    # НЕ открываем порт наружу в продакшне
+    expose: ["5432"]
+
+  # ── Redis ───────────────────────────────────────────────────
+  redis:
+    image: redis:7-alpine
+    container_name: motor_redis
+    restart: unless-stopped
+    command: >
+      redis-server
+      --appendonly yes
+      --requirepass ${REDIS_PASSWORD}
+      --maxmemory 256mb
+      --maxmemory-policy allkeys-lru
+    volumes:
+      - redis_data:/data
+    networks: [motor_net]
+    expose: ["6379"]
+    healthcheck:
+      test: ["CMD", "redis-cli", "-a", "${REDIS_PASSWORD}", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # ── Backend API ─────────────────────────────────────────────
+  backend:
+    image: ${DOCKER_USER}/motor-backend:latest
+    container_name: motor_backend
+    restart: unless-stopped
+    depends_on:
+      postgres: { condition: service_healthy }
+      redis:    { condition: service_healthy }
+    environment:
+      NODE_ENV:              production
+      PORT:                  3000
+      DATABASE_URL:          postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB}
+      REDIS_URL:             redis://:${REDIS_PASSWORD}@redis:6379
+      JWT_ACCESS_SECRET:     ${JWT_ACCESS_SECRET}
+      JWT_REFRESH_SECRET:    ${JWT_REFRESH_SECRET}
+      JWT_ACCESS_EXPIRES:    15m
+      JWT_REFRESH_EXPIRES:   30d
+      AI_PROVIDER:           ${AI_PROVIDER:-auto}
+      GROQ_API_KEY:          ${GROQ_API_KEY}
+      OPENROUTER_API_KEY:    ${OPENROUTER_API_KEY}
+      TELEGRAM_BOT_TOKEN:    ${TELEGRAM_BOT_TOKEN}
+      SBP_PHONE:             ${SBP_PHONE}
+      VAPID_PUBLIC_KEY:      ${VAPID_PUBLIC_KEY}
+      VAPID_PRIVATE_KEY:     ${VAPID_PRIVATE_KEY}
+      VAPID_EMAIL:           ${VAPID_EMAIL}
+      ALLOWED_ORIGINS:       https://${DOMAIN}
+      APP_URL:               https://${DOMAIN}
+    networks: [motor_net]
+    expose: ["3000"]
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://localhost:3000/health || exit 1"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+    logging:
+      driver: json-file
+      options: { max-size: "50m", max-file: "5" }
+
+  # ── Web Frontend ────────────────────────────────────────────
+  web:
+    image: ${DOCKER_USER}/motor-web:latest
+    container_name: motor_web
+    restart: unless-stopped
+    networks: [motor_net]
+    expose: ["80"]
+    logging:
+      driver: json-file
+      options: { max-size: "10m", max-file: "3" }
+
+  # ── Nginx + SSL ─────────────────────────────────────────────
+  nginx:
+    image: nginx:alpine
+    container_name: motor_nginx
+    restart: unless-stopped
+    depends_on:
+      backend: { condition: service_healthy }
+      web:     { condition: service_started }
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx/nginx.prod.conf:/etc/nginx/conf.d/default.conf:ro
+      - ./nginx/ssl:/etc/nginx/ssl:ro
+      - certbot_www:/var/www/certbot:ro
+      - certbot_conf:/etc/letsencrypt:ro
+    networks: [motor_net]
+    logging:
+      driver: json-file
+      options: { max-size: "20m", max-file: "3" }
+
+  # ── Certbot (Let's Encrypt) ─────────────────────────────────
+  certbot:
+    image: certbot/certbot
+    container_name: motor_certbot
+    volumes:
+      - certbot_www:/var/www/certbot
+      - certbot_conf:/etc/letsencrypt
+    # Запускать вручную: docker compose run --rm certbot
+    entrypoint: >
+      certbot certonly --webroot
+      --webroot-path=/var/www/certbot
+      --email ${CERTBOT_EMAIL}
+      --agree-tos --no-eff-email
+      -d ${DOMAIN}
+    profiles: [certbot]
+
+  # ── Certbot auto-renew ──────────────────────────────────────
+  certbot-renew:
+    image: certbot/certbot
+    container_name: motor_certbot_renew
+    restart: unless-stopped
+    volumes:
+      - certbot_www:/var/www/certbot
+      - certbot_conf:/etc/letsencrypt
+    entrypoint: >
+      sh -c "trap exit TERM;
+             while :; do
+               certbot renew --webroot --webroot-path=/var/www/certbot --quiet;
+               nginx -s reload 2>/dev/null || true;
+               sleep 12h & wait $${!};
+             done"
+    depends_on: [nginx]
+    profiles: [production]
+
+  # ── Monitoring: Prometheus ──────────────────────────────────
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: motor_prometheus
+    restart: unless-stopped
+    volumes:
+      - ./monitoring/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - prometheus_data:/prometheus
+    networks: [motor_net]
+    expose: ["9090"]
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.retention.time=30d'
+    profiles: [monitoring]
+
+  # ── Monitoring: Grafana ─────────────────────────────────────
+  grafana:
+    image: grafana/grafana:latest
+    container_name: motor_grafana
+    restart: unless-stopped
+    environment:
+      GF_SECURITY_ADMIN_PASSWORD: ${GRAFANA_PASSWORD:-admin}
+      GF_USERS_ALLOW_SIGN_UP:     false
+      GF_SERVER_ROOT_URL:         https://${DOMAIN}/grafana
+      GF_SERVER_SERVE_FROM_SUB_PATH: true
+    volumes:
+      - grafana_data:/var/lib/grafana
+      - ./monitoring/grafana/dashboards:/etc/grafana/provisioning/dashboards:ro
+      - ./monitoring/grafana/datasources:/etc/grafana/provisioning/datasources:ro
+    networks: [motor_net]
+    expose: ["3000"]
+    depends_on: [prometheus]
+    profiles: [monitoring]
+
+networks:
+  motor_net:
+    driver: bridge
+
+volumes:
+  postgres_data:
+  redis_data:
+  prometheus_data:
+  grafana_data:
+  certbot_www:
+  certbot_conf:
