@@ -570,3 +570,56 @@ model ToReminder {
   @@index([isSent])
   @@map("to_reminders")
 }
+
+// ══════════════════════════════════════
+// ИТЕРАЦИЯ 16 — ИНТЕГРАЦИИ
+// ══════════════════════════════════════
+
+// Выбранная система учёта
+enum AccountingSystem {
+  NONE          // Не подключено
+  ONS_1C        // 1С:Предприятие (через REST HTTP-сервис)
+  OPTIM_GARAGE  // Оптим Гараж (API)
+}
+
+// Настройки интеграции с системой учёта
+model AccountingSettings {
+  id          String           @id @default(uuid())
+  system      AccountingSystem @default(NONE)
+  // 1С
+  oneC_url    String?          // http://server/ib/hs/motor/
+  oneC_user   String?
+  oneC_pass   String?          // зашифрован
+  // Оптим Гараж
+  optimUrl    String?
+  optimApiKey String?
+  // Общее
+  autoSync    Boolean          @default(false)
+  lastSyncAt  DateTime?
+  syncErrors  String?
+  updatedAt   DateTime         @updatedAt
+  @@map("accounting_settings")
+}
+
+// Журнал синхронизации
+enum SyncStatus {
+  OK
+  ERROR
+  PARTIAL
+}
+
+model SyncLog {
+  id         String     @id @default(uuid())
+  system     AccountingSystem
+  entityType String     // order | client | vehicle | payment
+  entityId   String
+  status     SyncStatus
+  message    String?
+  payload    String?    // JSON что отправили
+  response   String?    // JSON что получили
+  createdAt  DateTime   @default(now())
+
+  @@index([entityId])
+  @@index([createdAt])
+  @@map("sync_logs")
+}

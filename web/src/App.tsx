@@ -28,6 +28,7 @@ import WarehousePage      from './pages/WarehousePage';
 import FinancePage        from './pages/FinancePage';
 import BookingsPage       from './pages/BookingsPage';
 import ReportPage         from './pages/ReportPage';
+import IntegrationPage    from './pages/IntegrationPage';
 
 function OnboardingGuard() {
   const navigate = useNavigate();
@@ -61,7 +62,8 @@ export default function App() {
         <Route path='/warehouse' element={<WarehousePage />} />
         <Route path='/finance' element={<FinancePage />} />
         <Route path='/bookings' element={<BookingsPage />} />
-        <Route path='/report'   element={<ReportPage />} />
+        <Route path='/report'       element={<ReportPage />} />
+        <Route path='/integration' element={<IntegrationPage />} />
 
         {/* Auth */}
         <Route element={<AuthLayout />}>
