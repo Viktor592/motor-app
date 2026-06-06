@@ -1,0 +1,76 @@
+name: EAS Build & Submit
+
+on:
+  push:
+    branches: [main]
+    paths:    [mobile/**]
+  workflow_dispatch:
+    inputs:
+      profile:
+        description: 'Build profile'
+        required: true
+        default: 'preview'
+        type: choice
+        options: [development, preview, production]
+      platform:
+        description: 'Platform'
+        required: true
+        default: 'all'
+        type: choice
+        options: [android, ios, all]
+
+jobs:
+  build:
+    name: EAS Build (${{ github.event.inputs.profile || 'preview' }})
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+          cache-dependency-path: mobile/package-lock.json
+
+      - name: Install dependencies
+        working-directory: mobile
+        run: npm ci
+
+      - name: Setup EAS
+        uses: expo/expo-github-action@v8
+        with:
+          eas-version: latest
+          token: ${{ secrets.EXPO_TOKEN }}
+
+      - name: Build Android (APK/AAB)
+        working-directory: mobile
+        run: |
+          PROFILE="${{ github.event.inputs.profile || 'preview' }}"
+          PLATFORM="${{ github.event.inputs.platform || 'all' }}"
+          if [ "$PLATFORM" = "all" ] || [ "$PLATFORM" = "android" ]; then
+            eas build --platform android --profile $PROFILE --non-interactive
+          fi
+
+      - name: Build iOS
+        working-directory: mobile
+        if: github.event.inputs.platform == 'ios' || github.event.inputs.platform == 'all'
+        run: |
+          PROFILE="${{ github.event.inputs.profile || 'preview' }}"
+          eas build --platform ios --profile $PROFILE --non-interactive
+
+      - name: Submit to stores (production only)
+        working-directory: mobile
+        if: github.event.inputs.profile == 'production'
+        run: eas submit --platform all --profile production --non-interactive
+
+      - name: Notify Telegram
+        if: always()
+        uses: appleboy/telegram-action@v0.1.1
+        with:
+          to:    ${{ secrets.TELEGRAM_CHAT_ID }}
+          token: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          message: |
+            ${{ job.status == 'success' && '✅' || '❌' }} EAS Build ${{ github.event.inputs.profile || 'preview' }}
+            Платформа: ${{ github.event.inputs.platform || 'all' }}
+            Коммит: ${{ github.sha }}

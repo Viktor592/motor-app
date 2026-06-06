@@ -1,0 +1,23 @@
+.container { position: fixed; bottom: 0; left: 0; right: 0; z-index: 100; display: flex; flex-direction: column; gap: 0; pointer-events: none; }
+
+.banner {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 12px 16px; font-size: 0.875rem; font-weight: 500;
+  pointer-events: all; gap: 12px;
+}
+
+.offline { background: #1e293b; color: #94a3b8; border-top: 1px solid #334155; }
+.update  { background: #1e3a5f; color: #93c5fd; border-top: 1px solid #1d4ed8; }
+.install {
+  background: var(--surface-0); border-top: 1px solid var(--border);
+  box-shadow: 0 -4px 24px rgba(0,0,0,.2);
+  padding: 14px 16px;
+}
+
+.installLeft  { display: flex; align-items: center; gap: 12px; flex: 1; }
+.installIcon  { font-size: 1.5rem; }
+.installTitle { font-size: 0.9rem; font-weight: 700; color: var(--text-1); }
+.installSub   { font-size: 0.78rem; color: var(--text-2); }
+
+.btn        { padding: 6px 14px; background: transparent; border: 1px solid currentColor; border-radius: 6px; cursor: pointer; font-size: 0.82rem; font-weight: 600; color: inherit; }
+.btnInstall { padding: 9px 18px; background: var(--accent); color: #fff; border: none; border-radius: 10px; cursor: pointer; font-size: 0.875rem; font-weight: 700; white-space: nowrap; }

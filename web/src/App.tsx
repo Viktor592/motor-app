@@ -1,4 +1,5 @@
 import React from 'react';
+import PWABanner from './components/PWABanner';
 import { BrowserRouter, Routes, Route, Navigate, useNavigate } from 'react-router-dom';
 import { useSelector } from 'react-redux';
 import { RootState } from './store';
@@ -94,6 +95,7 @@ export default function App() {
 
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
+      <PWABanner />
     </BrowserRouter>
   );
 }
