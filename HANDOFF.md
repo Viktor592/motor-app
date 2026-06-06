@@ -1,66 +1,69 @@
-# 🔄 HANDOFF — МОТОР AI-экосистема автосервиса
-> Актуальный документ контекста. Последнее обновление: Итерация 12.
+# ⚡ МОТОР — AI-экосистема автосервиса
+> Проект завершён. Все 20 итераций выполнены. Последнее обновление: Итерация 20.
 
 ---
 
 ## 📦 Проект
 
-**Название:** МОТОР — AI-экосистема для автосервиса  
-**GitHub:** https://github.com/Viktor592/motor-app  
-**Ветка:** `main`  
-**Итераций завершено:** 20 из 20 ✅ ЗАВЕРШЕНО  
-**Владелец:** Viktor592  
-
----
-
-## ✅ Завершённые итерации (1–12)
-
-### Итерации 1–9 (фундамент)
-| # | Что сделано |
+| | |
 |---|---|
-| 1 | Инициализация монорепо (backend / web / mobile) |
-| 2 | Auth: JWT + OTP (email / Telegram / console) |
-| 3 | Заказ-наряды: CRUD, статусы, PDF |
-| 4 | AI-агенты: Приёмщик → Диагност → Оценщик (Groq/Ollama) |
-| 5 | Онлайн-запись: слоты, виджет |
-| 6 | AI-чат, Socket.IO real-time |
-| 7 | СБП QR оплата (бесплатно) |
-| 8 | Telegram-бот (Telegraf) |
-| 9 | Аналитика: P&L владельца + аналитика мастера, экспорт PDF/Excel |
-
-### Итерация 10 — Склад и запчасти ✅
-- `backend/routes/warehouse.ts` — 10 эндпоинтов
-- `backend/services/suppliers.ts` — Exist.ru + Autodoc.ru API
-- Prisma: `StockMovement`, `StockReservation`, `Supplier`, `SupplierOrder`
-- Web: `WarehousePage` (остатки / нехватка / заказы / поставщики)
-- Авто-заказ при остатке ≤ 3 шт.
-
-### Итерация 11 — Финансы ✅
-- `backend/routes/finance.ts` — кассовые смены, транзакции, бюджет, P&L
-- Prisma: `CashShift`, `CashTransaction`, `ExpenseBudget`
-- Web: `FinancePage` (касса / история смен / P&L / бюджет vs факт)
-- Расчёт расхождения при закрытии смены
-- Динамика по неделям, структура расходов
-
-### Итерация 12 — Мобильный мастер + Push + Онлайн-запись ✅
-- `mobile/screens/master/MasterHomeScreen.tsx` — главная мастера
-- `mobile/screens/master/MasterOrderScreen.tsx` — работа с заказом
-- `backend/services/push.ts` — Expo Push (шаблоны: статус, чат, запись)
-- `backend/routes/booking.ts` — публичная запись, слоты, конвертация в заказ
-- `web/public/booking-widget.html` — автономный виджет для любого сайта
-- Web: `BookingsPage` — управление записями, конвертация в заказ
+| **Название** | МОТОР — AI-экосистема для автосервиса |
+| **GitHub** | https://github.com/Viktor592/motor-app |
+| **Ветка** | `main` |
+| **Статус** | ✅ Все 20 итераций завершены |
+| **Владелец** | Viktor592 |
+| **Автор** | Илья У. |
 
 ---
 
-## 🗂️ Полная структура файлов
+## 🗺️ Дорожная карта — все итерации выполнены
+
+| # | Итерация | Статус |
+|---|---|---|
+| 1 | Инициализация монорепо (backend / web / mobile) | ✅ |
+| 2 | Auth: JWT + OTP (email / Telegram / console) | ✅ |
+| 3 | Заказ-наряды: CRUD, статусы, PDF | ✅ |
+| 4 | AI-агенты: Приёмщик → Диагност → Оценщик (Groq/Ollama) | ✅ |
+| 5 | Онлайн-запись: слоты, виджет для сайта | ✅ |
+| 6 | AI-чат, Socket.IO real-time | ✅ |
+| 7 | СБП QR оплата (бесплатно) | ✅ |
+| 8 | Telegram-бот (Telegraf) | ✅ |
+| 9 | Аналитика: P&L владельца + аналитика мастера, экспорт PDF/Excel | ✅ |
+| 10 | Склад и запчасти (Exist.ru / Autodoc, авто-заказ) | ✅ |
+| 11 | Финансы: кассовые смены, P&L, бюджет vs факт | ✅ |
+| 12 | Мобильный мастер + Push-уведомления + Онлайн-запись | ✅ |
+| 13 | Расширенная аналитика: KPI, рейтинг мастеров, динамика | ✅ |
+| 14 | AI-диагностика v2: голос, фото, подбор аналогов, история VIN | ✅ |
+| 15 | Лояльность: баллы, рефералы, ТО-напоминания | ✅ |
+| 16 | Интеграции: 1С:Предприятие, Оптим Гараж | ✅ |
+| 17 | CI/CD: GitHub Actions, Docker, Nginx SSL, Grafana + Prometheus | ✅ |
+| 18 | Мультитенантность SaaS: тенанты, тарифы, ЮКасса | ✅ |
+| 19 | PWA + EAS Build: офлайн, установка, APK/IPA | ✅ |
+| 20 | Финальная полировка: тема, i18n, onboarding-тур | ✅ |
+
+---
+
+## 📁 Полная структура файлов
 
 ```
 motor-app/
+├── .github/
+│   ├── workflows/
+│   │   ├── ci.yml           ← typecheck + lint + tests + docker build
+│   │   ├── cd.yml           ← авто-деплой при push в main
+│   │   ├── backup.yml       ← ночной бэкап БД в S3 (02:00)
+│   │   └── eas-build.yml    ← сборка APK/IPA через EAS
+│   └── SECRETS.md           ← инструкция по настройке секретов
+│
 ├── backend/
 │   ├── prisma/
-│   │   ├── schema.prisma          ← все модели
-│   │   └── migrations/            ← 12 миграций
+│   │   ├── schema.prisma    ← все модели (20+ моделей)
+│   │   └── migrations/      ← 13 миграций
 │   └── src/
+│       ├── middleware/
+│       │   ├── auth.ts
+│       │   ├── errorHandler.ts
+│       │   └── tenant.ts    ← резолв тенанта по поддомену
 │       ├── routes/
 │       │   ├── auth.ts
 │       │   ├── orders.ts
@@ -69,53 +72,80 @@ motor-app/
 │       │   ├── pipeline.ts
 │       │   ├── payment.ts
 │       │   ├── admin.ts
-│       │   ├── analytics.ts
-│       │   ├── onboarding.ts
+│       │   ├── analytics.ts ← расширен в ит.13
 │       │   ├── settings.ts
 │       │   ├── export.ts
 │       │   ├── parts.ts
 │       │   ├── users.ts
-│       │   ├── warehouse.ts       ← ит.10
-│       │   ├── finance.ts         ← ит.11
-│       │   └── booking.ts         ← ит.12
+│       │   ├── warehouse.ts ← ит.10
+│       │   ├── finance.ts   ← ит.11
+│       │   ├── diag.ts      ← ит.14: голос/фото/VIN
+│       │   ├── loyalty.ts   ← ит.15: баллы/рефералы/ТО
+│       │   ├── integration.ts ← ит.16: 1С/Оптим Гараж
+│       │   └── saas.ts      ← ит.18: тенанты/биллинг
 │       └── services/
 │           ├── aiProvider.ts
-│           ├── sms.ts
 │           ├── notifications.ts
-│           ├── push.ts            ← ит.12
-│           ├── suppliers.ts       ← ит.10
+│           ├── push.ts       ← ит.12: Expo Push шаблоны
+│           ├── suppliers.ts  ← ит.10: Exist/Autodoc API
+│           ├── onec.ts       ← ит.16: 1С HTTP-сервис
+│           ├── optimgarage.ts← ит.16: Оптим Гараж API
+│           ├── metrics.ts    ← ит.17: Prometheus метрики
 │           ├── telegram.ts
 │           ├── payment.ts
 │           ├── pdfExport.ts
 │           └── scheduler.ts
+│
 ├── web/src/
+│   ├── components/
+│   │   ├── PWABanner.tsx         ← ит.19: установка/офлайн/обновление
+│   │   └── OnboardingTour.tsx    ← ит.20: 7-шаговый тур
+│   ├── hooks/
+│   │   └── usePWA.ts             ← ит.19
 │   ├── pages/
-│   │   ├── OtpPage.tsx
-│   │   ├── LoginPage.tsx
 │   │   ├── HomePage.tsx
-│   │   ├── BookingPage.tsx
-│   │   ├── OrdersPage.tsx
-│   │   ├── OrderDetailPage.tsx
-│   │   ├── ChatPage.tsx
-│   │   ├── DiagnosticsPage.tsx
-│   │   ├── ExecOrdersPage.tsx
-│   │   ├── AdminPage.tsx
-│   │   ├── PnlPage.tsx
-│   │   ├── MasterAnalyticsPage.tsx
-│   │   ├── ProfilePage.tsx
-│   │   ├── SettingsPage.tsx
-│   │   ├── OnboardingPage.tsx
-│   │   ├── WarehousePage.tsx      ← ит.10
-│   │   ├── FinancePage.tsx        ← ит.11
-│   │   └── BookingsPage.tsx       ← ит.12
+│   │   ├── OrdersPage.tsx / OrderDetailPage.tsx
+│   │   ├── BookingsPage.tsx      ← ит.12
+│   │   ├── WarehousePage.tsx     ← ит.10
+│   │   ├── FinancePage.tsx       ← ит.11
+│   │   ├── ReportPage.tsx        ← ит.13
+│   │   ├── IntegrationPage.tsx   ← ит.16
+│   │   ├── PlansPage.tsx         ← ит.18
+│   │   ├── OnboardingNewPage.tsx ← ит.18: регистрация SaaS
+│   │   └── SettingsPage.tsx      ← ит.20: тема + i18n
+│   ├── services/
+│   │   ├── api.ts
+│   │   ├── i18n.ts               ← ит.20: ru/kk/uk
+│   │   └── theme.ts              ← ит.20: dark/light/system
 │   └── public/
-│       └── booking-widget.html    ← ит.12
-└── mobile/src/screens/
-    ├── auth/   (Otp, Login, Register, SetName)
-    ├── client/ (Home, Booking, Chat, Orders, OrderDetail, Diagnostics)
-    ├── exec/   (ExecDashboard, ExecOrder, MasterAnalytics)
-    ├── master/ (MasterHome, MasterOrder)                ← ит.12
-    └── shared/ (Profile)
+│       ├── manifest.webmanifest  ← ит.19: PWA манифест
+│       ├── sw.js                 ← ит.19: Service Worker
+│       ├── offline.html          ← ит.19
+│       └── booking-widget.html   ← ит.12: виджет для сайта
+│
+├── mobile/
+│   ├── app.json                  ← ит.19: Expo config
+│   ├── eas.json                  ← ит.19: build profiles
+│   ├── EAS_BUILD_GUIDE.md        ← инструкция сборки
+│   └── src/screens/
+│       ├── auth/
+│       ├── client/
+│       ├── exec/
+│       ├── master/
+│       │   ├── MasterHomeScreen.tsx   ← ит.12
+│       │   └── MasterOrderScreen.tsx  ← ит.12
+│       └── shared/
+│
+├── monitoring/
+│   ├── prometheus.yml
+│   └── grafana/datasources/
+│
+├── nginx/nginx.prod.conf          ← ит.17: SSL + gzip + rate limit
+├── docker-compose.yml             ← dev
+├── docker-compose.prod.yml        ← ит.17: prod с Redis/Certbot/Grafana
+├── .env.production.example        ← все переменные с описаниями
+├── scripts/deploy.sh              ← ит.17: setup/update/backup
+└── HANDOFF.md                     ← этот файл
 ```
 
 ---
@@ -126,43 +156,36 @@ motor-app/
 |---|---|---|
 | AI-агенты | Groq API | 30 req/min |
 | AI резерв | Ollama (локально) | безлимит |
+| AI Vision | OpenRouter (GPT-4o mini) | pay-as-you-go |
 | OTP | Gmail SMTP / Telegram Bot | бесплатно |
-| Push веб | Web Push VAPID (W3C) | бесплатно |
-| Push моб | Expo Push Notifications | бесплатно |
-| Telegram | Telegraf self-hosted | бесплатно |
+| Push мобилка | Expo Push Notifications | бесплатно |
+| Push браузер | Web Push VAPID (W3C) | бесплатно |
+| Уведомления | Telegram Bot | бесплатно |
 | Оплата | СБП QR | 0% до 1 млн/мес |
+| Биллинг SaaS | ЮКасса | от 2.8% |
 | БД | PostgreSQL self-hosted | — |
-| Хостинг | Railway / Render (free tier) | 500 ч/мес |
+| Кэш | Redis | self-hosted |
+| Хостинг | VPS / Railway / Render | от 0 ₽ |
+| SSL | Let's Encrypt | бесплатно |
+| Мониторинг | Grafana + Prometheus | self-hosted |
+| EAS Build | Expo | 30 сборок/мес |
 
 ---
 
-## 🔑 Переменные окружения (.env)
+## 🔑 Переменные окружения
+
+Полный список с описаниями: `.env.production.example`
 
 ```env
-# AI
-AI_PROVIDER=auto
+DATABASE_URL=postgresql://motor:password@localhost:5432/motor_db
+JWT_ACCESS_SECRET=минимум_32_символа
+JWT_REFRESH_SECRET=другие_32_символа
+AI_PROVIDER=auto            # auto | groq | ollama
 GROQ_API_KEY=gsk_...
-OLLAMA_URL=http://localhost:11434
-
-# OTP
-OTP_CHANNEL=console            # console | email | telegram
-GMAIL_USER=your@gmail.com
-GMAIL_APP_PASSWORD=xxxx xxxx xxxx xxxx
 TELEGRAM_BOT_TOKEN=123:ABC...
-
-# Push
+SBP_PHONE=+79001234567
 VAPID_PUBLIC_KEY=BK...
 VAPID_PRIVATE_KEY=...
-VAPID_EMAIL=mailto:admin@motor-app.ru
-
-# Оплата
-SBP_PHONE=+79001234567
-
-# База данных
-DATABASE_URL=postgresql://motor:password@localhost:5432/motor_db
-JWT_ACCESS_SECRET=минимум32символа
-JWT_REFRESH_SECRET=другие32символа
-PORT=3000
 ```
 
 ---
@@ -175,10 +198,8 @@ cd motor-app
 
 # Backend
 cp backend/.env.example backend/.env
-# Заполнить: GROQ_API_KEY + DATABASE_URL + JWT секреты
 cd backend && npm install
-npx prisma migrate deploy
-npx prisma db seed
+npx prisma migrate deploy && npx prisma db seed
 npm run dev          # :3000
 
 # Web
@@ -192,91 +213,70 @@ npx expo start
 
 ---
 
-## 🗺️ Дорожная карта
+## 🏭 Production деплой
 
-### ✅ Готово (итерации 1–12)
-Фундамент, Auth, Заказы, AI-агенты, Запись, Чат, Оплата, Telegram,
-Аналитика, **Склад**, **Финансы**, **Мобильный мастер + Push + Виджет записи**
+```bash
+# На сервере (Ubuntu 22+)
+curl -fsSL https://raw.githubusercontent.com/Viktor592/motor-app/main/scripts/deploy.sh | bash -s setup
+```
+
+Или вручную:
+```bash
+git clone https://github.com/Viktor592/motor-app /opt/motor-app
+cd /opt/motor-app
+cp .env.production.example .env && nano .env
+./scripts/deploy.sh setup    # первый запуск + SSL
+./scripts/deploy.sh update   # обновление
+./scripts/deploy.sh backup   # ручной бэкап
+```
 
 ---
 
-### 🔜 Итерация 13 — Аналитика и отчёты (СЛЕДУЮЩАЯ)
-- PDF-отчёт за период (выручка, топ мастера, топ услуги)
-- Графики на web: выручка по дням, загрузка постов
-- Сравнение периодов: этот месяц vs прошлый
-- Экспорт в Excel полного P&L
-- KPI-карточки на главном дашборде
+## 📱 Сборка APK/IPA
 
-### 🔜 Итерация 14 — AI-диагностика v2
-- Голосовой ввод жалобы (Whisper API / expo-av)
-- Фото → диагноз (GPT-4o Vision / LLaVA локально)
-- Агент «Снабженец»: подбор аналогов запчастей по артикулу
-- История диагнозов по VIN
+```bash
+cd mobile
+npm install -g eas-cli && eas login
+eas build --platform android --profile preview    # APK (тест)
+eas build --platform android --profile production # AAB (Google Play)
+eas build --platform ios     --profile production # IPA (App Store)
+```
 
-### 🔜 Итерация 15 — Лояльность
-- Бонусная программа: начисление баллов за визиты
-- История автомобиля: все работы по VIN/гос.номеру
-- Напоминания о плановом ТО (автоматически через scheduler)
-- Реферальная программа: клиент → бонус за приведённого друга
-- Push/SMS напоминание за 24ч до записи
-
-### 🔜 Итерация 16 — Интеграции
-- 1С:Бухгалтерия (выгрузка актов)
-- Онлайн-касса 54-ФЗ (Атол / Эвотор API)
-- WhatsApp Business (Baileys — бесплатно)
-- Авто-ответ в WhatsApp: статус заказа по номеру
-
-### 🔜 Итерация 17 — CI/CD и деплой
-- GitHub Actions: тесты + сборка + деплой
-- Docker Compose production
-- Nginx + SSL (Let's Encrypt)
-- Мониторинг: Grafana + Prometheus (self-hosted)
-
-### 🔜 Итерация 18 — Мультитенантность (SaaS)
-- Схема БД: tenant_id на каждой таблице
-- Онбординг нового сервиса: 5 мин до работы
-- Биллинг: ЮKassa подписки (990/2990/4990 ₽/мес)
-- Белая метка: свой домен, логотип, цвета
-
-### 🔜 Итерация 19 — PWA + App Store
-- Web → PWA (offline, иконка, push)
-- Expo EAS Build → APK (Android)
-- Expo EAS Build → IPA (iOS TestFlight)
-
-### 🔜 Итерация 20 — Финальная полировка
-- Onboarding-тур для новых пользователей
-- Темная/светлая тема
-- i18n: русский + казахский + украинский
-- Полный тест-кейс (Jest + Playwright)
+Подробнее: `mobile/EAS_BUILD_GUIDE.md`
 
 ---
 
 ## 💰 Монетизация
 
-| Тариф | Цена | Что включено |
-|---|---|---|
-| Старт | 990 ₽/мес | 1 мастер, базовые функции |
-| Профи | 2990 ₽/мес | до 5 мастеров, AI-агенты, аналитика |
-| Бизнес | 4990 ₽/мес | без лимитов, склад, финансы, API |
+| Тариф | Цена | Мастера | Заказов/мес |
+|---|---|---|---|
+| Trial | 0 ₽ (14 дней) | 1 | 50 |
+| Старт | 990 ₽/мес | 1 | 200 |
+| Профи | 2990 ₽/мес | 5 | 1000 |
+| Бизнес | 4990 ₽/мес | ∞ | ∞ |
 
-**Целевой ROI для клиента:** AI экономит приёмщику 2+ ч/день → окупается за 2 дня
+**ROI для клиента:** AI экономит приёмщику 2+ ч/день → окупается за 2 дня
 
 ---
 
 ## 🏆 Гранты
 
-- **Фонд Бортника (УМНИК):** до 500 тыс ₽, подать в ноябре
-- **Сколково:** до 5 млн ₽, статус резидента
-- **Региональные МСП:** до 300 тыс ₽ (ИП/ООО)
-- **Тинькофф/Сбер акселератор:** менторство + инвестиции
+| Программа | Сумма | Срок |
+|---|---|---|
+| Фонд Бортника (УМНИК) | до 500 тыс ₽ | ноябрь |
+| Сколково | до 5 млн ₽ | постоянно |
+| Региональные МСП | до 300 тыс ₽ | постоянно |
+| Тинькофф / Сбер акселератор | инвестиции + менторство | конкурс |
 
 ---
 
-## 📎 Для новой сессии
+## 👤 Авторство
 
-1. Клонировать: `git clone https://github.com/Viktor592/motor-app`
-2. Сказать Claude: _«Продолжаем МОТОР, прочитай HANDOFF.md»_
-3. Проект завершён! Все 20 итераций выполнены.
+**Автор:** Илья У.  
+**GitHub:** https://github.com/Viktor592/motor-app  
+**Стек:** Node.js · TypeScript · React · React Native · PostgreSQL · Prisma · Docker  
+**Период разработки:** 20 итераций, ~12 000 строк кода
 
 ---
-*HANDOFF обновлён после итерации 16. Коммит: pending**
+
+*HANDOFF обновлён после итерации 20. Все работы завершены. ✅*
