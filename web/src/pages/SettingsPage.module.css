@@ -145,3 +145,18 @@
   .hoursRow   { flex-direction: column; }
   .page { padding: 20px 16px; }
 }
+
+/* Appearance tab */
+.themeGrid  { display: flex; gap: 10px; flex-wrap: wrap; }
+.themeCard  { display: flex; flex-direction: column; align-items: center; gap: 6px; padding: 14px 20px; border: 2px solid var(--border); border-radius: 12px; background: var(--surface-1); cursor: pointer; transition: all .15s; min-width: 90px; }
+.themeCard:hover { border-color: var(--accent); }
+.themeCardActive { border-color: var(--accent); background: var(--surface-0); }
+.themeIcon  { font-size: 1.5rem; }
+.themeName  { font-size: 0.82rem; font-weight: 600; color: var(--text-1); }
+
+.localeGrid     { display: flex; gap: 10px; flex-wrap: wrap; }
+.localeCard     { display: flex; align-items: center; gap: 8px; padding: 10px 16px; border: 2px solid var(--border); border-radius: 10px; background: var(--surface-1); cursor: pointer; transition: all .15s; }
+.localeCard:hover { border-color: var(--accent); }
+.localeCardActive { border-color: var(--accent); background: var(--surface-0); }
+.localeFlag     { font-size: 1.2rem; }
+.localeName     { font-size: 0.875rem; font-weight: 600; color: var(--text-1); }

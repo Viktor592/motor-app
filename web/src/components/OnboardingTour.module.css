@@ -1,0 +1,27 @@
+.root    { position: fixed; inset: 0; z-index: 9999; pointer-events: none; }
+.overlay { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: all; }
+
+.tip {
+  position: fixed; z-index: 10000;
+  width: 280px; pointer-events: all;
+  animation: fadeIn .2s ease;
+}
+@keyframes fadeIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+
+.tipInner {
+  background: var(--surface-0); border-radius: 14px;
+  border: 1px solid var(--border); padding: 18px;
+  box-shadow: 0 16px 48px rgba(0,0,0,.4);
+}
+
+.progress { display: flex; gap: 5px; margin-bottom: 12px; }
+.dot      { width: 6px; height: 6px; border-radius: 50%; background: var(--border); transition: all .2s; }
+.dotActive{ background: var(--accent); width: 18px; border-radius: 3px; }
+.dotDone  { background: #16a34a; }
+
+.title   { font-size: 0.95rem; font-weight: 800; margin: 0 0 6px; color: var(--text-1); }
+.text    { font-size: 0.82rem; color: var(--text-2); line-height: 1.5; margin: 0 0 14px; }
+
+.actions  { display: flex; gap: 8px; justify-content: space-between; }
+.btnSkip  { padding: 6px 12px; background: none; border: none; color: var(--text-2); cursor: pointer; font-size: 0.8rem; }
+.btnNext  { padding: 7px 16px; background: var(--accent); color: #fff; border: none; border-radius: 8px; cursor: pointer; font-size: 0.82rem; font-weight: 700; }

@@ -1,9 +1,11 @@
 import React from 'react';
-import PWABanner from './components/PWABanner';
+import PWABanner      from './components/PWABanner';
+import OnboardingTour from './components/OnboardingTour';
 import { BrowserRouter, Routes, Route, Navigate, useNavigate } from 'react-router-dom';
 import { useSelector } from 'react-redux';
 import { RootState } from './store';
 import './styles/global.css';
+import { getTheme, setTheme } from './services/theme';
 
 // Layouts
 import AuthLayout  from './layouts/AuthLayout';
@@ -96,6 +98,7 @@ export default function App() {
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
       <PWABanner />
+      <OnboardingTour />
     </BrowserRouter>
   );
 }

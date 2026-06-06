@@ -3,6 +3,10 @@ import ReactDOM from 'react-dom/client';
 import { Provider } from 'react-redux';
 import { store } from './store';
 import App from './App';
+import { getTheme, setTheme } from './services/theme';
+
+// Применить сохранённую тему до рендера
+setTheme(getTheme());
 
 ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>

@@ -1,8 +1,10 @@
 import React, { useEffect, useState } from 'react';
+import { useTheme } from '../services/theme';
+import { useLocale } from '../services/i18n';
 import { api } from '../services/api';
 import s from './SettingsPage.module.css';
 
-type Tab = 'service' | 'posts' | 'hours' | 'notifications' | 'export';
+type Tab = 'service' | 'posts' | 'hours' | 'notifications' | 'export' | 'appearance';
 
 interface ServiceSettings { name: string; city: string; phone: string; address: string; website: string; }
 interface HoursSettings   { start: number; end: number; workDays: number[] }
@@ -15,6 +17,7 @@ const TAB_LABELS: Record<Tab, string> = {
   hours:         '🕘 Часы работы',
   notifications: '🔔 Уведомления',
   export:        '📤 Экспорт',
+  appearance:    '🎨 Внешний вид',
 };
 
 const POST_TYPES = [
@@ -28,6 +31,8 @@ const DAY_NAMES = ['Вс', 'Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб'];
 export default function SettingsPage() {
   const [tab,    setTab]   = useState<Tab>('service');
   const [saving, setSaving]= useState(false);
+  const { theme, setTheme, isDark } = useTheme();
+  const { locale, setLocale, locales } = useLocale();
   const [saved,  setSaved] = useState('');
 
   // Service
@@ -276,7 +281,48 @@ export default function SettingsPage() {
           )}
 
           {/* ── Экспорт ── */}
-          {tab === 'export' && (
+          {tab === 'appearance' && (
+            <div className={s.section}>
+              <h2 className={s.sectionTitle}>🎨 Внешний вид</h2>
+
+              <div className={s.field}>
+                <label className={s.label}>Тема оформления</label>
+                <div className={s.themeGrid}>
+                  {([
+                    { id: 'dark',   icon: '🌙', name: 'Тёмная'   },
+                    { id: 'light',  icon: '☀️', name: 'Светлая'  },
+                    { id: 'system', icon: '💻', name: 'Системная' },
+                  ] as const).map(t => (
+                    <button
+                      key={t.id}
+                      className={`${s.themeCard} ${theme === t.id ? s.themeCardActive : ''}`}
+                      onClick={() => setTheme(t.id)}
+                    >
+                      <span className={s.themeIcon}>{t.icon}</span>
+                      <span className={s.themeName}>{t.name}</span>
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              <div className={s.field}>
+                <label className={s.label}>Язык интерфейса</label>
+                <div className={s.localeGrid}>
+                  {locales.map(l => (
+                    <button
+                      key={l.code}
+                      className={`${s.localeCard} ${locale === l.code ? s.localeCardActive : ''}`}
+                      onClick={() => setLocale(l.code)}
+                    >
+                      <span className={s.localeFlag}>{l.flag}</span>
+                      <span className={s.localeName}>{l.name}</span>
+                    </button>
+                  ))}
+                </div>
+              </div>
+            </div>
+          )}
+
             <div className={s.section}>
               <h2 className={s.sectionTitle}>Экспорт данных</h2>
               <div className={s.exportGrid}>

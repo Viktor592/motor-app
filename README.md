@@ -1,174 +1,102 @@
-# МОТОР — AI-экосистема автосервиса
+<div align="center">
 
-> Полноценная система управления автосервисом с AI-агентами, мобильным приложением и веб-версией.
+# ⚡ МОТОР
+### AI-экосистема для автосервиса
 
----
+[![CI](https://github.com/Viktor592/motor-app/actions/workflows/ci.yml/badge.svg)](https://github.com/Viktor592/motor-app/actions/workflows/ci.yml)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
-## 📱 Приложения
+**МОТОР** — полноценная система управления автосервисом с AI-ассистентами, онлайн-записью, складом, финансами и мобильным приложением для мастеров.
 
-| Платформа | Описание |
-|---|---|
-| **iOS / Android** | React Native CLI — запись, статусы, AI-чат, аналитика мастера |
-| **Web** | React + Vite — полный функционал + Admin-панель + P&L |
-| **Backend API** | Node.js + Express + PostgreSQL + Redis |
+[🚀 Демо](https://demo.motor-app.ru) · [📖 Документация](HANDOFF.md) · [📱 EAS Build](mobile/EAS_BUILD_GUIDE.md)
 
----
-
-## 🤖 AI-агенты (все бесплатно)
-
-| Агент | Функция |
-|---|---|
-| **Приёмщик** | Разбирает жалобу клиента → структурированный JSON |
-| **Диагност** | Строит гипотезы + список OEM-деталей с вероятностями |
-| **Оценщик** | Рассчитывает смету с наценками по категориям |
-
-**AI-провайдеры** (авто-переключение): Groq → Ollama → OpenRouter → Anthropic
+</div>
 
 ---
 
-## ⚡ Ключевые функции
+## 🎯 Что умеет МОТОР
 
-- 📅 **Онлайн-запись** к слесарю / электрику / диагносту
-- 🔍 **AI-диагностика** с гипотезами и сметой в реальном времени
-- 💬 **AI-чат** с агентом «Приёмщик»
-- 📊 **P&L дашборд** владельца: выручка, маржа, воронка
-- 📈 **Аналитика мастера**: топ работ, динамика, средний чек
-- 📄 **PDF заказ-наряд** + **Excel экспорт** клиентской базы
-- 🔔 **Push + Telegram** уведомления без Firebase
-- 💳 **СБП QR** оплата (0% комиссия)
-- ⚙️ **Admin-панель**: наценки, посты, пользователи, настройки
-- 🧙 **Онбординг-визард** — готов к работе за 3 минуты
+| Модуль | Описание |
+|--------|----------|
+| 📋 **Заказы** | Заказ-наряды, статусы, PDF, подпись клиента |
+| 🤖 **AI-агенты** | Приёмщик → Диагност → Оценщик (Groq/Ollama) |
+| 📅 **Онлайн-запись** | Виджет для сайта, слоты, конвертация в заказ |
+| 📦 **Склад** | Остатки, резервы, Exist.ru/Autodoc, авто-заказ |
+| 💰 **Финансы** | Кассовые смены, P&L, бюджет, расходы |
+| 📊 **Аналитика** | KPI, рейтинг мастеров, топ услуги, динамика |
+| 🎁 **Лояльность** | Бонусные баллы, реферальная программа, ТО-напоминания |
+| 🔗 **Интеграции** | 1С:Предприятие, Оптим Гараж |
+| 📱 **Мобилка** | React Native для мастеров (MasterHome, MasterOrder) |
+| 🌐 **PWA** | Офлайн, установка, push-уведомления |
+| ☁️ **SaaS** | Мультитенантность, тарифы, ЮКасса |
+| 🚀 **CI/CD** | GitHub Actions, Docker, Nginx SSL, Grafana |
 
----
+## 🆓 Стек (всё бесплатно)
+
+- **AI:** Groq API (30 req/min) + Ollama (локально)
+- **Push:** Expo Push (мобилка) + Web Push VAPID (браузер)
+- **Оплата:** СБП QR (0% до 1 млн/мес)
+- **Уведомления:** Telegram Bot (Telegraf)
+- **БД:** PostgreSQL + Prisma
+- **Деплой:** Docker Compose + Let's Encrypt SSL
 
 ## 🚀 Быстрый старт
 
-### С Docker (рекомендуется)
-
-```bash
+\`\`\`bash
 git clone https://github.com/Viktor592/motor-app
 cd motor-app
 
-# Настроить окружение
+# Backend
 cp backend/.env.example backend/.env
-# Заполнить: GROQ_API_KEY, JWT_ACCESS_SECRET, JWT_REFRESH_SECRET
+# Заполнить GROQ_API_KEY, DATABASE_URL, JWT секреты
 
-# Запустить всё
-make up           # Postgres + Redis + API + Web
-make db-migrate   # Применить миграции  
-make db-seed      # Заполнить тестовыми данными
+cd backend && npm install
+npx prisma migrate deploy && npx prisma db seed
+npm run dev   # :3000
 
-# Открыть http://localhost:5173
-```
+# Web
+cd ../web && npm install
+npm run dev   # :5173
 
-### Тестовые аккаунты (пароль: test1234)
+# Mobile
+cd ../mobile && npm install
+npx expo start
+\`\`\`
 
-| Роль | Телефон |
-|---|---|
-| Клиент | +79001234567 |
-| Мастер | +79111111111 |
-| Приёмщик | +79333333333 |
-| Администратор | +79444444444 |
+## 📦 Production деплой
 
-### Для разработки (без Docker)
+\`\`\`bash
+# Скопировать и заполнить .env
+cp .env.production.example .env
 
-```bash
-make install      # npm install во всех папках
-make db-migrate
-make db-seed
-make dev-all      # Backend :3000 + Web :5173 параллельно
-```
+# Первый запуск на сервере
+./scripts/deploy.sh setup
 
-### Мобильное приложение
+# Обновление
+./scripts/deploy.sh update
+\`\`\`
 
-```bash
-make android      # Android Studio + эмулятор
-make ios          # Xcode (только macOS)
-```
+## 📱 Сборка APK/IPA
 
----
+\`\`\`bash
+cd mobile
+npm install -g eas-cli && eas login
+eas build --platform android --profile preview
+\`\`\`
 
-## 🆓 Бесплатные интеграции
+Подробнее: [EAS_BUILD_GUIDE.md](mobile/EAS_BUILD_GUIDE.md)
 
-| Функция | Сервис | Лимит |
-|---|---|---|
-| AI-агенты | Groq API | 30 req/min |
-| AI локально | Ollama | Без лимитов |
-| OTP | Gmail SMTP | 500/день |
-| Уведомления | Telegram Bot | Без лимитов |
-| Push (веб) | Web Push VAPID | Без лимитов |
-| Push (моб) | Expo Push | Без лимитов |
-| Оплата | СБП QR | 0% до 1 млн/мес |
-| БД | PostgreSQL self-hosted | Без лимитов |
+## 💰 Тарифы (SaaS)
+
+| Тариф | Цена | Мастера | Заказов/мес |
+|-------|------|---------|-------------|
+| Trial | 0 ₽ (14 дней) | 1 | 50 |
+| Старт | 990 ₽/мес | 1 | 200 |
+| Профи | 2990 ₽/мес | 5 | 1000 |
+| Бизнес | 4990 ₽/мес | ∞ | ∞ |
 
 ---
 
-## 🛠️ Стек
-
-```
-Frontend Web:    React 18 · Vite · TypeScript · Redux Toolkit
-Mobile:          React Native 0.74 CLI · Redux · Socket.IO
-Backend:         Node.js · Express · TypeScript · Prisma
-Database:        PostgreSQL 16 · Redis 7
-AI:              Groq / Ollama / OpenRouter (бесплатно)
-Infra:           Docker Compose · Nginx · VAPID
-```
-
----
-
-## 📁 Структура проекта
-
-```
-motor-app/
-├── backend/
-│   ├── src/
-│   │   ├── agents/        # AI: receptionist, diagnostician, estimator
-│   │   ├── routes/        # auth, orders, booking, chat, pipeline...
-│   │   ├── services/      # aiProvider, payment, notifications, telegram
-│   │   └── utils/         # prisma, seed, maskPhone
-│   ├── prisma/schema.prisma
-│   ├── Dockerfile
-│   └── .env.example
-├── mobile/
-│   └── src/
-│       ├── screens/       # auth, client, exec, shared
-│       ├── store/slices/  # auth, orders, chat
-│       ├── navigation/
-│       ├── services/      # api, socket
-│       └── hooks/         # usePushToken, useSocketEvents
-├── web/
-│   └── src/
-│       ├── pages/         # 15+ страниц
-│       ├── layouts/       # AppLayout, AuthLayout
-│       ├── slices/        # auth, orders, chat
-│       └── services/      # api, socket, webPush
-├── docker-compose.yml
-├── nginx.conf
-├── Makefile
-├── ROADMAP.md
-└── README.md
-```
-
----
-
-## 📋 Команды Makefile
-
-```bash
-make up              # Запустить Docker стек
-make down            # Остановить
-make dev-all         # Разработка (backend + web)
-make db-seed         # Тестовые данные
-make db-studio       # Prisma Studio (GUI БД)
-make android / ios   # Запуск мобильного
-make logs            # Логи backend
-```
-
----
-
-## 🗺️ Дорожная карта
-
-Полная дорожная карта с планами на итерации 10–14: [ROADMAP.md](./ROADMAP.md)
-
----
-
-*Версия 1.0 · Итерация 9 · Все AI-сервисы бесплатные*
+<div align="center">
+Сделано с ❤️ для российских автосервисов
+</div>
