@@ -1,0 +1,105 @@
+.page    { padding: 24px; max-width: 1100px; margin: 0 auto; }
+.header  { margin-bottom: 20px; }
+.title   { font-size: 1.5rem; font-weight: 700; margin: 0 0 4px; }
+.sub     { font-size: 0.875rem; color: var(--text-2); margin: 0; }
+.loading { padding: 40px; text-align: center; color: var(--text-2); }
+.empty   { padding: 32px; text-align: center; color: var(--text-2); }
+
+.tabs      { display: flex; gap: 4px; flex-wrap: wrap; background: var(--surface-1); border-radius: 10px; padding: 4px; margin-bottom: 20px; }
+.tab       { padding: 7px 14px; border: none; border-radius: 7px; cursor: pointer; background: transparent; font-size: 0.82rem; color: var(--text-2); white-space: nowrap; }
+.tabActive { background: var(--surface-0); color: var(--text-1); font-weight: 600; box-shadow: 0 1px 4px rgba(0,0,0,.1); }
+
+.section      { background: var(--surface-0); border: 1px solid var(--border); border-radius: 12px; padding: 20px; }
+.sectionTitle { font-size: 1rem; font-weight: 700; margin: 0 0 6px; }
+.sectionSub   { font-size: 0.85rem; color: var(--text-2); margin: 0 0 20px; }
+
+/* Tax form */
+.taxForm    { background: var(--surface-1); border-radius: 10px; padding: 16px; margin-bottom: 20px; display: flex; flex-direction: column; gap: 12px; }
+.taxFormRow { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px; }
+.field      { display: flex; flex-direction: column; gap: 5px; }
+.label      { font-size: 0.75rem; font-weight: 700; color: var(--text-2); text-transform: uppercase; letter-spacing: .05em; }
+.input      { padding: 9px 12px; border: 1.5px solid var(--border); border-radius: 8px; background: var(--surface-0); color: var(--text-1); font-size: 0.875rem; }
+.input:focus { outline: none; border-color: var(--accent); }
+.select     { padding: 9px 12px; border: 1.5px solid var(--border); border-radius: 8px; background: var(--surface-0); color: var(--text-1); font-size: 0.875rem; }
+
+/* Tax results */
+.warningBox { background: #fef3c7; border: 1px solid #fcd34d; border-radius: 10px; padding: 12px 14px; margin-bottom: 16px; font-size: 0.875rem; color: #92400e; }
+.taxGrid    { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 12px; margin-bottom: 16px; }
+.taxCard    { background: var(--surface-1); border: 2px solid var(--border); border-radius: 12px; padding: 14px; position: relative; transition: border-color .15s; }
+.taxCardBest { border-color: var(--accent); background: var(--surface-0); }
+.bestBadge  { position: absolute; top: -10px; left: 12px; background: var(--accent); color: #fff; font-size: 0.72rem; font-weight: 700; padding: 2px 10px; border-radius: 20px; }
+.taxCardName  { font-size: 0.82rem; font-weight: 700; margin-bottom: 8px; }
+.taxCardTax   { font-size: 1.2rem; font-weight: 800; color: var(--accent); margin-bottom: 3px; }
+.taxCardEff   { font-size: 0.75rem; color: var(--text-2); margin-bottom: 4px; }
+.taxCardProfit{ font-size: 0.78rem; color: #16a34a; font-weight: 600; margin-bottom: 8px; }
+.taxCardDetails { font-size: 0.72rem; color: var(--text-2); display: flex; flex-direction: column; gap: 2px; }
+.detail       { line-height: 1.4; }
+
+.aiBox      { background: rgba(124,58,237,.08); border: 1px solid rgba(124,58,237,.3); border-radius: 12px; padding: 16px; margin-bottom: 16px; }
+.aiBoxTitle { font-size: 0.875rem; font-weight: 700; color: #7c3aed; margin-bottom: 8px; }
+.aiBoxText  { font-size: 0.875rem; color: var(--text-1); line-height: 1.6; white-space: pre-wrap; }
+
+.tipsBox    { background: var(--surface-1); border-radius: 10px; padding: 14px; }
+.tipsTitle  { font-size: 0.875rem; font-weight: 700; margin-bottom: 10px; }
+.tip        { font-size: 0.82rem; color: var(--text-1); padding: 4px 0; border-bottom: 1px solid var(--border); }
+.tip:last-child { border-bottom: none; }
+
+/* Deadlines */
+.deadlineList { display: flex; flex-direction: column; gap: 8px; }
+.deadlineRow  { display: flex; align-items: center; gap: 14px; padding: 12px 14px; background: var(--surface-1); border-radius: 10px; border: 1px solid var(--border); }
+.deadlineUrgent { border-color: #f59e0b; background: rgba(245,158,11,.06); }
+.deadlineDate { font-size: 0.875rem; font-weight: 700; min-width: 100px; }
+.deadlineInfo { flex: 1; }
+.deadlineTitle{ font-size: 0.9rem; font-weight: 600; }
+.deadlineType { font-size: 0.75rem; color: var(--text-2); margin-top: 2px; }
+.urgentBadge  { background: #f59e0b; color: #fff; font-size: 0.72rem; font-weight: 700; padding: 3px 10px; border-radius: 20px; white-space: nowrap; }
+
+/* KUDiR */
+.kudirHeader  { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 10px; margin-bottom: 16px; }
+.kudirActions { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+.kudirTotals  { display: flex; gap: 16px; flex-wrap: wrap; margin-bottom: 16px; }
+.kudirTotal   { display: flex; flex-direction: column; gap: 4px; padding: 12px 16px; background: var(--surface-1); border-radius: 10px; border: 1px solid var(--border); }
+.kudirTotalLabel { font-size: 0.75rem; color: var(--text-2); font-weight: 600; }
+.kudirTotalVal   { font-size: 1.1rem; font-weight: 800; }
+.autoAdded    { font-size: 0.8rem; color: #16a34a; padding: 6px 10px; background: #dcfce7; border-radius: 6px; }
+
+/* Table */
+.table     { width: 100%; border-collapse: collapse; font-size: 0.875rem; }
+.table th  { text-align: left; padding: 9px 12px; border-bottom: 2px solid var(--border); color: var(--text-2); font-size: 0.75rem; text-transform: uppercase; font-weight: 600; }
+.table td  { padding: 9px 12px; border-bottom: 1px solid var(--border); }
+.table tr:last-child td { border-bottom: none; }
+.table tr:hover td { background: var(--surface-1); }
+.income  { color: #16a34a; font-weight: 600; }
+.expense { color: #dc2626; font-weight: 600; }
+.statusBadge { padding: 2px 8px; border-radius: 20px; font-size: 0.75rem; font-weight: 700; }
+
+/* Info box */
+.infoBox { background: rgba(37,99,235,.07); border: 1px solid rgba(37,99,235,.2); border-radius: 10px; padding: 12px 14px; font-size: 0.875rem; margin-bottom: 16px; line-height: 1.5; }
+
+/* Fiscal env */
+.fiscalEnvBox { background: var(--surface-1); border-radius: 10px; padding: 14px; }
+.envTitle     { font-size: 0.82rem; font-weight: 700; margin-bottom: 10px; color: var(--text-2); text-transform: uppercase; }
+.envRow       { display: flex; align-items: center; gap: 12px; padding: 6px 0; border-bottom: 1px solid var(--border); }
+.envRow:last-child { border-bottom: none; }
+.envKey       { background: var(--surface-0); border: 1px solid var(--border); border-radius: 4px; padding: 2px 8px; font-size: 0.8rem; color: var(--accent); white-space: nowrap; }
+.envDesc      { font-size: 0.82rem; color: var(--text-2); }
+
+/* Settings */
+.settingsBlock { margin-bottom: 24px; }
+.blockTitle    { font-size: 0.9rem; font-weight: 700; margin: 0 0 12px; color: var(--text-2); }
+.formGrid      { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+@media (max-width: 600px) { .formGrid { grid-template-columns: 1fr; } }
+
+.taxSystemGrid     { display: flex; flex-wrap: wrap; gap: 8px; }
+.taxSystemCard     { padding: 8px 16px; border: 2px solid var(--border); border-radius: 8px; background: var(--surface-1); cursor: pointer; font-size: 0.82rem; font-weight: 600; transition: all .15s; }
+.taxSystemCard:hover { border-color: var(--accent); }
+.taxSystemActive   { border-color: var(--accent); background: var(--surface-0); color: var(--accent); }
+
+/* Docs */
+.docsHeader { display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; }
+
+/* Buttons */
+.btnPrimary   { padding: 10px 22px; background: var(--accent); color: #fff; border: none; border-radius: 8px; cursor: pointer; font-size: 0.875rem; font-weight: 700; }
+.btnPrimary:disabled { opacity: .5; cursor: default; }
+.btnSecondary { padding: 8px 14px; background: var(--surface-1); color: var(--text-1); border: 1.5px solid var(--border); border-radius: 8px; cursor: pointer; font-size: 0.82rem; font-weight: 600; text-decoration: none; display: inline-block; }
+.btnSecondary:hover { border-color: var(--accent); }

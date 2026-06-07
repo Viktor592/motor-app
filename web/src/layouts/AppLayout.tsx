@@ -30,6 +30,7 @@ const NAV_ADMIN = [
   { to: '/report',            icon: '📈', label: 'Отчёты'    },
   { to: '/integration',       icon: '🔗', label: 'Интеграции'},
   { to: '/plans',             icon: '💳', label: 'Тариф'      },
+  { to: '/edo',               icon: '🏛️', label: 'ЭДО / ФНС'  },
   { to: '/settings',          icon: '🔧', label: 'Настройки'  },
   { to: '/analytics/pnl',    icon: '📊', label: 'P&L'        },
   { to: '/exec/orders',      icon: '📋', label: 'Канбан'     },

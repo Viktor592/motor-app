@@ -34,6 +34,7 @@ import ReportPage         from './pages/ReportPage';
 import IntegrationPage    from './pages/IntegrationPage';
 import OnboardingNewPage  from './pages/OnboardingNewPage';
 import PlansPage          from './pages/PlansPage';
+import EdoPage            from './pages/EdoPage';
 
 function OnboardingGuard() {
   const navigate = useNavigate();
@@ -71,6 +72,7 @@ export default function App() {
         <Route path='/integration' element={<IntegrationPage />} />
         <Route path='/register'    element={<OnboardingNewPage />} />
         <Route path='/plans'       element={<PlansPage />} />
+        <Route path='/edo'         element={<EdoPage />} />
 
         {/* Auth */}
         <Route element={<AuthLayout />}>
