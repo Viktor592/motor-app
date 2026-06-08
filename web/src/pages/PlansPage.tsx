@@ -12,8 +12,12 @@ interface TenantInfo {
   usage: { masters: number; maxMasters: number; orders: number; maxOrders: number };
 }
 
-const PLAN_ICONS: Record<string, string> = { STARTER: '🚀', PRO: '⚡', BUSINESS: '🏆' };
-const PLAN_COLORS: Record<string, string> = { STARTER: '#2563eb', PRO: '#7c3aed', BUSINESS: '#d97706' };
+const PLAN_ICONS: Record<string, string> = {
+  STARTER: '🚀', PRO: '⚡', BUSINESS: '🏆', ENTERPRISE: '💎',
+};
+const PLAN_COLORS: Record<string, string> = {
+  STARTER: '#2563eb', PRO: '#7c3aed', BUSINESS: '#d97706', ENTERPRISE: '#0891b2',
+};
 
 export default function PlansPage() {
   const [plans, setPlans]   = useState<Plan[]>([]);
@@ -96,7 +100,7 @@ export default function PlansPage() {
             <div key={plan.id} className={`${styles.planCard} ${isCurrent ? styles.planCurrent : ''}`}
               style={isCurrent ? { borderColor: color } : {}}>
               {isCurrent && <div className={styles.currentBadge} style={{ background: color }}>Текущий</div>}
-              {plan.id === 'PRO' && !isCurrent && <div className={styles.popularBadge}>Популярный</div>}
+              {plan.id === 'BUSINESS' && !isCurrent && <div className={styles.popularBadge}>Популярный</div>}
 
               <div className={styles.planIcon}>{PLAN_ICONS[plan.id]}</div>
               <div className={styles.planName}>{plan.name}</div>

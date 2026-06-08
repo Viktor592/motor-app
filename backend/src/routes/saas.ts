@@ -13,10 +13,11 @@ export const saasRouter = Router();
 // ══════════════════════════════════════
 
 export const PLANS = {
-  TRIAL:    { maxMasters: 1,  maxOrdersPerMonth: 50,   priceRub: 0,    name: 'Пробный'  },
-  STARTER:  { maxMasters: 1,  maxOrdersPerMonth: 200,  priceRub: 990,  name: 'Старт'    },
-  PRO:      { maxMasters: 5,  maxOrdersPerMonth: 1000, priceRub: 2990, name: 'Профи'    },
-  BUSINESS: { maxMasters: 99, maxOrdersPerMonth: 9999, priceRub: 4990, name: 'Бизнес'   },
+  TRIAL:    { maxMasters: 1,  maxOrdersPerMonth: 50,   priceRub: 0,     name: 'Пробный'  },
+  STARTER:  { maxMasters: 2,  maxOrdersPerMonth: 300,  priceRub: 25000, name: 'Старт'    },
+  PRO:      { maxMasters: 5,  maxOrdersPerMonth: 1000, priceRub: 35000, name: 'Профи'    },
+  BUSINESS: { maxMasters: 15, maxOrdersPerMonth: 5000, priceRub: 45000, name: 'Бизнес'   },
+  ENTERPRISE:{ maxMasters: 99, maxOrdersPerMonth: 9999, priceRub: 55000, name: 'Корпорат' },
 } as const;
 
 // ══════════════════════════════════════
@@ -177,7 +178,7 @@ saasRouter.patch('/me/branding', authenticate, authorize('ADMIN'), async (req, r
 saasRouter.post('/billing/upgrade', authenticate, authorize('ADMIN'), async (req, res, next) => {
   try {
     const { plan } = z.object({
-      plan: z.enum(['STARTER', 'PRO', 'BUSINESS']),
+      plan: z.enum(['STARTER', 'PRO', 'BUSINESS', 'ENTERPRISE']),
     }).parse(req.body);
 
     const user = await prisma.user.findUnique({ where: { id: req.user!.userId }, select: { tenantId: true } });
@@ -326,9 +327,10 @@ async function createYukassaPayment(opts: {
 function getPlanFeatures(plan: keyof typeof PLANS): string[] {
   const base = ['Заказ-наряды', 'Клиентская база', 'Telegram-бот', 'Онлайн-запись'];
   switch (plan) {
-    case 'STARTER':  return [...base, '1 мастер', 'AI-приёмщик', 'Базовая аналитика'];
-    case 'PRO':      return [...base, 'До 5 мастеров', 'AI-агенты', 'Склад', 'Финансы', 'Push-уведомления'];
-    case 'BUSINESS': return [...base, 'Без лимитов', 'Все функции', '1С/Оптим Гараж', 'White-label', 'API'];
-    default:         return base;
+    case 'STARTER':   return [...base, 'До 2 мастеров', 'AI-приёмщик', 'Аналитика', 'PWA'];
+    case 'PRO':       return [...base, 'До 5 мастеров', 'Все AI-агенты', 'Склад', 'Финансы', 'Лояльность'];
+    case 'BUSINESS':  return [...base, 'До 15 мастеров', 'ЭДО и ФНС', 'Онлайн-касса', '1С/Оптим Гараж', 'Push-уведомления'];
+    case 'ENTERPRISE':return [...base, 'Без лимитов', 'Все функции', 'White-label', 'API', 'SLA 99.9%', 'Выделенный менеджер'];
+    default:          return base;
   }
 }

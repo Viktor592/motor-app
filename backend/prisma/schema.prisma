@@ -630,10 +630,11 @@ model SyncLog {
 
 // Тариф
 enum PlanType {
-  STARTER    // 990 ₽/мес — 1 мастер
-  PRO        // 2990 ₽/мес — до 5 мастеров
-  BUSINESS   // 4990 ₽/мес — без лимитов
-  TRIAL      // Бесплатный 14 дней
+  STARTER
+  PRO
+  BUSINESS
+  ENTERPRISE
+  TRIAL
 }
 
 enum TenantStatus {
