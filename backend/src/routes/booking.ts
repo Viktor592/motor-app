@@ -170,9 +170,9 @@ bookingRouter.post('/:id/convert', authenticate, authorize('ADMIN', 'RECEPTIONIS
     let vehicleId: string | undefined;
     if (booking.vehiclePlate) {
       const vehicle = await prisma.vehicle.upsert({
-        where:  { plate: booking.vehiclePlate },
+        where:  { plateNum: booking.vehiclePlate },
         update: {},
-        create: { clientId: client.id, make: booking.vehicleMake ?? '', model: booking.vehicleModel ?? '', plate: booking.vehiclePlate },
+        create: { clientId: client.id, brand: booking.vehicleMake ?? '', model: booking.vehicleModel ?? '', plate: booking.vehiclePlate },
       });
       vehicleId = vehicle.id;
     }
@@ -183,8 +183,8 @@ bookingRouter.post('/:id/convert', authenticate, authorize('ADMIN', 'RECEPTIONIS
     const order = await prisma.order.create({
       data: {
         orderNumber: String(nextNum), clientId: client.id,
-        vehicleId, specialistType: booking.serviceType,
-        complaint: booking.description ?? null, status: 'PENDING',
+        vehicleId, specialistType: booking.serviceType as any,
+        complaint: booking.description ?? null, status: 'NEW',
       },
     });
 

@@ -200,7 +200,7 @@ diagRouter.post('/vin-history', authenticate, authorize('ADMIN','RECEPTIONIST','
       .parse(req.body);
 
     const vehicle = await prisma.vehicle.findFirst({
-      where: vin ? { vin } : { plate: plate! },
+      where: vin ? { vin } : { plateNum: plate! },
       include: {
         orders: {
           where:   { status: 'CLOSED' },
@@ -217,7 +217,7 @@ diagRouter.post('/vin-history', authenticate, authorize('ADMIN','RECEPTIONIST','
       return res.json({ found: false, vehicle: null, history: [] });
     }
 
-    const history = vehicle.orders.map(o => ({
+    const history = (vehicle as any).orders.map(o => ({
       orderId:     o.id,
       orderNumber: o.orderNumber,
       date:        o.createdAt,
@@ -239,7 +239,7 @@ diagRouter.post('/vin-history', authenticate, authorize('ADMIN','RECEPTIONIST','
 
     res.json({
       found:   true,
-      vehicle: { make: vehicle.brand, model: vehicle.model, year: vehicle.year, plate: vehicle.plateNum, vin: vehicle.vinHash },
+      vehicle: { make: vehicle.brand, model: vehicle.model, year: vehicle.year, plate: vehicle.plateNumNum, vin: vehicle.vinHashHash },
       history,
       summary,
       totalVisits:  history.length,

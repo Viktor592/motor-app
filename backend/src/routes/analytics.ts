@@ -253,7 +253,7 @@ analyticsRouter.get('/report', authenticate, authorize('ADMIN'), async (req, res
         if (item.type !== 'WORK') return;
         const cur = serviceMap[item.name] ?? { count: 0, revenue: 0 };
         cur.count++;
-        cur.revenue += item.retailPrice * item.qty;
+        cur.revenue += Number(item.retailPrice) * item.qty;
         serviceMap[item.name] = cur;
       });
     });

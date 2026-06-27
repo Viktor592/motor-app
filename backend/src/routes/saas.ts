@@ -111,21 +111,21 @@ saasRouter.get('/me', authenticate, async (req, res, next) => {
   try {
     const user = await prisma.user.findUnique({
       where: { id: req.user!.userId },
-      select: { tenantId: true },
+      select: { tenantId: true } as any,
     });
     if (!user?.tenantId) throw new AppError(404, 'Тенант не найден');
 
     const tenant = await prisma.tenant.findUnique({
-      where: { id: user.tenantId },
+      where: { id: (user as any).tenantId } as any,
       include: { subscription: { include: { payments: { orderBy: { createdAt: 'desc' }, take: 5 } } } },
     });
 
     // Текущие лимиты
     const plan = PLANS[tenant!.plan];
-    const mastersCount = await prisma.user.count({ where: { tenantId: user.tenantId, role: 'MASTER' } });
+    const mastersCount = await prisma.user.count({ where: { tenantId: (user as any).tenantId, role: 'MASTER' } as any });
     const now = new Date();
     const monthStart = new Date(now.getFullYear(), now.getMonth(), 1);
-    const ordersThisMonth = await prisma.order.count({ where: { tenantId: user.tenantId, createdAt: { gte: monthStart } } });
+    const ordersThisMonth = await prisma.order.count({ where: { tenantId: (user as any).tenantId, createdAt: { gte: monthStart } as any } });
 
     // Дней до конца триала
     let trialDaysLeft: number | null = null;
@@ -150,7 +150,7 @@ saasRouter.get('/me', authenticate, async (req, res, next) => {
 // PATCH /api/v1/saas/me/branding — обновить брендинг
 saasRouter.patch('/me/branding', authenticate, authorize('ADMIN'), async (req, res, next) => {
   try {
-    const user = await prisma.user.findUnique({ where: { id: req.user!.userId }, select: { tenantId: true } });
+    const user = await prisma.user.findUnique({ where: { id: req.user!.userId }, select: { tenantId: true } as any });
     if (!user?.tenantId) throw new AppError(404, 'Тенант не найден');
 
     const data = z.object({
@@ -161,7 +161,7 @@ saasRouter.patch('/me/branding', authenticate, authorize('ADMIN'), async (req, r
     }).parse(req.body);
 
     const tenant = await prisma.tenant.update({
-      where: { id: user.tenantId },
+      where: { id: (user as any).tenantId } as any,
       data,
     });
     invalidateTenantCache(tenant.slug);
@@ -181,7 +181,7 @@ saasRouter.post('/billing/upgrade', authenticate, authorize('ADMIN'), async (req
       plan: z.enum(['STARTER', 'PRO', 'BUSINESS', 'ENTERPRISE']),
     }).parse(req.body);
 
-    const user = await prisma.user.findUnique({ where: { id: req.user!.userId }, select: { tenantId: true } });
+    const user = await prisma.user.findUnique({ where: { id: req.user!.userId }, select: { tenantId: true } as any });
     if (!user?.tenantId) throw new AppError(404, 'Тенант не найден');
 
     const planInfo = PLANS[plan];
@@ -190,7 +190,7 @@ saasRouter.post('/billing/upgrade', authenticate, authorize('ADMIN'), async (req
     const yukassaPayment = await createYukassaPayment({
       amount:      planInfo.priceRub,
       description: `МОТОР — тариф ${planInfo.name} (1 месяц)`,
-      metadata:    { tenantId: user.tenantId, plan },
+      metadata:    { tenantId: (user as any).tenantId, plan },
       returnUrl:   `https://${process.env.BASE_DOMAIN}/billing/success`,
     });
 
@@ -212,7 +212,7 @@ saasRouter.post('/billing/webhook', async (req, res, next) => {
     const { tenantId, plan } = event.object.metadata ?? {};
     if (!tenantId || !plan) return res.json({ ok: true });
 
-    const tenant = await prisma.tenant.findUnique({ where: { id: tenantId } });
+    const tenant = await prisma.tenant.findUnique({ where: { id: tenantId } as any });
     if (!tenant) return res.json({ ok: true });
 
     const paidUntil = new Date();
@@ -221,13 +221,13 @@ saasRouter.post('/billing/webhook', async (req, res, next) => {
     // Обновляем тенант
     await prisma.$transaction(async tx => {
       await tx.tenant.update({
-        where: { id: tenantId },
+        where: { id: tenantId } as any,
         data:  { plan, status: 'ACTIVE', paidUntil },
       });
 
       // Создаём / обновляем подписку
       const sub = await tx.subscription.upsert({
-        where:  { tenantId },
+        where: { tenantId } as any,
         update: { plan, status: 'ACTIVE', priceRub: PLANS[plan as keyof typeof PLANS].priceRub, currentPeriodEnd: paidUntil },
         create: { tenantId, plan, status: 'ACTIVE', priceRub: PLANS[plan as keyof typeof PLANS].priceRub, currentPeriodEnd: paidUntil },
       });
