@@ -78,7 +78,7 @@ chatRouter.post('/', authenticate, async (req, res, next) => {
     }
 
     // Вызов AI (бесплатный провайдер)
-    const aiResponse = await callAI(RECEPTIONIST_SYSTEM, messages, 1024);
+    const aiResponse = await callAI(RECEPTIONIST_SYSTEM, messages as any, 1024);
 
     // Сохранить ответ
     const aiMsg = await prisma.chatMessage.create({

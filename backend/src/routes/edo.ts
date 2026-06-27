@@ -151,7 +151,7 @@ edoRouter.post('/documents/invoice', async (req, res, next) => {
         docNumber:        docNum,
         totalAmount,
         counterpartyName: order.client.name,
-        counterpartyInn:  order.client.inn,
+        counterpartyInn:  (order.client as any).inn,
         createdBy:        req.user!.userId,
       },
     });
@@ -173,7 +173,7 @@ edoRouter.post('/documents/invoice', async (req, res, next) => {
       },
       client: {
         name:  order.client.name,
-        inn:   order.client.inn ?? undefined,
+        inn:   (order.client as any).inn ?? undefined,
         phone: order.client.phone,
       },
       items: order.items.map(i => ({
@@ -222,7 +222,7 @@ edoRouter.post('/documents/act', async (req, res, next) => {
         docNumber:        docNum,
         totalAmount,
         counterpartyName: order.client.name,
-        counterpartyInn:  order.client.inn,
+        counterpartyInn:  (order.client as any).inn,
         createdBy:        req.user!.userId,
       },
     });
@@ -233,7 +233,7 @@ edoRouter.post('/documents/act', async (req, res, next) => {
         name: settings.orgName ?? '', inn: settings.orgInn ?? '',
         address: settings.orgAddress ?? '', director: settings.orgDirector ?? undefined,
       },
-      client: { name: order.client.name, inn: order.client.inn ?? undefined, phone: order.client.phone },
+      client: { name: order.client.name, inn: (order.client as any).inn ?? undefined, phone: order.client.phone },
       items: order.items.map(i => ({
         name: i.name, unit: i.type === 'WORK' ? 'услуга' : 'шт',
         qty: i.qty, price: Number(i.retailPrice), amount: Number(i.retailPrice) * i.qty,
