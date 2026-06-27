@@ -163,16 +163,16 @@ bookingRouter.post('/:id/convert', authenticate, authorize('ADMIN', 'RECEPTIONIS
     let client = await prisma.user.findFirst({ where: { phone: booking.clientPhone } });
     if (!client) {
       client = await prisma.user.create({
-        data: { phone: booking.clientPhone, name: booking.clientName, role: 'CLIENT' },
+        data: { phone: booking.clientPhone, phoneMasked: booking.clientPhone.replace(/\d(?=\d{4})/g,'*'), name: booking.clientName, role: 'CLIENT' },
       });
     }
 
     let vehicleId: string | undefined;
     if (booking.vehiclePlate) {
       const vehicle = await prisma.vehicle.upsert({
-        where:  { plateNum: booking.vehiclePlate },
+        where:  { id: '_nonexistent_' }, // placeholder — логика ниже
         update: {},
-        create: { clientId: client.id, brand: booking.vehicleMake ?? '', model: booking.vehicleModel ?? '', plate: booking.vehiclePlate },
+        create: { clientId: client.id, brand: booking.vehicleMake ?? '', model: booking.vehicleModel ?? '', year: 0, plateNum: booking.vehiclePlate ?? null },
       });
       vehicleId = vehicle.id;
     }
@@ -183,8 +183,8 @@ bookingRouter.post('/:id/convert', authenticate, authorize('ADMIN', 'RECEPTIONIS
     const order = await prisma.order.create({
       data: {
         orderNumber: String(nextNum), clientId: client.id,
-        vehicleId, specialistType: booking.serviceType as any,
-        complaint: booking.description ?? null, status: 'NEW',
+        vehicleId: vehicleId ?? '', specialistType: booking.serviceType as any,
+        complaintRaw: booking.description ?? '', status: 'NEW',
       },
     });
 

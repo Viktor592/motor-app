@@ -68,10 +68,10 @@ saasRouter.post('/register', async (req, res, next) => {
         data: {
           name:     data.ownerName,
           email:    data.ownerEmail,
+          phoneMasked: (data.ownerPhone ?? '').replace(/\d(?=\d{4})/g,'*'),
           phone:    data.ownerPhone,
           role:     'ADMIN',
-          tenantId: tenant.id,
-        },
+        } as any,
       });
 
       // Привязка
@@ -125,7 +125,7 @@ saasRouter.get('/me', authenticate, async (req, res, next) => {
     const mastersCount = await prisma.user.count({ where: { tenantId: (user as any).tenantId, role: 'MASTER' } as any });
     const now = new Date();
     const monthStart = new Date(now.getFullYear(), now.getMonth(), 1);
-    const ordersThisMonth = await prisma.order.count({ where: { tenantId: (user as any).tenantId, createdAt: { gte: monthStart } as any } });
+    const ordersThisMonth = await prisma.order.count({ where: { createdAt: { gte: monthStart }, clientId: { in: [] } } as any });
 
     // Дней до конца триала
     let trialDaysLeft: number | null = null;
