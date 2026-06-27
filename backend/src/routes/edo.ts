@@ -593,8 +593,8 @@ edoRouter.get('/deadlines', async (req, res, next) => {
   } catch (e) { next(e); }
 });
 
-function getTaxDeadlines(system: string, year: number) {
-  const d = [];
+function getTaxDeadlines(system: string, year: number): { date: Date; title: string; type: string; urgent: boolean }[] {
+  const d: { date: Date; title: string; type: string; urgent: boolean }[] = [];
 
   if (['USN_INCOME', 'USN_INCOME_MINUS'].includes(system)) {
     d.push(

@@ -14,12 +14,12 @@ function signTokens(userId: string, role: string, phone: string) {
   const access = jwt.sign(
     { userId, role, phone },
     process.env.JWT_ACCESS_SECRET!,
-    { expiresIn: process.env.JWT_ACCESS_EXPIRES || '15m' }
+    { expiresIn: (process.env.JWT_ACCESS_EXPIRES || '15m') as any }
   );
   const refresh = jwt.sign(
     { userId, role, phone },
     process.env.JWT_REFRESH_SECRET!,
-    { expiresIn: process.env.JWT_REFRESH_EXPIRES || '30d' }
+    { expiresIn: (process.env.JWT_REFRESH_EXPIRES || '30d') as any }
   );
   return { access, refresh };
 }

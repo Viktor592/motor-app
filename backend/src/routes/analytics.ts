@@ -332,7 +332,7 @@ analyticsRouter.get('/kpi', authenticate, authorize('ADMIN', 'RECEPTIONIST'), as
       prisma.order.findMany({ where: { status: 'CLOSED', paidAt: { gte: todayStart } }, select: { totalRetail: true } }),
       prisma.order.findMany({ where: { status: 'CLOSED', paidAt: { gte: weekStart  } }, select: { totalRetail: true } }),
       prisma.order.findMany({ where: { status: 'CLOSED', paidAt: { gte: monthStart } }, select: { totalRetail: true } }),
-      prisma.order.count({ where: { status: { in: ['PENDING','IN_PROGRESS','WAITING_PARTS','QUALITY_CHECK','DONE'] } } }),
+      prisma.order.count({ where: { status: { in: ['NEW','IN_PROGRESS','ASSESSED','CONFIRMED','READY'] } } }),
       prisma.booking.count({ where: { status: 'PENDING' } }),
       prisma.cashShift.findFirst({ where: { status: 'OPEN' } }),
     ]);

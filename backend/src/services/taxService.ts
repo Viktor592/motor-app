@@ -23,7 +23,7 @@ export interface TaxParams {
   region:        string;   // код региона: 77=Москва, 78=СПб
   revenue:       number;   // выручка за период ₽
   expenses:      number;   // расходы за период ₽
-  employees:     number;   // кол-во сотрудников
+  employees?:    number;   // кол-во сотрудников
   insuredAmount: number;   // страховые взносы ИП за себя ₽
   patentCost?:   number;   // стоимость патента (если ПСН)
   period:        'quarter' | 'year';
@@ -65,7 +65,7 @@ export function calculateTax(params: TaxParams): TaxResult {
       const regionRate = getUsnRate(params.region, 'income'); // 1–6%
       const rawTax     = params.revenue * regionRate / 100;
       // Вычет страховых взносов: до 50% налога если есть сотрудники, до 100% если ИП без сотрудников
-      const maxDeduct  = params.employees > 0 ? rawTax * 0.5 : rawTax;
+      const maxDeduct  = Number(params.employees ?? 0) > 0 ? rawTax * 0.5 : rawTax;
       const deductions = Math.min(insurance * periodK, maxDeduct);
       const finalTax   = Math.max(0, rawTax - deductions);
       return {
@@ -83,7 +83,7 @@ export function calculateTax(params: TaxParams): TaxResult {
           `Налог до вычетов: ${fmtRub(rawTax)}`,
           `Вычет страх. взносов: ${fmtRub(deductions)}`,
           `Итого налог: ${fmtRub(finalTax)}`,
-          params.employees === 0 ? 'ИП без сотрудников — вычет 100% взносов' : 'С сотрудниками — вычет до 50% налога',
+          (params.employees ?? 0) === 0 ? 'ИП без сотрудников — вычет 100% взносов' : 'С сотрудниками — вычет до 50% налога',
         ],
       };
     }
@@ -118,7 +118,7 @@ export function calculateTax(params: TaxParams): TaxResult {
       const patentCost = params.patentCost ?? estimatePatentCost(params.region);
       const annualCost = patentCost * periodK;
       // Вычет взносов из стоимости патента (как в УСН «Доходы»)
-      const maxDeduct  = params.employees > 0 ? annualCost * 0.5 : annualCost;
+      const maxDeduct  = Number(params.employees ?? 0) > 0 ? annualCost * 0.5 : annualCost;
       const deductions = Math.min(insurance * periodK, maxDeduct);
       const finalTax   = Math.max(0, annualCost - deductions);
       return {
@@ -222,7 +222,7 @@ export async function analyzeTaxOptimization(params: TaxParams): Promise<{
   const prompt = `Ты налоговый консультант автосервиса. Данные за период:
 - Выручка: ${fmtRub(params.revenue)}
 - Расходы: ${fmtRub(params.expenses)}
-- Сотрудников: ${params.employees}
+- Сотрудников: ${(params.employees ?? 0)}
 - Регион: ${params.region}
 
 Результаты расчёта по режимам:
@@ -247,15 +247,15 @@ ${results.map(r => `${r.systemName}: налог ${fmtRub(r.finalTax)}, став�
     'Используйте инвестиционный вычет при покупке оборудования',
     'Применяйте региональную льготную ставку (проверьте закон своего региона)',
     'При выручке до 2.4 млн — рассмотрите НПД (самозанятость)',
-    params.employees === 0 ? 'Без сотрудников — вычет 100% страховых взносов из налога УСН' : '',
+    (params.employees ?? 0) === 0 ? 'Без сотрудников — вычет 100% страховых взносов из налога УСН' : '',
     params.expenses / params.revenue > 0.6 ? 'Высокие расходы (>60%) — УСН 15% может быть выгоднее УСН 6%' : '',
   ].filter(Boolean) as string[];
 
   const warnings: string[] = [];
   if (params.revenue > 60_000_000) warnings.push('⚠️ Выручка >60 млн — ПСН и НПД недоступны');
   if (params.revenue > 150_000_000) warnings.push('⚠️ Выручка >150 млн — УСН недоступна, нужна ОСНО');
-  if (params.employees > 100) warnings.push('⚠️ Более 100 сотрудников — УСН недоступна');
-  if (params.employees > 15) warnings.push('⚠️ Более 15 сотрудников — ПСН недоступна');
+  if (Number(params.employees ?? 0) > 100) warnings.push('⚠️ Более 100 сотрудников — УСН недоступна');
+  if (Number(params.employees ?? 0) > 15) warnings.push('⚠️ Более 15 сотрудников — ПСН недоступна');
 
   return {
     results,
@@ -324,7 +324,7 @@ export function generateUsnDeclarationXml(opts: {
   taxAmount:    number;
   advancePaid:  number;
   insurance:    number;
-  employees:    number;
+  employees?:   number;
 }): string {
   const now = new Date();
   return `<?xml version="1.0" encoding="windows-1251"?>

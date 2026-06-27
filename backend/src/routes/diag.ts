@@ -231,17 +231,15 @@ diagRouter.post('/vin-history', authenticate, authorize('ADMIN','RECEPTIONIST','
     if (history.length > 0) {
       
       const allWorks = history.flatMap(h => h.works).slice(0, 30);
-      summary = await ai.complete(
-        `Краткое резюме истории обслуживания автомобиля ${vehicle.make} ${vehicle.model} (${vehicle.year ?? '?'}).\n` +
+      const prompt = `Краткое резюме истории обслуживания автомобиля ${vehicle.brand} ${vehicle.model} (${vehicle.year ?? '?'}).\n` +
         `Выполненные работы: ${allWorks.join(', ')}.\n` +
-        `Напиши 2–3 предложения: что делали, на что обратить внимание при следующем визите.`,
-        { maxTokens: 200, temperature: 0.4 },
-      );
+        `Напиши 2–3 предложения: что делали, на что обратить внимание при следующем визите.`;
+      summary = (await callAI('', [{ role: 'user' as const, content: prompt }], 200)).text;
     }
 
     res.json({
       found:   true,
-      vehicle: { make: vehicle.make, model: vehicle.model, year: vehicle.year, plate: vehicle.plate, vin: vehicle.vin },
+      vehicle: { make: vehicle.brand, model: vehicle.model, year: vehicle.year, plate: vehicle.plateNum, vin: vehicle.vinHash },
       history,
       summary,
       totalVisits:  history.length,
