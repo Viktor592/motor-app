@@ -344,7 +344,7 @@ export default function SettingsPage() {
                     <input type="date" className={s.dateInput} value={expTo}   onChange={e => setExpTo(e.target.value)}   />
                   </div>
                   <a
-                    href={`/api/v1/export/orders/xlsx?from=${expFrom}&to=${expTo}`}
+                    href={"/api/v1/export/orders/xlsx?from=" + expFrom + "&to=" + expTo}
                     className={s.exportBtn}
                     target="_blank" rel="noreferrer"
                   >
