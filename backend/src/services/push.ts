@@ -49,7 +49,7 @@ export async function sendPush(token: string, title: string, body: string, data?
       body: JSON.stringify(message),
     });
 
-    const result = await resp.json();
+    const result = await resp.json() as any;
     if (result.data?.status === 'error') {
       console.warn('[Push] Ошибка:', result.data.details);
     }
@@ -73,7 +73,7 @@ export async function sendPushBatch(messages: PushMessage[]): Promise<PushResult
         headers: { 'Accept': 'application/json', 'Content-Type': 'application/json' },
         body: JSON.stringify(batch),
       });
-      const json = await resp.json();
+      const json = await resp.json() as any;
       results.push(...(json.data ?? []));
     } catch (e) {
       console.error('[Push] Batch error:', e);

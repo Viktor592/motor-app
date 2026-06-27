@@ -7,7 +7,7 @@
  * - XML-декларации УСН
  */
 
-import { getAiClient } from './aiProvider';
+import { callAI } from './aiProvider';
 
 // ── Налоговые режимы ──────────────────────────────────────────
 
@@ -218,7 +218,7 @@ export async function analyzeTaxOptimization(params: TaxParams): Promise<{
   const savings = worst.finalTax - best.finalTax;
 
   // AI-рекомендация
-  const ai = await getAiClient();
+  
   const prompt = `Ты налоговый консультант автосервиса. Данные за период:
 - Выручка: ${fmtRub(params.revenue)}
 - Расходы: ${fmtRub(params.expenses)}
@@ -238,7 +238,7 @@ ${results.map(r => `${r.systemName}: налог ${fmtRub(r.finalTax)}, став�
 Важно: только легальные методы. Никакой "серой" оптимизации.
 Отвечай кратко и по-русски.`;
 
-  const aiText = await ai.complete(prompt, { maxTokens: 500, temperature: 0.4 });
+  const aiText = (await callAI("", [{ role: "user", content: prompt }], 500)).text;
 
   // Законные советы по оптимизации
   const legalTips = [

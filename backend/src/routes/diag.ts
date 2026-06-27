@@ -1,7 +1,7 @@
 import { Router } from 'express';
 import { z } from 'zod';
 import { authenticate, authorize } from '../middleware/auth';
-import { getAiClient } from '../services/aiProvider';
+import { callAI } from '../services/aiProvider';
 import { prisma } from '../utils/prisma';
 
 export const diagRouter = Router();
@@ -19,7 +19,7 @@ diagRouter.post('/voice', authenticate, authorize('ADMIN','RECEPTIONIST','MASTER
       mimeType:    z.string().default('audio/webm'),
     }).parse(req.body);
 
-    const ai = await getAiClient();
+    
 
     // Groq Whisper API
     if (process.env.GROQ_API_KEY) {
@@ -57,7 +57,7 @@ diagRouter.post('/photo', authenticate, authorize('ADMIN','RECEPTIONIST','MASTER
       context:     z.string().optional(), // доп. контекст: марка авто, жалоба
     }).parse(req.body);
 
-    const ai = await getAiClient();
+    
 
     // Пробуем vision-модель через OpenRouter (llava или gpt-4o)
     const systemPrompt = `Ты — опытный автодиагност. Анализируй изображение и определи:
@@ -147,7 +147,7 @@ diagRouter.post('/parts-suggest', authenticate, authorize('ADMIN','RECEPTIONIST'
       vehicleYear:  z.number().int().optional(),
     }).parse(req.body);
 
-    const ai = await getAiClient();
+    
 
     const prompt = `Ты — агент «Снабженец» в автосервисе. 
 Запчасть: артикул ${article}${name ? `, название: ${name}` : ''}.
@@ -162,7 +162,7 @@ ${vehicleMake ? `Автомобиль: ${vehicleMake} ${vehicleModel ?? ''} ${ve
   ...
 ]`;
 
-    const raw = await ai.complete(prompt, { maxTokens: 600, temperature: 0.3 });
+    const raw = (await callAI("", [{ role: "user", content: prompt }], 600)).text;
     const cleaned = raw.replace(/```json|```/g, '').trim();
 
     let suggestions: any[] = [];
@@ -229,7 +229,7 @@ diagRouter.post('/vin-history', authenticate, authorize('ADMIN','RECEPTIONIST','
     // AI: краткое резюме истории обслуживания
     let summary = '';
     if (history.length > 0) {
-      const ai = await getAiClient();
+      
       const allWorks = history.flatMap(h => h.works).slice(0, 30);
       summary = await ai.complete(
         `Краткое резюме истории обслуживания автомобиля ${vehicle.make} ${vehicle.model} (${vehicle.year ?? '?'}).\n` +

@@ -246,7 +246,7 @@ function generateEfs1Xml(opts: {
   orgName: string; inn: string; kpp?: string; regNumber: string;
   employees: { snils: string; name: string; hireDate?: Date; fireDate?: Date }[];
 }): string {
-  const sections = opts.employees.map(emp => `
+  const sections = (opts.employees ?? []).map(emp => `
     <ЗЛ СНИЛС="${emp.snils}">
       <ФИО>${emp.name}</ФИО>
       ${emp.hireDate ? `<ДатаПриёма>${emp.hireDate.toLocaleDateString('ru-RU')}</ДатаПриёма>` : ''}

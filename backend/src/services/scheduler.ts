@@ -4,6 +4,7 @@
  */
 
 import { prisma } from '../utils/prisma';
+import { sendPush } from './push';
 import { sendTelegramMessage } from './telegram';
 import { processDueReminders } from '../routes/loyalty';
 
@@ -162,8 +163,9 @@ export async function checkAndSendReports() {
           select: { id: true },
         });
         for (const admin of admins) {
-          await sendPushToUser(
-            admin.id,
+          const u = await prisma.user.findUnique({ where: { id: admin.id }, select: { pushToken: true } });
+          if (u?.pushToken) await sendPush(
+            u.pushToken,
             result.status === 'SENT' ? '✅ Декларация отправлена' : '⚠️ Ошибка отправки',
             `УСН за ${year}: ${result.message ?? result.status}`,
           );
