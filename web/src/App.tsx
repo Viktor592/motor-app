@@ -35,6 +35,7 @@ import IntegrationPage    from './pages/IntegrationPage';
 import OnboardingNewPage  from './pages/OnboardingNewPage';
 import PlansPage          from './pages/PlansPage';
 import EdoPage            from './pages/EdoPage';
+import OtpPage            from './pages/OtpPage';
 
 function OnboardingGuard() {
   const navigate = useNavigate();
