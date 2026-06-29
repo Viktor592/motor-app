@@ -29,8 +29,6 @@ services:
     command: redis-server --appendonly yes
     volumes:
       - redis_data:/data
-    ports:
-      - "6379:6379"
     healthcheck:
       test: ["CMD", "redis-cli", "ping"]
       interval: 5s
@@ -59,7 +57,7 @@ services:
       JWT_ACCESS_EXPIRES:    15m
       JWT_REFRESH_EXPIRES:   30d
       ANTHROPIC_API_KEY:     ${ANTHROPIC_API_KEY}
-      ALLOWED_ORIGINS:       http://localhost:5173,https://motor-app.ru
+      ALLOWED_ORIGINS:       http://localhost:3001,http://localhost:3002,http://localhost:3003,http://localhost:3004
     ports:
       - "3000:3000"
     healthcheck:
@@ -68,17 +66,45 @@ services:
       timeout: 5s
       retries: 5
 
-  # ── Web Frontend ────────────────────────────────────────
-  web:
+  # ── SaaS (логин + регистрация автосервиса) ──────────────
+  app-saas:
     build:
-      context: ./web
+      context: ./apps/saas
       dockerfile: Dockerfile
-    container_name: motor_web
+    container_name: motor_saas
     restart: unless-stopped
-    depends_on:
-      - backend
     ports:
-      - "5173:80"
+      - "3004:80"
+
+  # ── Client app ──────────────────────────────────────────
+  app-client:
+    build:
+      context: ./apps/client
+      dockerfile: Dockerfile
+    container_name: motor_client
+    restart: unless-stopped
+    ports:
+      - "3001:80"
+
+  # ── Staff app (мастер/исполнитель) ──────────────────────
+  app-staff:
+    build:
+      context: ./apps/staff
+      dockerfile: Dockerfile
+    container_name: motor_staff
+    restart: unless-stopped
+    ports:
+      - "3002:80"
+
+  # ── Admin app ───────────────────────────────────────────
+  app-admin:
+    build:
+      context: ./apps/admin
+      dockerfile: Dockerfile
+    container_name: motor_admin
+    restart: unless-stopped
+    ports:
+      - "3003:80"
 
   # ── Nginx (reverse proxy) ───────────────────────────────
   nginx:
@@ -87,7 +113,10 @@ services:
     restart: unless-stopped
     depends_on:
       - backend
-      - web
+      - app-saas
+      - app-client
+      - app-staff
+      - app-admin
     ports:
       - "80:80"
     volumes:

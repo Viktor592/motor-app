@@ -1,0 +1,54 @@
+.page    { padding:32px 36px; max-width:900px; }
+.loading { padding:64px; color:var(--dust); text-align:center; }
+.back    { margin-bottom:20px; }
+.back a  { color:var(--dust); text-decoration:none; font-size:13px; }
+.back a:hover { color:var(--ore); }
+
+.header  { display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:28px; }
+.eye     { font-size:10px; color:var(--ore); letter-spacing:.3em; text-transform:uppercase; margin-bottom:6px; }
+.h1      { font-family:'Bebas Neue',sans-serif; font-size:48px; color:var(--chalk); letter-spacing:.05em; }
+.sub     { font-size:12px; color:var(--dust); margin-top:4px; }
+
+.grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(220px,1fr)); gap:12px; margin-bottom:20px; }
+.card { background:var(--plate); border:1px solid var(--wire); border-radius:4px; padding:16px; }
+.cardTitle { font-size:12px; font-weight:700; color:var(--dust); text-transform:uppercase; letter-spacing:.12em; margin-bottom:10px; }
+.cardRow   { display:flex; justify-content:space-between; font-size:13px; padding:5px 0; border-bottom:1px solid rgba(42,42,53,.4); }
+.cardRow:last-child { border-bottom:none; }
+.cardRow span { color:var(--dust); }
+.cardRow b    { color:var(--chalk); font-weight:600; }
+
+.specPill {
+  background:var(--ore-d); border:1px solid rgba(255,98,0,.3); border-radius:4px;
+  padding:8px 12px; font-size:14px; font-weight:700; color:var(--ore); display:inline-block;
+}
+.priceVal  { font-size:28px; font-weight:900; color:var(--teal); }
+.priceNote { font-size:11px; color:var(--soot); margin-top:4px; }
+
+.complaint { background:var(--plate); border:1px solid var(--wire); border-radius:4px; padding:20px; margin-bottom:20px; }
+.complaintTitle { font-size:11px; font-weight:700; color:var(--dust); text-transform:uppercase; letter-spacing:.12em; margin-bottom:10px; }
+.complaintText  { font-size:14px; color:var(--ash); line-height:1.7; }
+
+.items { background:var(--plate); border:1px solid var(--wire); border-radius:4px; overflow:hidden; margin-bottom:20px; }
+.itemsTitle { padding:12px 16px; border-bottom:1px solid var(--wire); font-size:12px; font-weight:700; color:var(--dust); text-transform:uppercase; letter-spacing:.1em; }
+.itemsTable { }
+.itemsHead {
+  display:grid; grid-template-columns:1fr 60px 100px 100px;
+  padding:8px 16px; font-size:10px; font-weight:700; color:var(--soot); text-transform:uppercase; letter-spacing:.1em;
+}
+.itemRow {
+  display:grid; grid-template-columns:1fr 60px 100px 100px;
+  padding:10px 16px; border-top:1px solid rgba(42,42,53,.4);
+  font-size:13px; color:var(--ash);
+}
+.itemRow span:nth-child(2), .itemRow span:nth-child(3), .itemRow span:nth-child(4) { text-align:right; color:var(--chalk); font-weight:600; }
+
+.actions { display: flex; gap: 10px; flex-wrap: wrap; }
+.actBtn {
+  display:inline-flex; align-items:center; gap:8px;
+  background:var(--plate); border:1px solid var(--wire); border-radius:4px;
+  padding:11px 18px; text-decoration:none; color:var(--ash); font-size:13px;
+  transition:all .2s;
+}
+.actBtn:hover { border-color:var(--ore); color:var(--ore); }
+
+@media(max-width:600px) { .page { padding:20px 16px; } .h1 { font-size:36px; } }

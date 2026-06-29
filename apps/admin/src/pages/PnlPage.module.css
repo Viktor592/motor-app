@@ -1,0 +1,71 @@
+.page    { padding: 32px 36px; max-width: 1200px; }
+.eye     { font-size: 10px; color: var(--ore); letter-spacing: .3em; text-transform: uppercase; margin-bottom: 6px; }
+.h1      { font-family: 'Bebas Neue', sans-serif; font-size: 48px; color: var(--chalk); letter-spacing: .05em; }
+.loading { color: var(--dust); padding: 24px 0; }
+.topRow  { display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 28px; flex-wrap: wrap; gap: 14px; }
+.periodBtns { display: flex; gap: 4px; }
+.periodBtn  { background: var(--plate); border: 1px solid var(--wire); border-radius: 4px; padding: 8px 16px; font-size: 12px; font-weight: 700; color: var(--dust); cursor: pointer; transition: all .15s; }
+.periodBtn:hover  { border-color: var(--ore); color: var(--ash); }
+.periodActive     { background: var(--ore-d) !important; border-color: var(--ore) !important; color: var(--ore) !important; }
+
+/* KPI */
+.kpiGrid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 20px; }
+.kpi     { background: var(--plate); border: 1px solid var(--wire); border-radius: 6px; padding: 20px; border-left: 3px solid var(--wire); }
+.kpiGreen { border-left-color: var(--green); }
+.kpiTeal  { border-left-color: var(--teal); }
+.kpiOre   { border-left-color: var(--ore); }
+.kpiBlue  { border-left-color: var(--blue); }
+.kpiLabel { font-size: 10px; font-weight: 700; color: var(--dust); text-transform: uppercase; letter-spacing: .14em; margin-bottom: 6px; }
+.kpiVal   { font-family: 'Bebas Neue', sans-serif; font-size: 36px; color: var(--chalk); letter-spacing: .04em; }
+.kpiSub   { font-size: 11px; color: var(--soot); margin-top: 4px; }
+
+/* Grids */
+.grid2    { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 14px; }
+.card     { background: var(--plate); border: 1px solid var(--wire); border-radius: 6px; padding: 20px; }
+.cardTitle { font-size: 13px; font-weight: 700; color: var(--chalk); margin-bottom: 16px; }
+.empty    { color: var(--soot); font-size: 13px; padding: 16px 0; }
+
+/* Bar chart */
+.chart   { display: flex; align-items: flex-end; gap: 6px; height: 160px; padding-top: 8px; position: relative; }
+.bar     { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: flex-end; height: 100%; position: relative; cursor: pointer; }
+.bar:hover .barTooltip { display: flex; }
+.barTooltip {
+  display: none; flex-direction: column; gap: 3px;
+  position: absolute; bottom: 100%; left: 50%; transform: translateX(-50%);
+  background: var(--cage); border: 1px solid var(--wire); border-radius: 4px;
+  padding: 8px 10px; font-size: 11px; color: var(--ash); white-space: nowrap; z-index: 10;
+  margin-bottom: 6px;
+}
+.barTooltip b { color: var(--chalk); font-size: 13px; }
+.barFill { width: 100%; background: var(--ore); border-radius: 2px 2px 0 0; transition: height .4s; min-height: 2px; position: absolute; bottom: 20px; }
+.barProfitFill { width: 60%; background: var(--green); border-radius: 2px 2px 0 0; opacity: .7; position: absolute; bottom: 20px; }
+.barLabel { font-size: 9px; color: var(--soot); position: absolute; bottom: 4px; }
+
+/* Funnel */
+.funnelRow   { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
+.funnelLabel { font-size: 12px; color: var(--dust); width: 100px; flex-shrink: 0; }
+.funnelBar   { flex: 1; height: 8px; background: var(--wire); border-radius: 4px; overflow: hidden; }
+.funnelFill  { height: 100%; border-radius: 4px; transition: width .5s; }
+.funnelCount { font-size: 13px; font-weight: 700; color: var(--chalk); width: 30px; text-align: right; }
+
+/* By spec */
+.specRow   { margin-bottom: 14px; }
+.specLabel { font-size: 13px; color: var(--chalk); margin-bottom: 5px; }
+.specBar   { height: 6px; background: var(--wire); border-radius: 3px; overflow: hidden; margin-bottom: 4px; }
+.specFill  { height: 100%; background: var(--ore); border-radius: 3px; transition: width .5s; }
+.specRight { display: flex; justify-content: space-between; }
+.specRevenue { font-size: 13px; font-weight: 700; color: var(--teal); }
+.specOrders  { font-size: 11px; color: var(--soot); }
+
+/* Masters */
+.masterRow   { display: flex; align-items: center; gap: 12px; padding: 10px 0; border-bottom: 1px solid rgba(42,42,53,.5); }
+.masterRow:last-child { border-bottom: none; }
+.masterRank  { font-size: 20px; width: 28px; flex-shrink: 0; }
+.masterName  { flex: 1; font-size: 14px; color: var(--chalk); font-weight: 600; }
+.masterStats { display: flex; flex-direction: column; align-items: flex-end; gap: 2px; }
+.masterRevenue { font-size: 14px; font-weight: 700; color: var(--teal); }
+.masterOrders  { font-size: 11px; color: var(--soot); }
+
+@media (max-width: 1000px) { .grid2 { grid-template-columns: 1fr; } }
+@media (max-width: 700px)  { .kpiGrid { grid-template-columns: 1fr 1fr; } .page { padding: 20px 16px; } }
+@media (max-width: 480px)  { .kpiGrid { grid-template-columns: 1fr; } }
