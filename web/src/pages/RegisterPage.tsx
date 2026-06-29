@@ -13,7 +13,12 @@ export default function RegisterPage() {
   const navigate = useNavigate();
   const { loading, error } = useSelector((st: RootState) => st.auth);
 
-  const fmt = (v: string) => '+7' + v.replace(/\D/g,'').slice(1, 11);
+  const fmt = (v: string) => {
+    const digits = v.replace(/\D/g, '');
+    if (!digits) return '';
+    const normalized = digits.startsWith('7') ? digits : digits.startsWith('8') ? '7' + digits.slice(1) : '7' + digits;
+    return '+' + normalized.slice(0, 11);
+  };
 
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();

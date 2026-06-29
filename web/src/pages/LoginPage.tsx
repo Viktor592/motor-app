@@ -13,9 +13,10 @@ export default function LoginPage() {
   const { loading, error } = useSelector((st: RootState) => st.auth);
 
   const fmt = (v: string) => {
-    const n = v.replace(/\D/g, '');
-    if (!n) return '';
-    return '+7' + n.slice(1, 11);
+    const digits = v.replace(/\D/g, '');
+    if (!digits) return '';
+    const normalized = digits.startsWith('7') ? digits : digits.startsWith('8') ? '7' + digits.slice(1) : '7' + digits;
+    return '+' + normalized.slice(0, 11);
   };
 
   const submit = async (e: React.FormEvent) => {
