@@ -76,8 +76,7 @@ services:
     container_name: motor_web
     restart: unless-stopped
     depends_on:
-      backend:
-        condition: service_healthy
+      - backend
     ports:
       - "5173:80"
 
