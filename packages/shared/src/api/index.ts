@@ -1,107 +1,58 @@
-// ═══════════════════════════════════════════════════
-// МОТОР — API Client
-// ═══════════════════════════════════════════════════
-import axios, { AxiosError, InternalAxiosRequestConfig } from 'axios';
-import type {
-  ApiResponse,
-  BookingRequest,
-  Booking,
-  TimeSlot,
-  WorkshopPost,
-  DiagResult,
-  Client,
-  SpecialistType,
-} from '../types';
+import axios, { type AxiosInstance } from 'axios';
+import { getAccessToken, getRefreshToken, saveTokens, clearTokens } from '../auth';
 
-// ── Base URL — swap via env ──────────────────────
-export const API_BASE_URL =
-  process.env.MOTOR_API_URL ?? 'https://api.motor-auto.ru/v1';
+const BASE_URL = typeof window !== 'undefined'
+  ? (window.__MOTOR_API_URL__ ?? '/api/v1')
+  : '/api/v1';
 
-export const apiClient = axios.create({
-  baseURL: API_BASE_URL,
-  timeout: 15_000,
-  headers: { 'Content-Type': 'application/json' },
-});
+declare global {
+  interface Window { __MOTOR_API_URL__?: string; }
+}
 
-// ── Auth token injection ─────────────────────────
-apiClient.interceptors.request.use((config: InternalAxiosRequestConfig) => {
-  const token = getToken();
-  if (token) config.headers.Authorization = `Bearer ${token}`;
-  return config;
-});
+export function createApiClient(baseURL = BASE_URL): AxiosInstance {
+  const client = axios.create({ baseURL, timeout: 15000 });
 
-// ── Global error handler ─────────────────────────
-apiClient.interceptors.response.use(
-  (r) => r,
-  (err: AxiosError) => {
-    if (err.response?.status === 401) {
-      clearToken();
-      // Emit event — mobile and web handle navigation differently
-      tokenExpiredEmitter();
+  client.interceptors.request.use(cfg => {
+    const token = getAccessToken();
+    if (token) cfg.headers.Authorization = `Bearer ${token}`;
+    return cfg;
+  });
+
+  let refreshing = false;
+  let queue: Array<(t: string) => void> = [];
+
+  client.interceptors.response.use(
+    r => r,
+    async err => {
+      const orig = err.config;
+      if (err.response?.status === 401 && !orig._retry) {
+        orig._retry = true;
+        if (refreshing) {
+          return new Promise(res =>
+            queue.push(t => { orig.headers.Authorization = `Bearer ${t}`; res(client(orig)); })
+          );
+        }
+        refreshing = true;
+        try {
+          const refresh = getRefreshToken();
+          const { data } = await axios.post(`${baseURL}/auth/refresh`, { refresh });
+          saveTokens(data);
+          queue.forEach(fn => fn(data.access));
+          queue = [];
+          orig.headers.Authorization = `Bearer ${data.access}`;
+          return client(orig);
+        } catch {
+          clearTokens();
+          window.location.replace(window.__MOTOR_SAAS_URL__ ?? '/');
+        } finally {
+          refreshing = false;
+        }
+      }
+      return Promise.reject(err);
     }
-    return Promise.reject(err);
-  }
-);
+  );
 
-// Stubs — replaced by platform-specific storage
-let _token: string | null = null;
-export const setToken = (t: string) => { _token = t; };
-export const getToken = () => _token;
-export const clearToken = () => { _token = null; };
-export let tokenExpiredEmitter = () => {};
-export const setTokenExpiredHandler = (fn: () => void) => { tokenExpiredEmitter = fn; };
+  return client;
+}
 
-// ═══════════════════════════════════════════════════
-// API METHODS
-// ═══════════════════════════════════════════════════
-
-// ── Auth ─────────────────────────────────────────
-export const authApi = {
-  requestOtp: (phone: string) =>
-    apiClient.post<ApiResponse<void>>('/auth/otp', { phone }),
-
-  verifyOtp: (phone: string, code: string) =>
-    apiClient.post<ApiResponse<{ token: string; client: Client }>>('/auth/verify', { phone, code }),
-};
-
-// ── Booking ──────────────────────────────────────
-export const bookingApi = {
-  getSlots: (params: { date: string; specialistType: SpecialistType }) =>
-    apiClient.get<ApiResponse<TimeSlot[]>>('/slots', { params }),
-
-  getSlotsRange: (params: { from: string; to: string; specialistType: SpecialistType }) =>
-    apiClient.get<ApiResponse<TimeSlot[]>>('/slots/range', { params }),
-
-  createBooking: (payload: BookingRequest) =>
-    apiClient.post<ApiResponse<Booking>>('/bookings', payload),
-
-  getBooking: (id: string) =>
-    apiClient.get<ApiResponse<Booking>>(`/bookings/${id}`),
-
-  getMyBookings: () =>
-    apiClient.get<ApiResponse<Booking[]>>('/bookings/my'),
-
-  cancelBooking: (id: string, reason: string) =>
-    apiClient.patch<ApiResponse<Booking>>(`/bookings/${id}/cancel`, { reason }),
-};
-
-// ── Workshop ─────────────────────────────────────
-export const workshopApi = {
-  getPosts: () =>
-    apiClient.get<ApiResponse<WorkshopPost[]>>('/workshop/posts'),
-};
-
-// ── Diagnostics ──────────────────────────────────
-export const diagApi = {
-  getResult: (bookingId: string) =>
-    apiClient.get<ApiResponse<DiagResult>>(`/diagnostics/${bookingId}`),
-};
-
-// ── Client ───────────────────────────────────────
-export const clientApi = {
-  getMe: () =>
-    apiClient.get<ApiResponse<Client>>('/clients/me'),
-
-  updateProfile: (data: Partial<Pick<Client, 'name' | 'email'>>) =>
-    apiClient.patch<ApiResponse<Client>>('/clients/me', data),
-};
+export const api = createApiClient();

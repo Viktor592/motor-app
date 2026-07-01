@@ -1,158 +1,67 @@
-<div align="center">
+# МОТОР — Платформа управления автосервисом
 
-# ⚡ МОТОР
-### AI-экосистема для автосервиса
+## Архитектура: 6 отдельных приложений
 
-[![CI](https://github.com/Viktor592/motor-app/actions/workflows/ci.yml/badge.svg)](https://github.com/Viktor592/motor-app/actions/workflows/ci.yml)
-[![21/21 итераций](https://img.shields.io/badge/итераций-21%2F21%20✅-brightgreen)](https://github.com/Viktor592/motor-app)
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
-
-**МОТОР** — полноценная система управления автосервисом с AI-ассистентами,  
-онлайн-записью, складом, финансами, ЭДО и автоматической отчётностью в ФНС.
-
-[📖 HANDOFF](HANDOFF.md) · [📱 EAS Build](mobile/EAS_BUILD_GUIDE.md) · [🔑 Секреты CI/CD](.github/SECRETS.md)
-
-</div>
-
----
-
-## 🎯 Возможности
-
-| Модуль | Описание |
-|--------|----------|
-| 📋 **Заказы** | Заказ-наряды, статусы, PDF, подпись клиента |
-| 🤖 **AI-агенты** | Приёмщик → Диагност → Оценщик (Groq / Ollama) |
-| 🎙️ **AI-диагностика v2** | Голосовой ввод, фото → диагноз, история по VIN |
-| 📅 **Онлайн-запись** | Виджет для сайта, слоты, конвертация в заказ |
-| 📦 **Склад** | Остатки, резервы, Exist.ru / Autodoc, авто-заказ |
-| 💰 **Финансы** | Кассовые смены, P&L, бюджет vs факт |
-| 📊 **Аналитика** | KPI, рейтинг мастеров, топ услуги, динамика |
-| 🎁 **Лояльность** | Баллы, реферальная программа, ТО-напоминания |
-| 🔗 **Интеграции** | 1С:Предприятие, Оптим Гараж |
-| 🏛️ **ЭДО и ФНС** | МЧД, КУДиР, декларация УСН, авто-отправка через Контур |
-| 🧾 **Онлайн-касса** | Атол Онлайн 54-ФЗ — фискализация чеков |
-| 🤖 **AI-налоговый агент** | Сравнение УСН/Патент/НПД/ОСНО, оптимизация |
-| 📱 **Мобилка** | React Native / Expo для мастеров |
-| 🌐 **PWA** | Офлайн-режим, установка, push-уведомления |
-| ☁️ **SaaS** | Мультитенантность, тарифы, ЮКасса |
-| 🚀 **CI/CD** | GitHub Actions, Docker, Nginx SSL, Grafana |
-| 🎨 **Полировка** | Тёмная/светлая тема, i18n (ru/kk/uk), onboarding-тур |
-
----
-
-## 🗺️ Дорожная карта — все 21 итерация выполнена
-
-| # | Итерация | Статус |
-|---|----------|--------|
-| 1  | Инициализация монорепо (backend / web / mobile) | ✅ |
-| 2  | Auth: JWT + OTP (email / Telegram / console) | ✅ |
-| 3  | Заказ-наряды: CRUD, статусы, PDF | ✅ |
-| 4  | AI-агенты: Приёмщик → Диагност → Оценщик | ✅ |
-| 5  | Онлайн-запись: слоты, виджет для сайта | ✅ |
-| 6  | AI-чат, Socket.IO real-time | ✅ |
-| 7  | СБП QR оплата (бесплатно) | ✅ |
-| 8  | Telegram-бот (Telegraf) | ✅ |
-| 9  | Аналитика: P&L, экспорт PDF/Excel | ✅ |
-| 10 | Склад и запчасти (Exist.ru / Autodoc, авто-заказ) | ✅ |
-| 11 | Финансы: кассовые смены, P&L, бюджет vs факт | ✅ |
-| 12 | Мобильный мастер + Push + Онлайн-запись | ✅ |
-| 13 | Расширенная аналитика: KPI, рейтинг, динамика | ✅ |
-| 14 | AI-диагностика v2: голос, фото, VIN-история | ✅ |
-| 15 | Лояльность: баллы, рефералы, ТО-напоминания | ✅ |
-| 16 | Интеграции: 1С:Предприятие, Оптим Гараж | ✅ |
-| 17 | CI/CD: GitHub Actions, Docker, Nginx SSL, Grafana | ✅ |
-| 18 | Мультитенантность SaaS: тенанты, тарифы, ЮКасса | ✅ |
-| 19 | PWA + EAS Build: офлайн, установка, APK/IPA | ✅ |
-| 20 | Финальная полировка: тема, i18n, onboarding-тур | ✅ |
-| 21 | ЭДО, МЧД, авто-отчётность ФНС/СФР, Атол 54-ФЗ, AI-налоги | ✅ |
-
----
-
-## 🆓 Стек (всё бесплатно / open-source)
-
-- **AI:** Groq API (30 req/min бесплатно) + Ollama (локально, безлимит)
-- **Push:** Expo Push (мобилка) + Web Push VAPID (браузер)
-- **Оплата:** СБП QR — 0% до 1 млн/мес
-- **Уведомления:** Telegram Bot
-- **ЭДО:** Контур.Диадок API (платный оператор, но рынок требует)
-- **Касса:** Атол Онлайн (54-ФЗ)
-- **БД:** PostgreSQL + Prisma
-- **Деплой:** Docker Compose + Let's Encrypt SSL
-
----
-
-## 💰 Тарифы
-
-| Тариф | Цена | Мастера | Заказов/мес | Что включено |
-|-------|------|---------|-------------|--------------|
-| Trial | 0 ₽ (14 дней) | 1 | 50 | Базовые функции |
-| 🚀 Старт | **25 000 ₽/мес** | 2 | 300 | AI-приёмщик, аналитика, PWA |
-| ⚡ Профи | **35 000 ₽/мес** | 5 | 1000 | Все AI-агенты, склад, финансы |
-| 🏆 Бизнес | **45 000 ₽/мес** | 15 | 5000 | ЭДО, касса 54-ФЗ, 1С |
-| 💎 Корпорат | **55 000 ₽/мес** | ∞ | ∞ | White-label, API, SLA 99.9% |
-
----
-
-## 🚀 Быстрый старт
-
-```bash
-git clone https://github.com/Viktor592/motor-app
-cd motor-app
-
-# Backend
-cp backend/.env.example backend/.env
-# Заполнить: GROQ_API_KEY, DATABASE_URL, JWT секреты
-
-cd backend && npm install
-npx prisma migrate deploy && npx prisma db seed
-npm run dev   # :3000
-
-# Web
-cd ../web && npm install
-npm run dev   # :5173
-
-# Mobile
-cd ../mobile && npm install
-npx expo start
+```
+motor-app/
+├── backend/              # Node.js + TypeScript + Prisma (PostgreSQL)
+├── apps/
+│   ├── saas/             # Web: Вход + Регистрация автосервиса
+│   ├── client-web/       # Web: Клиент (запись, заказы, чат)
+│   ├── staff-web/        # Web: Мастер/Исполнитель (канбан, аналитика)
+│   ├── admin/            # Web: Администратор автосервиса (всё управление)
+│   ├── client-mobile/    # iOS + Android: Клиент (Expo/React Native)
+│   └── staff-mobile/     # iOS + Android: Мастер (Expo/React Native)
+└── packages/shared/      # Общие типы, api-клиент, auth-утилиты
 ```
 
----
+## Порты
 
-## 🏭 Production деплой
+| Приложение      | URL                   | Роль              |
+|-----------------|-----------------------|-------------------|
+| SaaS (вход)     | http://server:80      | Все               |
+| Client Web      | http://server:3001    | CLIENT            |
+| Staff Web       | http://server:3002    | MASTER / STAFF    |
+| Admin           | http://server:3003    | ADMIN             |
+| Backend API     | http://server:3000    | —                 |
+| Client Mobile   | iOS / Android         | CLIENT            |
+| Staff Mobile    | iOS / Android         | MASTER / STAFF    |
+
+## Как работает авторизация
+
+1. Пользователь открывает **:80** → SaaS (единая точка входа)
+2. Вводит телефон + пароль
+3. Backend возвращает JWT + роль
+4. Автоматический редирект на нужное приложение по роли:
+   - CLIENT  → :3001
+   - ADMIN   → :3003
+   - MASTER/STAFF → :3002
+   - Мобильные — прямо внутри приложения
+5. Каждое приложение проверяет роль при загрузке — чужой не попадёт
+
+## Деплой
 
 ```bash
-./scripts/deploy.sh setup    # первый запуск + SSL
-./scripts/deploy.sh update   # обновление
-./scripts/deploy.sh backup   # ручной бэкап БД
+git pull
+docker-compose up -d --build
 ```
 
----
-
-## 📱 Сборка APK / IPA
+## Мобильные приложения (Expo)
 
 ```bash
-cd mobile && eas build --platform android --profile preview
+# Клиентское
+cd apps/client-mobile
+npm install
+expo start
+
+# Мастер
+cd apps/staff-mobile
+npm install
+expo start
 ```
-Подробнее: [`mobile/EAS_BUILD_GUIDE.md`](mobile/EAS_BUILD_GUIDE.md)
 
----
-
-## 🏛️ Авто-отчётность в ФНС
-
-1. Заполнить реквизиты: `/edo` → Настройки
-2. Создать МЧД: `/edo` → зарегистрировать через Диадок (один раз)
-3. Добавить `KONTUR_API_KEY` в `.env`
-4. Система сама отслеживает дедлайны и отправляет отчёты
-
----
-
-## 👤 Автор
-
-**Илья У.**  
-GitHub: [Viktor592](https://github.com/Viktor592)
-
----
-
-<div align="center">
-Сделано с ❤️ для российских автосервисов
-</div>
+Сборка для сторов:
+```bash
+eas build --platform android
+eas build --platform ios
+```

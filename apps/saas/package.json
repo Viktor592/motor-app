@@ -1,9 +1,9 @@
 {
-  "name": "motor-saas",
+  "name": "@motor/saas",
   "version": "1.0.0",
   "private": true,
   "scripts": {
-    "dev":   "vite --port 3004",
+    "dev": "vite --port 3000",
     "build": "vite build",
     "preview": "vite preview"
   },

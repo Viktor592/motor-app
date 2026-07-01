@@ -1,0 +1,42 @@
+{
+  "expo": {
+    "name": "МОТОР — Клиент",
+    "slug": "motor-client",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "scheme": "motor-client",
+    "userInterfaceStyle": "dark",
+    "splash": {
+      "image": "./assets/splash.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#060608"
+    },
+    "ios": {
+      "supportsTablet": false,
+      "bundleIdentifier": "ru.motor.client"
+    },
+    "android": {
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/adaptive-icon.png",
+        "backgroundColor": "#060608"
+      },
+      "package": "ru.motor.client"
+    },
+    "plugins": [
+      "expo-router",
+      "expo-secure-store",
+      [
+        "expo-notifications",
+        {
+          "icon": "./assets/notification-icon.png",
+          "color": "#ff6200"
+        }
+      ]
+    ],
+    "extra": {
+      "apiUrl": "https://api.motor-app.ru",
+      "eas": { "projectId": "motor-client" }
+    }
+  }
+}

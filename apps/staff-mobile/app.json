@@ -1,0 +1,12 @@
+{
+  "expo": {
+    "name": "МОТОР — Мастер",
+    "slug": "motor-staff",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "userInterfaceStyle": "dark",
+    "ios": { "bundleIdentifier": "ru.motor.staff", "supportsTablet": false },
+    "android": { "package": "ru.motor.staff" },
+    "extra": { "apiUrl": "https://api.motor-app.ru" }
+  }
+}
