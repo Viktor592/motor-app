@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
-import { useTheme } from '../services/theme';
-import { useLocale } from '../services/i18n';
+import { getTheme, setTheme } from '../services/theme';
+import { getLocale, setLocale } from '../services/i18n';
 import { api } from '../services/api';
 import s from './SettingsPage.module.css';
 

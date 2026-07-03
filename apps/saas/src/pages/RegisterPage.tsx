@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import styles from './OnboardingNewPage.module.css';
+import styles from './RegisterPage.module.css';
 
 const TIMEZONES = [
   { value: 'Europe/Moscow',       label: 'Москва (UTC+3)'        },
@@ -11,7 +11,7 @@ const TIMEZONES = [
   { value: 'Asia/Vladivostok',    label: 'Владивосток (UTC+10)'  },
 ];
 
-export default function OnboardingNewPage() {
+export default function RegisterPage() {
   const [step, setStep]     = useState(1);
   const [loading, setLoading] = useState(false);
   const [error, setError]   = useState('');

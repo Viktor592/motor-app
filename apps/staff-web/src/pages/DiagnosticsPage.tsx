@@ -2,7 +2,7 @@ import React, { useEffect, useState, useRef } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import { api } from '../services/api';
 import { getSocket, joinOrder, leaveOrder } from '../services/socket';
-import { StatusBadge } from '../components/common/StatusBadge';
+import { StatusBadge } from '../components/StatusBadge';
 import s from './DiagnosticsPage.module.css';
 
 interface PipelineStep {

@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import { fetchOrders } from '../slices/ordersSlice';
 import { AppDispatch, RootState } from '../store';
-import { StatusBadge } from '../components/common/StatusBadge';
+import { StatusBadge } from '../components/StatusBadge';
 import s from './ExecOrdersPage.module.css';
 
 const COLUMNS = [

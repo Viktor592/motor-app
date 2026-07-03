@@ -3,7 +3,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { Link } from 'react-router-dom';
 import { fetchOrders } from '../slices/ordersSlice';
 import { AppDispatch, RootState } from '../store';
-import { StatusBadge } from '../components/common/StatusBadge';
+import { StatusBadge } from '../components/StatusBadge';
 import s from './HomePage.module.css';
 
 export default function HomePage() {
