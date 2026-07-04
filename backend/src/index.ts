@@ -1,4 +1,10 @@
 import 'dotenv/config';
+
+// Необработанные ошибки не должны ронять весь сервер (напр. невалидный Telegram-токен)
+process.on('unhandledRejection', (reason) => {
+  console.error('[UnhandledRejection]', reason);
+});
+
 import express from 'express';
 import http from 'http';
 import cors from 'cors';

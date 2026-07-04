@@ -141,9 +141,12 @@ export async function initTelegramBot(): Promise<void> {
       );
     });
 
-    // Запуск polling
-    bot.launch();
-    console.log('[Telegram] Бот запущен');
+    // Запуск polling — не должен ронять весь сервер при невалидном токене
+    bot.launch().then(() => {
+      console.log('[Telegram] Бот запущен');
+    }).catch(err => {
+      console.error('[Telegram] Не удалось запустить бота:', err.message ?? err);
+    });
 
     // Graceful stop
     process.once('SIGINT',  () => bot.stop('SIGINT'));
