@@ -55,6 +55,10 @@ services:
     build:
       context: ./apps/saas
       dockerfile: Dockerfile
+      args:
+        VITE_CLIENT_WEB_URL: http://5.35.89.212:3001
+        VITE_STAFF_WEB_URL:  http://5.35.89.212:3002
+        VITE_ADMIN_URL:      http://5.35.89.212:3003
     container_name: motor_saas
     restart: unless-stopped
 
