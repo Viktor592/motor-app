@@ -3,6 +3,8 @@ WORKDIR /app
 COPY package*.json ./
 RUN npm install
 COPY . .
+ARG VITE_SAAS_URL
+ENV VITE_SAAS_URL=$VITE_SAAS_URL
 RUN npm run build
 
 FROM nginx:alpine

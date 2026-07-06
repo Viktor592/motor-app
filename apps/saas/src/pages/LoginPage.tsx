@@ -35,17 +35,20 @@ export default function LoginPage() {
       const data = await res.json();
       if (!res.ok) throw new Error(data.error ?? 'Ошибка входа');
 
-      // Сохраняем токены
-      localStorage.setItem('motor_access',    data.access);
-      localStorage.setItem('motor_refresh',   data.refresh);
-      localStorage.setItem('motor_user_id',   data.user.id);
-      localStorage.setItem('motor_user_name', data.user.name);
-      localStorage.setItem('motor_user_role', data.user.role);
-      localStorage.setItem('motor_user_phone',data.user.phone ?? phone);
-
-      // Редирект по роли в нужное приложение
+      // Редирект по роли — токены передаём через URL, т.к. localStorage
+      // не общий между разными портами (разные origin для браузера)
       const url = ROLE_URLS[data.user.role];
-      if (url) window.location.replace(url);
+      if (url) {
+        const params = new URLSearchParams({
+          access:  data.access,
+          refresh: data.refresh,
+          id:      data.user.id,
+          name:    data.user.name,
+          role:    data.user.role,
+          phone:   data.user.phone ?? phone,
+        });
+        window.location.replace(`${url}/auth?${params.toString()}`);
+      }
     } catch (e: any) {
       setError(e.message);
     } finally { setLoading(false); }

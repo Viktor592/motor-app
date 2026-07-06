@@ -66,6 +66,8 @@ services:
     build:
       context: ./apps/client-web
       dockerfile: Dockerfile
+      args:
+        VITE_SAAS_URL: http://5.35.89.212
     container_name: motor_client_web
     restart: unless-stopped
 
@@ -73,6 +75,8 @@ services:
     build:
       context: ./apps/staff-web
       dockerfile: Dockerfile
+      args:
+        VITE_SAAS_URL: http://5.35.89.212
     container_name: motor_staff_web
     restart: unless-stopped
 
@@ -80,6 +84,8 @@ services:
     build:
       context: ./apps/admin
       dockerfile: Dockerfile
+      args:
+        VITE_SAAS_URL: http://5.35.89.212
     container_name: motor_admin
     restart: unless-stopped
 

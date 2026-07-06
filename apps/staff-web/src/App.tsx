@@ -6,6 +6,7 @@ import ChatPage             from './pages/ChatPage';
 import ProfilePage          from './pages/ProfilePage';
 import OrderDetailPage      from './pages/OrderDetailPage';
 import DiagnosticsPage      from './pages/DiagnosticsPage';
+import AuthCallback         from './pages/AuthCallback';
 
 const SAAS = import.meta.env.VITE_SAAS_URL ?? 'http://localhost:3000';
 const STAFF_ROLES = ['MASTER', 'STAFF'];
@@ -20,21 +21,26 @@ function Guard({ children }: { children: React.ReactNode }) {
 export default function App() {
   return (
     <BrowserRouter>
-      <Guard>
-        <Routes>
-          <Route element={<AppLayout />}>
-            <Route path="/"                       element={<ExecOrdersPage />} />
-            <Route path="/orders"                 element={<ExecOrdersPage />} />
-            <Route path="/orders/:id"             element={<OrderDetailPage />} />
-            <Route path="/orders/:id/diagnostics" element={<DiagnosticsPage />} />
-            <Route path="/analytics"              element={<MasterAnalyticsPage />} />
-            <Route path="/chat"                   element={<ChatPage />} />
-            <Route path="/chat/:orderId"          element={<ChatPage />} />
-            <Route path="/profile"                element={<ProfilePage />} />
-            <Route path="*"                       element={<Navigate to="/" replace />} />
-          </Route>
-        </Routes>
-      </Guard>
+      <Routes>
+        <Route path="/auth" element={<AuthCallback />} />
+        <Route path="/*" element={
+          <Guard>
+            <Routes>
+              <Route element={<AppLayout />}>
+                <Route path="/"                       element={<ExecOrdersPage />} />
+                <Route path="/orders"                 element={<ExecOrdersPage />} />
+                <Route path="/orders/:id"             element={<OrderDetailPage />} />
+                <Route path="/orders/:id/diagnostics" element={<DiagnosticsPage />} />
+                <Route path="/analytics"              element={<MasterAnalyticsPage />} />
+                <Route path="/chat"                   element={<ChatPage />} />
+                <Route path="/chat/:orderId"          element={<ChatPage />} />
+                <Route path="/profile"                element={<ProfilePage />} />
+                <Route path="*"                       element={<Navigate to="/" replace />} />
+              </Route>
+            </Routes>
+          </Guard>
+        } />
+      </Routes>
     </BrowserRouter>
   );
 }
