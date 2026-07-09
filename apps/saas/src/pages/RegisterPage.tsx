@@ -75,8 +75,8 @@ export default function RegisterPage() {
         <div className={styles.successCard}>
           <div className={styles.successRow}>
             <span>Адрес</span>
-            <a href={`https://${form.slug}.motor-app.ru`} className={styles.successLink}>
-              {form.slug}.motor-app.ru
+            <a href={`https://${form.slug}.83.222.19.108.nip.io`} className={styles.successLink}>
+              {form.slug}.83.222.19.108.nip.io
             </a>
           </div>
           <div className={styles.successRow}>
@@ -88,7 +88,7 @@ export default function RegisterPage() {
             <strong>14 дней бесплатно</strong>
           </div>
         </div>
-        <a className={styles.btnPrimary} href={`https://${form.slug}.motor-app.ru`}>
+        <a className={styles.btnPrimary} href={`https://${form.slug}.83.222.19.108.nip.io`}>
           Открыть мой сервис →
         </a>
       </div>
@@ -185,7 +185,7 @@ export default function RegisterPage() {
                     if (v.length >= 3) checkSlug(v);
                     else setSlugAvail(null);
                   }} />
-                <span className={styles.slugSuffix}>.motor-app.ru</span>
+                <span className={styles.slugSuffix}>.83.222.19.108.nip.io</span>
               </div>
               {checkingSlug && <div className={styles.slugHint}>Проверяю…</div>}
               {!checkingSlug && slugAvail === true  && <div className={styles.slugOk}>✅ Адрес свободен</div>}
@@ -195,7 +195,7 @@ export default function RegisterPage() {
 
             <div className={styles.preview}>
               <div className={styles.previewLabel}>Ваш адрес будет:</div>
-              <div className={styles.previewUrl}>https://{form.slug || 'your-service'}.motor-app.ru</div>
+              <div className={styles.previewUrl}>https://{form.slug || 'your-service'}.83.222.19.108.nip.io</div>
             </div>
 
             <div className={styles.btnRow}>
