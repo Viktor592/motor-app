@@ -6,14 +6,12 @@ import OrdersPage      from './pages/OrdersPage';
 import OrderDetailPage from './pages/OrderDetailPage';
 import ChatPage        from './pages/ChatPage';
 import ProfilePage     from './pages/ProfilePage';
-import AuthCallback    from './pages/AuthCallback';
-
-const SAAS = import.meta.env.VITE_SAAS_URL ?? 'http://localhost:3000';
+import LoginPage       from './pages/LoginPage';
 
 function Guard({ children }: { children: React.ReactNode }) {
   const token = localStorage.getItem('motor_access');
   const role  = localStorage.getItem('motor_user_role');
-  if (!token || role !== 'CLIENT') { window.location.replace(SAAS); return null; }
+  if (!token || role !== 'CLIENT') { window.location.replace('/login'); return null; }
   return <>{children}</>;
 }
 
@@ -21,7 +19,7 @@ export default function App() {
   return (
     <BrowserRouter>
       <Routes>
-        <Route path="/auth" element={<AuthCallback />} />
+        <Route path="/login" element={<LoginPage />} />
         <Route path="/*" element={
           <Guard>
             <Routes>

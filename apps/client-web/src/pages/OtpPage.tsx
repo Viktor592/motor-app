@@ -74,11 +74,11 @@ export default function OtpPage() {
     try {
       const res = await api.post('/auth/otp/verify', { phone: rawPhone(), code: fullCode });
       const { access, refresh, user } = res.data;
-      localStorage.setItem('access_token',  access);
-      localStorage.setItem('refresh_token', refresh);
-      localStorage.setItem('user_id',   user.id);
-      localStorage.setItem('user_name', user.name);
-      localStorage.setItem('user_role', user.role);
+      localStorage.setItem('motor_access',  access);
+      localStorage.setItem('motor_refresh', refresh);
+      localStorage.setItem('motor_user_id',   user.id);
+      localStorage.setItem('motor_user_name', user.name);
+      localStorage.setItem('motor_user_role', user.role);
       // Reload store
       window.location.href = '/';
     } catch (e: any) {
