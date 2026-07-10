@@ -19,6 +19,7 @@ enum UserRole {
   MASTER
   RECEPTIONIST
   ADMIN
+  SUPERADMIN
 }
 
 model User {
@@ -642,6 +643,7 @@ enum TenantStatus {
   SUSPENDED   // неоплата
   TRIAL
   CANCELLED
+  PENDING_VERIFICATION // ждёт одобрения супер-админом
 }
 
 // Тенант — один автосервис
@@ -651,7 +653,9 @@ model Tenant {
   name         String                // "Автосервис Победа"
   domain       String?      @unique  // победа-авто.рф (кастомный домен)
   plan         PlanType     @default(TRIAL)
-  status       TenantStatus @default(TRIAL)
+  status       TenantStatus @default(PENDING_VERIFICATION)
+  inn          String?      // ИНН для верификации
+  ogrn         String?      // ОГРН для верификации
   trialEndsAt  DateTime?
   paidUntil    DateTime?
   // Брендинг
