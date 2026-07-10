@@ -15,46 +15,58 @@ import OrderDetailPage from './pages/OrderDetailPage';
 import DiagnosticsPage from './pages/DiagnosticsPage';
 import ChatPage        from './pages/ChatPage';
 import ProfilePage     from './pages/ProfilePage';
-import AuthCallback    from './pages/AuthCallback';
-
-const SAAS = import.meta.env.VITE_SAAS_URL ?? 'http://localhost:3000';
+import OwnerLoginPage      from './pages/OwnerLoginPage';
+import SuperAdminLoginPage from './pages/SuperAdminLoginPage';
+import SuperAdminTenantsPage from './pages/SuperAdminTenantsPage';
 
 function Guard({ children }: { children: React.ReactNode }) {
   const token = localStorage.getItem('motor_access');
   const role  = localStorage.getItem('motor_user_role');
-  if (!token || (role !== 'ADMIN' && role !== 'SUPERADMIN')) { window.location.replace(SAAS); return null; }
+  if (!token || (role !== 'ADMIN' && role !== 'SUPERADMIN')) { window.location.replace('/owner/login'); return null; }
   return <>{children}</>;
+}
+
+function RoleRouter() {
+  const role = localStorage.getItem('motor_user_role');
+  if (role === 'SUPERADMIN') {
+    return (
+      <Routes>
+        <Route path="/" element={<SuperAdminTenantsPage />} />
+        <Route path="*" element={<Navigate to="/" replace />} />
+      </Routes>
+    );
+  }
+  return (
+    <Routes>
+      <Route element={<AppLayout />}>
+        <Route path="/"                         element={<AdminPage />} />
+        <Route path="/pnl"                      element={<PnlPage />} />
+        <Route path="/warehouse"                element={<WarehousePage />} />
+        <Route path="/finance"                  element={<FinancePage />} />
+        <Route path="/bookings"                 element={<BookingsPage />} />
+        <Route path="/report"                   element={<ReportPage />} />
+        <Route path="/integration"              element={<IntegrationPage />} />
+        <Route path="/settings"                 element={<SettingsPage />} />
+        <Route path="/edo"                      element={<EdoPage />} />
+        <Route path="/plans"                    element={<PlansPage />} />
+        <Route path="/orders"                   element={<OrdersPage />} />
+        <Route path="/orders/:id"               element={<OrderDetailPage />} />
+        <Route path="/orders/:id/diagnostics"   element={<DiagnosticsPage />} />
+        <Route path="/chat"                     element={<ChatPage />} />
+        <Route path="/profile"                  element={<ProfilePage />} />
+        <Route path="*"                         element={<Navigate to="/" replace />} />
+      </Route>
+    </Routes>
+  );
 }
 
 export default function App() {
   return (
     <BrowserRouter>
       <Routes>
-        <Route path="/auth" element={<AuthCallback />} />
-        <Route path="/*" element={
-          <Guard>
-            <Routes>
-              <Route element={<AppLayout />}>
-                <Route path="/"                         element={<AdminPage />} />
-                <Route path="/pnl"                      element={<PnlPage />} />
-                <Route path="/warehouse"                element={<WarehousePage />} />
-                <Route path="/finance"                  element={<FinancePage />} />
-                <Route path="/bookings"                 element={<BookingsPage />} />
-                <Route path="/report"                   element={<ReportPage />} />
-                <Route path="/integration"              element={<IntegrationPage />} />
-                <Route path="/settings"                 element={<SettingsPage />} />
-                <Route path="/edo"                      element={<EdoPage />} />
-                <Route path="/plans"                    element={<PlansPage />} />
-                <Route path="/orders"                   element={<OrdersPage />} />
-                <Route path="/orders/:id"               element={<OrderDetailPage />} />
-                <Route path="/orders/:id/diagnostics"   element={<DiagnosticsPage />} />
-                <Route path="/chat"                     element={<ChatPage />} />
-                <Route path="/profile"                  element={<ProfilePage />} />
-                <Route path="*"                         element={<Navigate to="/" replace />} />
-              </Route>
-            </Routes>
-          </Guard>
-        } />
+        <Route path="/owner/login" element={<OwnerLoginPage />} />
+        <Route path="/admin/login" element={<SuperAdminLoginPage />} />
+        <Route path="/*" element={<Guard><RoleRouter /></Guard>} />
       </Routes>
     </BrowserRouter>
   );
