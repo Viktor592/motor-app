@@ -7,7 +7,7 @@ export const api = axios.create({
 });
 
 api.interceptors.request.use(cfg => {
-  const token = localStorage.getItem('access_token');
+  const token = localStorage.getItem('motor_access');
   if (token) cfg.headers.Authorization = `Bearer ${token}`;
   return cfg;
 });
@@ -26,9 +26,9 @@ api.interceptors.response.use(
       }
       refreshing = true;
       try {
-        const refresh = localStorage.getItem('refresh_token');
+        const refresh = localStorage.getItem('motor_refresh');
         const { data } = await axios.post('/api/v1/auth/refresh', { refresh });
-        localStorage.setItem('access_token', data.access);
+        localStorage.setItem('motor_access', data.access);
         api.defaults.headers.common.Authorization = `Bearer ${data.access}`;
         queue.forEach(cb => cb(data.access)); queue = [];
         return api(orig);
