@@ -61,6 +61,7 @@ app.use(cors({
 app.use(express.json({ limit: '10mb' }));
 app.use(morgan('dev'));
 app.use(rateLimiter);
+app.use(tenantMiddleware);
 
 // ── Health check ──
 app.get('/health', (_req, res) => {

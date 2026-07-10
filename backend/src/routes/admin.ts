@@ -1,8 +1,10 @@
 import { Router } from 'express';
 import { z } from 'zod';
+import bcrypt from 'bcryptjs';
 import { prisma } from '../utils/prisma';
 import { authenticate, authorize } from '../middleware/auth';
 import { AppError } from '../middleware/errorHandler';
+import { maskPhone } from '../utils/maskPhone';
 
 export const adminRouter = Router();
 
@@ -106,6 +108,41 @@ adminRouter.get('/users', authorize('ADMIN'), async (req, res, next) => {
     ]);
 
     res.json({ users, total });
+  } catch (e) { next(e); }
+});
+
+// ── Создать сотрудника (мастер / приёмщик) ────────────────
+adminRouter.post('/staff', authorize('ADMIN'), async (req, res, next) => {
+  try {
+    if (!req.tenantId) throw new AppError(400, 'Тенант не определён');
+
+    const body = z.object({
+      phone:    z.string().regex(/^\+7\d{10}$/, 'Формат: +7XXXXXXXXXX'),
+      name:     z.string().min(2).max(100),
+      password: z.string().min(6),
+      role:     z.enum(['MASTER', 'RECEPTIONIST']),
+    }).parse(req.body);
+
+    const exists = await prisma.user.findUnique({ where: { phone: body.phone } });
+    if (exists) throw new AppError(409, 'Пользователь с таким номером уже существует');
+
+    const passwordHash = await bcrypt.hash(body.password, 12);
+    const staff = await prisma.$transaction(async tx => {
+      const user = await tx.user.create({
+        data: {
+          phone: body.phone, phoneMasked: maskPhone(body.phone),
+          name: body.name, passwordHash, role: body.role,
+        } as any,
+      });
+      await tx.tenantUser.create({
+        data: { tenantId: req.tenantId!, userId: user.id, role: 'STAFF' },
+      });
+      return user;
+    });
+
+    res.status(201).json({
+      id: staff.id, name: staff.name, phone: staff.phoneMasked, role: staff.role,
+    });
   } catch (e) { next(e); }
 });
 
