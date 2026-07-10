@@ -273,11 +273,8 @@ saasRouter.get('/billing/plans', async (_req, res) => {
 // ══════════════════════════════════════
 
 // GET /api/v1/saas/admin/tenants
-saasRouter.get('/admin/tenants', authenticate, async (req, res, next) => {
+saasRouter.get('/admin/tenants', authenticate, authorize('SUPERADMIN'), async (req, res, next) => {
   try {
-    // Только super-admin (env переменная)
-    if (req.user!.userId !== process.env.SUPER_ADMIN_ID) throw new AppError(403, 'Forbidden');
-
     const { page = '1', status } = req.query as Record<string, string>;
     const where: any = {};
     if (status) where.status = status;
@@ -294,6 +291,19 @@ saasRouter.get('/admin/tenants', authenticate, async (req, res, next) => {
     });
 
     res.json({ tenants, total, mrr: mrr._sum.priceRub ?? 0 });
+  } catch (e) { next(e); }
+});
+
+// PATCH /api/v1/saas/admin/tenants/:id/approve — одобрить или отклонить автосервис
+saasRouter.patch('/admin/tenants/:id/approve', authenticate, authorize('SUPERADMIN'), async (req, res, next) => {
+  try {
+    const { approve } = z.object({ approve: z.boolean() }).parse(req.body);
+    const tenant = await prisma.tenant.update({
+      where: { id: req.params.id },
+      data:  { status: approve ? 'ACTIVE' : 'CANCELLED' },
+    });
+    invalidateTenantCache(tenant.slug);
+    res.json({ ok: true, tenant });
   } catch (e) { next(e); }
 });
 
