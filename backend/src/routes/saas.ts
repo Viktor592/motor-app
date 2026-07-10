@@ -1,10 +1,12 @@
 import { Router } from 'express';
 import { z } from 'zod';
+import bcrypt from 'bcryptjs';
 import { prisma } from '../utils/prisma';
 import { authenticate, authorize } from '../middleware/auth';
 import { AppError } from '../middleware/errorHandler';
 import { invalidateTenantCache } from '../middleware/tenant';
 import { sendPush } from '../services/push';
+import { maskPhone } from '../utils/maskPhone';
 
 export const saasRouter = Router();
 
@@ -31,7 +33,10 @@ saasRouter.post('/register', async (req, res, next) => {
       name:        z.string().min(3).max(100),
       ownerName:   z.string().min(2),
       ownerEmail:  z.string().email(),
-      ownerPhone:  z.string().min(7).optional(),
+      ownerPhone:  z.string().regex(/^\+7\d{10}$/, 'Формат: +7XXXXXXXXXX'),
+      password:    z.string().min(6),
+      inn:         z.string().min(10).max(12),
+      ogrn:        z.string().min(13).max(15).optional(),
       slug:        z.string().min(3).max(50).regex(/^[a-z0-9-]+$/, 'Только строчные латинские буквы, цифры и дефис'),
       timezone:    z.string().default('Europe/Moscow'),
     }).parse(req.body);
@@ -56,21 +61,25 @@ saasRouter.post('/register', async (req, res, next) => {
           name:        data.name,
           ownerEmail:  data.ownerEmail,
           ownerPhone:  data.ownerPhone,
+          inn:         data.inn,
+          ogrn:        data.ogrn,
           plan:        'TRIAL',
-          status:      'TRIAL',
+          status:      'PENDING_VERIFICATION',
           trialEndsAt: trialEnds,
           timezone:    data.timezone,
         },
       });
 
       // Пользователь-владелец
+      const passwordHash = await bcrypt.hash(data.password, 12);
       const owner = await tx.user.create({
         data: {
-          name:     data.ownerName,
-          email:    data.ownerEmail,
-          phoneMasked: (data.ownerPhone ?? '').replace(/\d(?=\d{4})/g,'*'),
-          phone:    data.ownerPhone,
-          role:     'ADMIN',
+          name:        data.ownerName,
+          email:       data.ownerEmail,
+          phoneMasked: maskPhone(data.ownerPhone),
+          phone:       data.ownerPhone,
+          passwordHash,
+          role:        'ADMIN',
         } as any,
       });
 
@@ -83,12 +92,13 @@ saasRouter.post('/register', async (req, res, next) => {
     });
 
     res.status(201).json({
-      ok:      true,
+      ok:       true,
       tenantId: result.tenant.id,
       slug:     result.tenant.slug,
+      status:   'PENDING_VERIFICATION',
       url:      `https://${data.slug}.${process.env.BASE_DOMAIN ?? 'motor-app.ru'}`,
       trialEndsAt: trialEnds,
-      message: `Добро пожаловать! Пробный период — 14 дней. URL: ${data.slug}.motor-app.ru`,
+      message: `Заявка принята и отправлена на проверку. После одобрения вы сможете войти по телефону и паролю.`,
     });
   } catch (e) { next(e); }
 });
