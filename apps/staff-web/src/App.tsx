@@ -9,7 +9,7 @@ import DiagnosticsPage      from './pages/DiagnosticsPage';
 import AuthCallback         from './pages/AuthCallback';
 
 const SAAS = import.meta.env.VITE_SAAS_URL ?? 'http://localhost:3000';
-const STAFF_ROLES = ['MASTER', 'STAFF'];
+const STAFF_ROLES = ['MASTER', 'RECEPTIONIST'];
 
 function Guard({ children }: { children: React.ReactNode }) {
   const token = localStorage.getItem('motor_access');

@@ -22,7 +22,7 @@ const SAAS = import.meta.env.VITE_SAAS_URL ?? 'http://localhost:3000';
 function Guard({ children }: { children: React.ReactNode }) {
   const token = localStorage.getItem('motor_access');
   const role  = localStorage.getItem('motor_user_role');
-  if (!token || role !== 'ADMIN') { window.location.replace(SAAS); return null; }
+  if (!token || (role !== 'ADMIN' && role !== 'SUPERADMIN')) { window.location.replace(SAAS); return null; }
   return <>{children}</>;
 }
 

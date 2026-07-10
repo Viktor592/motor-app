@@ -3,10 +3,11 @@ import { Link } from 'react-router-dom';
 import s from './Auth.module.css';
 
 const ROLE_URLS: Record<string, string> = {
-  CLIENT: import.meta.env.VITE_CLIENT_WEB_URL ?? 'http://localhost:3001',
-  ADMIN:  import.meta.env.VITE_ADMIN_URL      ?? 'http://localhost:3003',
-  MASTER: import.meta.env.VITE_STAFF_WEB_URL  ?? 'http://localhost:3002',
-  STAFF:  import.meta.env.VITE_STAFF_WEB_URL  ?? 'http://localhost:3002',
+  CLIENT:       import.meta.env.VITE_CLIENT_WEB_URL ?? 'http://localhost:3001',
+  ADMIN:        import.meta.env.VITE_ADMIN_URL      ?? 'http://localhost:3003',
+  SUPERADMIN:   import.meta.env.VITE_ADMIN_URL      ?? 'http://localhost:3003',
+  MASTER:       import.meta.env.VITE_STAFF_WEB_URL  ?? 'http://localhost:3002',
+  RECEPTIONIST: import.meta.env.VITE_STAFF_WEB_URL  ?? 'http://localhost:3002',
 };
 
 export default function LoginPage() {
