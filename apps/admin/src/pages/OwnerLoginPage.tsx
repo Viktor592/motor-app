@@ -1,7 +1,9 @@
 import { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { api } from '../services/api';
 import s from './Auth.module.css';
+
+const SAAS = import.meta.env.VITE_SAAS_URL ?? 'http://localhost:3000';
 
 export default function OwnerLoginPage() {
   const [phone, setPhone]       = useState('');
@@ -58,7 +60,7 @@ export default function OwnerLoginPage() {
           {loading ? '…' : 'Войти →'}
         </button>
 
-        <p className={s.link}>Нет автосервиса? <Link to="/owner/register">Зарегистрировать</Link></p>
+        <p className={s.link}>Нет автосервиса? <a href={`${SAAS}/owner/register`}>Зарегистрировать</a></p>
       </form>
     </div>
   );
