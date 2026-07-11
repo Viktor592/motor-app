@@ -11,7 +11,7 @@ const TIMEZONES = [
   { value: 'Asia/Vladivostok',    label: 'Владивосток (UTC+10)'  },
 ];
 
-export default function RegisterPage() {
+export default function OwnerRegisterPage() {
   const [step, setStep]     = useState(1);
   const [loading, setLoading] = useState(false);
   const [error, setError]   = useState('');
@@ -21,9 +21,12 @@ export default function RegisterPage() {
 
   const [form, setForm] = useState({
     name:       '',
+    inn:        '',
+    ogrn:       '',
     ownerName:  '',
     ownerEmail: '',
     ownerPhone: '',
+    password:   '',
     slug:       '',
     timezone:   'Europe/Moscow',
   });
@@ -69,27 +72,25 @@ export default function RegisterPage() {
   if (step === 4 && result) return (
     <div className={styles.page}>
       <div className={styles.success}>
-        <div className={styles.successIcon}>🎉</div>
-        <h1 className={styles.successTitle}>Готово! Добро пожаловать в МОТОР</h1>
-        <p className={styles.successSub}>Ваш сервис создан. Пробный период — 14 дней.</p>
+        <div className={styles.successIcon}>📋</div>
+        <h1 className={styles.successTitle}>Заявка отправлена на проверку</h1>
+        <p className={styles.successSub}>Мы проверим ИНН/ОГРН и одобрим доступ, обычно это быстро.</p>
         <div className={styles.successCard}>
           <div className={styles.successRow}>
-            <span>Адрес</span>
-            <a href={`https://${form.slug}.83.222.19.108.nip.io`} className={styles.successLink}>
-              {form.slug}.83.222.19.108.nip.io
-            </a>
+            <span>Будущий адрес</span>
+            <span className={styles.successLink}>{form.slug}.83.222.19.108.nip.io</span>
           </div>
           <div className={styles.successRow}>
-            <span>Email для входа</span>
-            <strong>{form.ownerEmail}</strong>
+            <span>Телефон для входа</span>
+            <strong>{form.ownerPhone}</strong>
           </div>
           <div className={styles.successRow}>
-            <span>Пробный период</span>
-            <strong>14 дней бесплатно</strong>
+            <span>Статус</span>
+            <strong>На проверке</strong>
           </div>
         </div>
-        <a className={styles.btnPrimary} href={`https://${form.slug}.83.222.19.108.nip.io`}>
-          Открыть мой сервис →
+        <a className={styles.btnPrimary} href="/owner/login">
+          Перейти ко входу →
         </a>
       </div>
     </div>
@@ -129,12 +130,22 @@ export default function RegisterPage() {
                 }} />
             </div>
             <div className={styles.field}>
+              <label className={styles.label}>ИНН *</label>
+              <input className={styles.input} placeholder="7712345678" maxLength={12}
+                value={form.inn} onChange={e => upd('inn', e.target.value.replace(/\D/g, ''))} />
+            </div>
+            <div className={styles.field}>
+              <label className={styles.label}>ОГРН / ОГРНИП (необязательно)</label>
+              <input className={styles.input} placeholder="1157746000000" maxLength={15}
+                value={form.ogrn} onChange={e => upd('ogrn', e.target.value.replace(/\D/g, ''))} />
+            </div>
+            <div className={styles.field}>
               <label className={styles.label}>Часовой пояс</label>
               <select className={styles.select} value={form.timezone} onChange={e => upd('timezone', e.target.value)}>
                 {TIMEZONES.map(tz => <option key={tz.value} value={tz.value}>{tz.label}</option>)}
               </select>
             </div>
-            <button className={styles.btnPrimary} disabled={form.name.length < 3}
+            <button className={styles.btnPrimary} disabled={form.name.length < 3 || form.inn.length < 10}
               onClick={() => setStep(2)}>
               Далее →
             </button>
@@ -155,14 +166,23 @@ export default function RegisterPage() {
                 value={form.ownerEmail} onChange={e => upd('ownerEmail', e.target.value)} />
             </div>
             <div className={styles.field}>
-              <label className={styles.label}>Телефон</label>
-              <input className={styles.input} type="tel" placeholder="+7 (999) 000-00-00"
-                value={form.ownerPhone} onChange={e => upd('ownerPhone', e.target.value)} />
+              <label className={styles.label}>Телефон *</label>
+              <input className={styles.input} type="tel" placeholder="+79990000000"
+                value={form.ownerPhone} onChange={e => {
+                  const d = e.target.value.replace(/\D/g, '');
+                  const n = d.startsWith('7') ? d : d.startsWith('8') ? '7'+d.slice(1) : '7'+d;
+                  upd('ownerPhone', d ? '+' + n.slice(0,11) : '');
+                }} />
+            </div>
+            <div className={styles.field}>
+              <label className={styles.label}>Пароль *</label>
+              <input className={styles.input} type="password" placeholder="Минимум 6 символов"
+                value={form.password} onChange={e => upd('password', e.target.value)} />
             </div>
             <div className={styles.btnRow}>
               <button className={styles.btnSecondary} onClick={() => setStep(1)}>← Назад</button>
               <button className={styles.btnPrimary}
-                disabled={form.ownerName.length < 2 || !form.ownerEmail.includes('@')}
+                disabled={form.ownerName.length < 2 || !form.ownerEmail.includes('@') || !/^\+7\d{10}$/.test(form.ownerPhone) || form.password.length < 6}
                 onClick={() => setStep(3)}>
                 Далее →
               </button>
