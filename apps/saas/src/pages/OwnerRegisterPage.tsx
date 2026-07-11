@@ -61,7 +61,7 @@ export default function OwnerRegisterPage() {
         body:    JSON.stringify(form),
       });
       const data = await r.json();
-      if (!r.ok) throw new Error(data.message ?? 'Ошибка регистрации');
+      if (!r.ok) throw new Error(data.error ?? data.message ?? 'Ошибка регистрации');
       setResult(data);
       setStep(4);
     } catch (e: any) {
