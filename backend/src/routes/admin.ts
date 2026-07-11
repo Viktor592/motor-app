@@ -114,7 +114,12 @@ adminRouter.get('/users', authorize('ADMIN'), async (req, res, next) => {
 // ── Создать сотрудника (мастер / приёмщик) ────────────────
 adminRouter.post('/staff', authorize('ADMIN'), async (req, res, next) => {
   try {
-    if (!req.tenantId) throw new AppError(400, 'Тенант не определён');
+    let tenantId = req.tenantId;
+    if (!tenantId) {
+      const tu = await prisma.tenantUser.findFirst({ where: { userId: req.user!.userId } });
+      tenantId = tu?.tenantId;
+    }
+    if (!tenantId) throw new AppError(400, 'Тенант не определён');
 
     const body = z.object({
       phone:    z.string().regex(/^\+7\d{10}$/, 'Формат: +7XXXXXXXXXX'),
@@ -135,7 +140,7 @@ adminRouter.post('/staff', authorize('ADMIN'), async (req, res, next) => {
         } as any,
       });
       await tx.tenantUser.create({
-        data: { tenantId: req.tenantId!, userId: user.id, role: 'STAFF' },
+        data: { tenantId: tenantId!, userId: user.id, role: 'STAFF' },
       });
       return user;
     });

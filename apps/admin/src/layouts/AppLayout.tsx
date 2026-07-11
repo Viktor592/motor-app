@@ -3,8 +3,6 @@ import { useEffect } from 'react';
 import { connectSocket, disconnectSocket } from '../services/socket';
 import s from './AppLayout.module.css';
 
-const SAAS = import.meta.env.VITE_SAAS_URL ?? 'http://localhost:3000';
-
 const NAV = [
   { to: '/',           icon: '⚙',  label: 'Панель'      },
   { to: '/orders',     icon: '📋', label: 'Заказы'      },
@@ -15,6 +13,7 @@ const NAV = [
   { to: '/report',     icon: '📈', label: 'Отчёты'      },
   { to: '/edo',        icon: '📄', label: 'ЭДО'         },
   { to: '/integration',icon: '🔗', label: 'Интеграции'  },
+  { to: '/staff',      icon: '👥', label: 'Сотрудники'  },
   { to: '/plans',      icon: '💎', label: 'Тариф'       },
   { to: '/settings',   icon: '🛠', label: 'Настройки'   },
   { to: '/chat',       icon: '🤖', label: 'AI-чат'      },
@@ -39,7 +38,7 @@ export default function AppLayout() {
           ))}
         </nav>
         <button className={s.logout}
-          onClick={() => { localStorage.clear(); window.location.replace(SAAS); }}>
+          onClick={() => { localStorage.clear(); window.location.replace('/owner/login'); }}>
           → Выйти
         </button>
       </aside>

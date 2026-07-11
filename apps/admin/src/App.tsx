@@ -10,6 +10,7 @@ import IntegrationPage from './pages/IntegrationPage';
 import SettingsPage    from './pages/SettingsPage';
 import EdoPage         from './pages/EdoPage';
 import PlansPage       from './pages/PlansPage';
+import StaffPage       from './pages/StaffPage';
 import OrdersPage      from './pages/OrdersPage';
 import OrderDetailPage from './pages/OrderDetailPage';
 import DiagnosticsPage from './pages/DiagnosticsPage';
@@ -49,6 +50,7 @@ function RoleRouter() {
         <Route path="/settings"                 element={<SettingsPage />} />
         <Route path="/edo"                      element={<EdoPage />} />
         <Route path="/plans"                    element={<PlansPage />} />
+        <Route path="/staff"                    element={<StaffPage />} />
         <Route path="/orders"                   element={<OrdersPage />} />
         <Route path="/orders/:id"               element={<OrderDetailPage />} />
         <Route path="/orders/:id/diagnostics"   element={<DiagnosticsPage />} />
