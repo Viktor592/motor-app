@@ -5,12 +5,11 @@
   background: var(--plate);
   border-right: 1px solid var(--wire);
   display: flex; flex-direction: column;
-  justify-content: space-between;
   position: sticky; top: 0; height: 100vh;
 }
 
-.sideTop { padding: 20px 14px; overflow-y: auto; }
-.sideBot { padding: 12px; border-top: 1px solid var(--wire); }
+.sideTop { flex: 1; min-height: 0; padding: 20px 14px; overflow-y: auto; }
+.sideBot { flex-shrink: 0; padding: 12px; border-top: 1px solid var(--wire); }
 
 .logo { display: flex; align-items: center; gap: 10px; padding: 8px 10px 20px; }
 .hex {
