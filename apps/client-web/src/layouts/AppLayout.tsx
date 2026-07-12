@@ -1,17 +1,16 @@
 import { Outlet, NavLink } from 'react-router-dom';
 import { useEffect } from 'react';
+import { Hexagon, CalendarPlus, ClipboardList, Bot, User, LogOut } from 'lucide-react';
 import { connectSocket, disconnectSocket } from '../services/socket';
 import s from './AppLayout.module.css';
 
 const NAV = [
-  { to: '/',        icon: '⬡',  label: 'Главная' },
-  { to: '/booking', icon: '📅', label: 'Запись'  },
-  { to: '/orders',  icon: '📋', label: 'Заказы'  },
-  { to: '/chat',    icon: '🤖', label: 'AI-чат'  },
-  { to: '/profile', icon: '👤', label: 'Профиль' },
+  { to: '/',        icon: Hexagon,      label: 'Главная' },
+  { to: '/booking', icon: CalendarPlus, label: 'Запись'  },
+  { to: '/orders',  icon: ClipboardList,label: 'Заказы'  },
+  { to: '/chat',    icon: Bot,          label: 'AI-чат'  },
+  { to: '/profile', icon: User,         label: 'Профиль' },
 ];
-
-const SAAS = import.meta.env.VITE_SAAS_URL ?? 'http://localhost:3000';
 
 export default function AppLayout() {
   useEffect(() => { connectSocket(); return disconnectSocket; }, []);
@@ -21,19 +20,23 @@ export default function AppLayout() {
       <header className={s.header}>
         <span className={s.logo}>⬡ МОТОР</span>
         <span className={s.role}>Клиент</span>
-        <button className={s.logout} onClick={() => { localStorage.clear(); window.location.replace(SAAS); }}>
-          Выйти
+        <button className={s.logoutBtn}
+          onClick={() => { localStorage.clear(); window.location.replace('/login'); }}>
+          <LogOut size={14} />
         </button>
       </header>
       <main className={s.main}><Outlet /></main>
       <nav className={s.nav}>
-        {NAV.map(n => (
-          <NavLink key={n.to} to={n.to} end={n.to === '/'}
-            className={({ isActive }) => [s.link, isActive ? s.active : ''].join(' ')}>
-            <span className={s.icon}>{n.icon}</span>
-            <span className={s.label}>{n.label}</span>
-          </NavLink>
-        ))}
+        {NAV.map(n => {
+          const Icon = n.icon;
+          return (
+            <NavLink key={n.to} to={n.to} end={n.to === '/'}
+              className={({ isActive }) => [s.navItem, isActive ? s.navActive : ''].join(' ')}>
+              <Icon size={20} className={s.navIcon} />
+              <span className={s.navLabel}>{n.label}</span>
+            </NavLink>
+          );
+        })}
       </nav>
     </div>
   );
