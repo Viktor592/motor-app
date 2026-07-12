@@ -672,6 +672,7 @@ model Tenant {
 
   users        TenantUser[]
   subscription Subscription?
+  promotions   Promotion[]
 
   @@index([slug])
   @@index([status])
@@ -716,6 +717,21 @@ model Subscription {
 
   payments        Payment[]
   @@map("subscriptions")
+}
+
+// Акции/баннеры для клиентов. tenantId = null -> общая акция от платформы (супер-админ),
+// tenantId = конкретный -> акция автосервиса, видна только его клиентам.
+model Promotion {
+  id          String   @id @default(uuid())
+  tenantId    String?
+  tenant      Tenant?  @relation(fields: [tenantId], references: [id])
+  title       String
+  body        String
+  active      Boolean  @default(true)
+  createdAt   DateTime @default(now())
+
+  @@index([tenantId])
+  @@map("promotions")
 }
 
 // История платежей
