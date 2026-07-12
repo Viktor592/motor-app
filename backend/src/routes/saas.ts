@@ -307,6 +307,84 @@ saasRouter.patch('/admin/tenants/:id/approve', authenticate, authorize('SUPERADM
   } catch (e) { next(e); }
 });
 
+// PATCH /api/v1/saas/admin/tenants/:id/status — приостановить/забанить/вернуть в работу любой автосервис
+saasRouter.patch('/admin/tenants/:id/status', authenticate, authorize('SUPERADMIN'), async (req, res, next) => {
+  try {
+    const { status } = z.object({ status: z.enum(['ACTIVE', 'SUSPENDED', 'CANCELLED']) }).parse(req.body);
+    const tenant = await prisma.tenant.update({ where: { id: req.params.id }, data: { status } });
+    invalidateTenantCache(tenant.slug);
+    res.json({ ok: true, tenant });
+  } catch (e) { next(e); }
+});
+
+// GET /api/v1/saas/admin/tenants/:id — детали автосервиса: владелец, сотрудники, счётчики
+saasRouter.get('/admin/tenants/:id', authenticate, authorize('SUPERADMIN'), async (req, res, next) => {
+  try {
+    const tenant = await prisma.tenant.findUnique({ where: { id: req.params.id } });
+    if (!tenant) throw new AppError(404, 'Автосервис не найден');
+
+    const memberships = await prisma.tenantUser.findMany({ where: { tenantId: tenant.id } });
+    const users = await prisma.user.findMany({ where: { id: { in: memberships.map(m => m.userId) } } });
+
+    res.json({
+      tenant,
+      staff: users.map(u => ({ id: u.id, name: u.name, phone: u.phoneMasked, role: u.role })),
+    });
+  } catch (e) { next(e); }
+});
+
+// GET /api/v1/saas/admin/users — все пользователи платформы (владельцы + клиенты)
+saasRouter.get('/admin/users', authenticate, authorize('SUPERADMIN'), async (req, res, next) => {
+  try {
+    const { role, page = '1' } = req.query as Record<string, string>;
+    const where = role ? { role: role as any } : {};
+    const [users, total] = await Promise.all([
+      prisma.user.findMany({
+        where, skip: (Number(page) - 1) * 30, take: 30,
+        orderBy: { createdAt: 'desc' },
+        select: { id: true, name: true, phoneMasked: true, email: true, role: true, isActive: true, createdAt: true },
+      }),
+      prisma.user.count({ where }),
+    ]);
+    res.json({ users, total });
+  } catch (e) { next(e); }
+});
+
+// ── Акции платформы (общие для всех клиентов) ─────────────
+saasRouter.get('/admin/promotions', authenticate, authorize('SUPERADMIN'), async (_req, res, next) => {
+  try {
+    const promos = await prisma.promotion.findMany({ where: { tenantId: null }, orderBy: { createdAt: 'desc' } });
+    res.json({ promotions: promos });
+  } catch (e) { next(e); }
+});
+
+saasRouter.post('/admin/promotions', authenticate, authorize('SUPERADMIN'), async (req, res, next) => {
+  try {
+    const body = z.object({ title: z.string().min(2), body: z.string().min(2) }).parse(req.body);
+    const promo = await prisma.promotion.create({ data: { ...body, tenantId: null } });
+    res.status(201).json({ promotion: promo });
+  } catch (e) { next(e); }
+});
+
+saasRouter.delete('/admin/promotions/:id', authenticate, authorize('SUPERADMIN'), async (req, res, next) => {
+  try {
+    await prisma.promotion.delete({ where: { id: req.params.id } });
+    res.json({ ok: true });
+  } catch (e) { next(e); }
+});
+
+// GET /api/v1/saas/promotions — публичные активные акции (для клиентского приложения)
+saasRouter.get('/promotions', async (_req, res, next) => {
+  try {
+    const promos = await prisma.promotion.findMany({
+      where: { tenantId: null, active: true },
+      orderBy: { createdAt: 'desc' },
+      select: { id: true, title: true, body: true },
+    });
+    res.json({ promotions: promos });
+  } catch (e) { next(e); }
+});
+
 // ══════════════════════════════════════
 // ХЕЛПЕРЫ
 // ══════════════════════════════════════

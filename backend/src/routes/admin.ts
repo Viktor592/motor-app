@@ -210,3 +210,47 @@ adminRouter.get('/posts/load', async (_req, res, next) => {
     })));
   } catch (e) { next(e); }
 });
+
+// ── Акции автосервиса (видны только его клиентам) ─────────
+adminRouter.get('/promotions', async (req, res, next) => {
+  try {
+    let tenantId = req.tenantId;
+    if (!tenantId) {
+      const tu = await prisma.tenantUser.findFirst({ where: { userId: req.user!.userId } });
+      tenantId = tu?.tenantId;
+    }
+    if (!tenantId) throw new AppError(400, 'Тенант не определён');
+
+    const promos = await prisma.promotion.findMany({ where: { tenantId }, orderBy: { createdAt: 'desc' } });
+    res.json({ promotions: promos });
+  } catch (e) { next(e); }
+});
+
+adminRouter.post('/promotions', authorize('ADMIN'), async (req, res, next) => {
+  try {
+    let tenantId = req.tenantId;
+    if (!tenantId) {
+      const tu = await prisma.tenantUser.findFirst({ where: { userId: req.user!.userId } });
+      tenantId = tu?.tenantId;
+    }
+    if (!tenantId) throw new AppError(400, 'Тенант не определён');
+
+    const body = z.object({ title: z.string().min(2), body: z.string().min(2) }).parse(req.body);
+    const promo = await prisma.promotion.create({ data: { ...body, tenantId } });
+    res.status(201).json({ promotion: promo });
+  } catch (e) { next(e); }
+});
+
+adminRouter.delete('/promotions/:id', authorize('ADMIN'), async (req, res, next) => {
+  try {
+    let tenantId = req.tenantId;
+    if (!tenantId) {
+      const tu = await prisma.tenantUser.findFirst({ where: { userId: req.user!.userId } });
+      tenantId = tu?.tenantId;
+    }
+    const promo = await prisma.promotion.findUnique({ where: { id: req.params.id } });
+    if (!promo || promo.tenantId !== tenantId) throw new AppError(404, 'Акция не найдена');
+    await prisma.promotion.delete({ where: { id: req.params.id } });
+    res.json({ ok: true });
+  } catch (e) { next(e); }
+});
