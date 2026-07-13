@@ -6,6 +6,7 @@
 .tabs    { display: flex; gap: 4px; border-bottom: 1px solid var(--wire); margin-bottom: 24px; }
 .tab     { background: none; border: none; padding: 10px 18px; font-size: 13px; font-weight: 600; color: var(--dust); cursor: pointer; border-bottom: 2px solid transparent; margin-bottom: -1px; transition: all .15s; }
 .tab:hover { color: var(--ash); }
+.tab[data-active="true"] { color: var(--ore); border-bottom-color: var(--ore); }
 .tabActive { color: var(--ore) !important; border-bottom-color: var(--ore); }
 
 /* Stats */

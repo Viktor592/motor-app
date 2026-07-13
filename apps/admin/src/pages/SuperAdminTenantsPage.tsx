@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { Link } from 'react-router-dom';
 import { api } from '../services/api';
 import s from './AdminPage.module.css';
 
@@ -32,6 +33,14 @@ export default function SuperAdminTenantsPage() {
     } finally { setBusyId(null); }
   };
 
+  const setStatus = async (id: string, status: string) => {
+    setBusyId(id);
+    try {
+      await api.patch(`/saas/admin/tenants/${id}/status`, { status });
+      await load();
+    } finally { setBusyId(null); }
+  };
+
   const name = localStorage.getItem('motor_user_name');
 
   return (
@@ -52,7 +61,7 @@ export default function SuperAdminTenantsPage() {
           {tenants.map(t => (
             <div key={t.id} className={s.ruleRow} style={{ gridTemplateColumns: '1fr 1fr 140px 200px' }}>
               <div>
-                <div className={s.ruleCategory}>{t.name}</div>
+                <Link to={`/tenants/${t.id}`} className={s.ruleCategory} style={{ textDecoration: 'none' }}>{t.name}</Link>
                 <div style={{ fontSize: 12, color: 'var(--dust)' }}>{t.slug} · ИНН {t.inn || '—'}</div>
               </div>
               <div style={{ fontSize: 13 }}>{t.ownerEmail}<br/>{t.ownerPhone}</div>
@@ -66,6 +75,15 @@ export default function SuperAdminTenantsPage() {
                       onClick={() => decide(t.id, false)}>❌ Отклонить</button>
                   </>
                 )}
+                {t.status === 'ACTIVE' && (
+                  <button className={s.tab} disabled={busyId === t.id}
+                    onClick={() => setStatus(t.id, 'SUSPENDED')}>⏸ Приостановить</button>
+                )}
+                {t.status === 'SUSPENDED' && (
+                  <button className={s.tab} disabled={busyId === t.id}
+                    onClick={() => setStatus(t.id, 'ACTIVE')}>✅ Вернуть</button>
+                )}
+                <Link to={`/tenants/${t.id}`} className={s.tab} style={{ textDecoration: 'none', display: 'inline-block' }}>Детали →</Link>
               </div>
             </div>
           ))}

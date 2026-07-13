@@ -11,6 +11,7 @@ import SettingsPage    from './pages/SettingsPage';
 import EdoPage         from './pages/EdoPage';
 import PlansPage       from './pages/PlansPage';
 import StaffPage       from './pages/StaffPage';
+import PromotionsPage  from './pages/PromotionsPage';
 import OrdersPage      from './pages/OrdersPage';
 import OrderDetailPage from './pages/OrderDetailPage';
 import DiagnosticsPage from './pages/DiagnosticsPage';
@@ -18,7 +19,11 @@ import ChatPage        from './pages/ChatPage';
 import ProfilePage     from './pages/ProfilePage';
 import OwnerLoginPage      from './pages/OwnerLoginPage';
 import SuperAdminLoginPage from './pages/SuperAdminLoginPage';
+import SuperAdminLayout    from './pages/SuperAdminLayout';
 import SuperAdminTenantsPage from './pages/SuperAdminTenantsPage';
+import SuperAdminTenantDetailPage from './pages/SuperAdminTenantDetailPage';
+import SuperAdminUsersPage from './pages/SuperAdminUsersPage';
+import SuperAdminPromotionsPage from './pages/SuperAdminPromotionsPage';
 
 function Guard({ children }: { children: React.ReactNode }) {
   const token = localStorage.getItem('motor_access');
@@ -32,8 +37,13 @@ function RoleRouter() {
   if (role === 'SUPERADMIN') {
     return (
       <Routes>
-        <Route path="/" element={<SuperAdminTenantsPage />} />
-        <Route path="*" element={<Navigate to="/" replace />} />
+        <Route element={<SuperAdminLayout />}>
+          <Route path="/"              element={<SuperAdminTenantsPage />} />
+          <Route path="/tenants/:id"   element={<SuperAdminTenantDetailPage />} />
+          <Route path="/users"         element={<SuperAdminUsersPage />} />
+          <Route path="/promotions"    element={<SuperAdminPromotionsPage />} />
+          <Route path="*"              element={<Navigate to="/" replace />} />
+        </Route>
       </Routes>
     );
   }
@@ -51,6 +61,7 @@ function RoleRouter() {
         <Route path="/edo"                      element={<EdoPage />} />
         <Route path="/plans"                    element={<PlansPage />} />
         <Route path="/staff"                    element={<StaffPage />} />
+        <Route path="/promotions"               element={<PromotionsPage />} />
         <Route path="/orders"                   element={<OrdersPage />} />
         <Route path="/orders/:id"               element={<OrderDetailPage />} />
         <Route path="/orders/:id/diagnostics"   element={<DiagnosticsPage />} />

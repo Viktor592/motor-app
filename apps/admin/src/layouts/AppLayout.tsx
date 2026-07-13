@@ -2,7 +2,7 @@ import { Outlet, NavLink } from 'react-router-dom';
 import { useEffect } from 'react';
 import {
   Gauge, ClipboardList, CalendarDays, Package, Wallet, TrendingUp,
-  BarChart3, FileText, Plug, Users, Gem, Settings, Bot, User, LogOut,
+  BarChart3, FileText, Plug, Users, Gem, Settings, Bot, User, LogOut, Megaphone,
 } from 'lucide-react';
 import { connectSocket, disconnectSocket } from '../services/socket';
 import s from './AppLayout.module.css';
@@ -31,8 +31,9 @@ const GROUPS = [
   {
     label: 'Команда и тариф',
     items: [
-      { to: '/staff', icon: Users, label: 'Сотрудники' },
-      { to: '/plans', icon: Gem,   label: 'Тариф'       },
+      { to: '/staff',      icon: Users,     label: 'Сотрудники' },
+      { to: '/promotions', icon: Megaphone, label: 'Акции'      },
+      { to: '/plans',      icon: Gem,       label: 'Тариф'      },
     ],
   },
   {

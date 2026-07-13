@@ -1,17 +1,20 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { Link } from 'react-router-dom';
 import { fetchOrders } from '../slices/ordersSlice';
 import { AppDispatch, RootState } from '../store';
 import { StatusBadge } from '../components/StatusBadge';
+import { api } from '../services/api';
 import s from './HomePage.module.css';
 
 export default function HomePage() {
   const dispatch = useDispatch<AppDispatch>();
   const { name }  = useSelector((st: RootState) => st.auth);
   const { list, loading } = useSelector((st: RootState) => st.orders);
+  const [promos, setPromos] = useState<{ id: string; title: string; body: string }[]>([]);
 
   useEffect(() => { dispatch(fetchOrders()); }, []);
+  useEffect(() => { api.get('/saas/promotions').then(r => setPromos(r.data.promotions)).catch(() => {}); }, []);
 
   const active = list.filter(o => !['CLOSED','CANCELLED'].includes(o.status));
   const closed = list.filter(o => o.status === 'CLOSED').slice(0, 3);
@@ -30,6 +33,21 @@ export default function HomePage() {
           AI-агенты онлайн
         </div>
       </div>
+
+      {promos.length > 0 && (
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 10, margin: '0 0 20px' }}>
+          {promos.map(p => (
+            <div key={p.id} style={{
+              padding: '14px 16px', borderRadius: 12,
+              background: 'linear-gradient(135deg, var(--ore-d), var(--plate))',
+              border: '1px solid var(--wire)',
+            }}>
+              <div style={{ fontWeight: 700, color: 'var(--chalk)', marginBottom: 3 }}>🔥 {p.title}</div>
+              <div style={{ fontSize: 13, color: 'var(--ash)' }}>{p.body}</div>
+            </div>
+          ))}
+        </div>
+      )}
 
       {/* Quick actions */}
       <div className={s.qaGrid}>
