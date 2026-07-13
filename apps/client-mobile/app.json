@@ -35,7 +35,7 @@
       ]
     ],
     "extra": {
-      "apiUrl": "https://api.motor-app.ru",
+      "apiUrl": "http://83.222.19.108:3000",
       "eas": { "projectId": "motor-client" }
     }
   }

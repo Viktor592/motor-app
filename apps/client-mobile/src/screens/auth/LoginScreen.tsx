@@ -1,6 +1,8 @@
 import { useState } from 'react';
-import { View, Text, TextInput, TouchableOpacity, StyleSheet, Alert } from 'react-native';
+import { View, Text, TextInput, TouchableOpacity, StyleSheet, Alert, Linking } from 'react-native';
 import { api, saveAuth } from '../../services/api';
+
+const SAAS_URL = process.env.EXPO_PUBLIC_SAAS_URL ?? 'http://83.222.19.108';
 
 interface Props { onLogin: () => void; }
 
@@ -42,6 +44,9 @@ export default function LoginScreen({ onLogin }: Props) {
         secureTextEntry value={password} onChangeText={setPass} />
       <TouchableOpacity style={s.btn} onPress={login} disabled={loading}>
         <Text style={s.btnText}>{loading ? 'Входим…' : 'Войти →'}</Text>
+      </TouchableOpacity>
+      <TouchableOpacity onPress={() => Linking.openURL(`${SAAS_URL}/register`)} style={{ marginTop: 16 }}>
+        <Text style={{ color: '#8a8a95', textAlign: 'center', fontSize: 13 }}>Нет аккаунта? Зарегистрироваться</Text>
       </TouchableOpacity>
     </View>
   );

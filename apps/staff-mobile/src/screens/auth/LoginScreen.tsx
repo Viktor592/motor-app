@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { View, Text, TextInput, TouchableOpacity, StyleSheet, Alert } from 'react-native';
 import { api, saveAuth } from '../../services/api';
 
-const STAFF_ROLES = ['MASTER', 'STAFF'];
+const STAFF_ROLES = ['MASTER', 'RECEPTIONIST'];
 
 interface Props { onLogin: () => void; }
 

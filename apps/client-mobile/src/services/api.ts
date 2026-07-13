@@ -1,7 +1,7 @@
 import axios from 'axios';
 import * as SecureStore from 'expo-secure-store';
 
-const API_URL = process.env.EXPO_PUBLIC_API_URL ?? 'https://api.motor-app.ru/api/v1';
+const API_URL = process.env.EXPO_PUBLIC_API_URL ?? 'http://83.222.19.108:3000/api/v1';
 
 export const api = axios.create({ baseURL: API_URL, timeout: 15000 });
 

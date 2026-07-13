@@ -7,6 +7,6 @@
     "userInterfaceStyle": "dark",
     "ios": { "bundleIdentifier": "ru.motor.staff", "supportsTablet": false },
     "android": { "package": "ru.motor.staff" },
-    "extra": { "apiUrl": "https://api.motor-app.ru" }
+    "extra": { "apiUrl": "http://83.222.19.108:3000" }
   }
 }
