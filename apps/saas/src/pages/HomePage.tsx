@@ -21,6 +21,11 @@ export default function HomePage() {
         <p className={styles.link} style={{ marginTop: 24, opacity: 0.5 }}>
           <a href={`${ADMIN}/admin/login`}>Вход супер-админа</a>
         </p>
+        <p className={styles.link} style={{ marginTop: 8, fontSize: 12, opacity: 0.6 }}>
+          <Link to="/privacy">Политика обработки персональных данных</Link>
+          {' · '}
+          <Link to="/offer">Публичная оферта</Link>
+        </p>
       </div>
     </div>
   );
