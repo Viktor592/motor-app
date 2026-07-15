@@ -7,6 +7,7 @@ export default function StaffPage() {
   const [phone, setPhone]       = useState('');
   const [password, setPassword] = useState('');
   const [role, setRole]         = useState<'MASTER' | 'RECEPTIONIST'>('MASTER');
+  const [commissionPct, setCommissionPct] = useState('');
   const [error, setError]       = useState('');
   const [ok, setOk]             = useState('');
   const [loading, setLoading]   = useState(false);
@@ -27,9 +28,12 @@ export default function StaffPage() {
     }
     setLoading(true);
     try {
-      const { data } = await api.post('/admin/staff', { name, phone, password, role });
+      const { data } = await api.post('/admin/staff', {
+        name, phone, password, role,
+        commissionPct: commissionPct ? Number(commissionPct) : undefined,
+      });
       setOk(`Сотрудник «${data.name}» создан. Сообщите ему телефон и пароль для входа.`);
-      setName(''); setPhone(''); setPassword('');
+      setName(''); setPhone(''); setPassword(''); setCommissionPct('');
     } catch (e: any) {
       setError(e.response?.data?.error ?? 'Не удалось создать сотрудника');
     } finally { setLoading(false); }
@@ -59,6 +63,9 @@ export default function StaffPage() {
           <option value="MASTER">Мастер</option>
           <option value="RECEPTIONIST">Приёмщик</option>
         </select>
+        <input placeholder="% зарплаты от суммы заказов (необязательно)" type="number" min="0" max="100"
+          value={commissionPct} onChange={e => setCommissionPct(e.target.value)}
+          style={{ padding: 10, borderRadius: 8, border: '1px solid var(--line)' }} />
         <button className={s.tab} disabled={loading} type="submit">
           {loading ? '…' : '+ Добавить сотрудника'}
         </button>

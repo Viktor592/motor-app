@@ -11,7 +11,7 @@ export default function HomePage() {
   const dispatch = useDispatch<AppDispatch>();
   const { name }  = useSelector((st: RootState) => st.auth);
   const { list, loading } = useSelector((st: RootState) => st.orders);
-  const [promos, setPromos] = useState<{ id: string; title: string; body: string }[]>([]);
+  const [promos, setPromos] = useState<{ id: string; title: string; body: string; imageUrl?: string }[]>([]);
 
   useEffect(() => { dispatch(fetchOrders()); }, []);
   useEffect(() => { api.get('/saas/promotions').then(r => setPromos(r.data.promotions)).catch(() => {}); }, []);
@@ -38,12 +38,15 @@ export default function HomePage() {
         <div style={{ display: 'flex', flexDirection: 'column', gap: 10, margin: '0 0 20px' }}>
           {promos.map(p => (
             <div key={p.id} style={{
-              padding: '14px 16px', borderRadius: 12,
+              display: 'flex', gap: 12, alignItems: 'center', padding: '14px 16px', borderRadius: 12,
               background: 'linear-gradient(135deg, var(--ore-d), var(--plate))',
               border: '1px solid var(--wire)',
             }}>
-              <div style={{ fontWeight: 700, color: 'var(--chalk)', marginBottom: 3 }}>🔥 {p.title}</div>
-              <div style={{ fontSize: 13, color: 'var(--ash)' }}>{p.body}</div>
+              {p.imageUrl && <img src={p.imageUrl} alt="" style={{ width: 48, height: 48, borderRadius: 8, objectFit: 'cover', flexShrink: 0 }} />}
+              <div>
+                <div style={{ fontWeight: 700, color: 'var(--chalk)', marginBottom: 3 }}>🔥 {p.title}</div>
+                <div style={{ fontSize: 13, color: 'var(--ash)' }}>{p.body}</div>
+              </div>
             </div>
           ))}
         </div>

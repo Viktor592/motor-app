@@ -350,17 +350,25 @@ saasRouter.get('/admin/users', authenticate, authorize('SUPERADMIN'), async (req
   } catch (e) { next(e); }
 });
 
-// ── Акции платформы (общие для всех клиентов) ─────────────
-saasRouter.get('/admin/promotions', authenticate, authorize('SUPERADMIN'), async (_req, res, next) => {
+// ── Акции платформы (общие для всех клиентов ИЛИ для владельцев) ─────────────
+saasRouter.get('/admin/promotions', authenticate, authorize('SUPERADMIN'), async (req, res, next) => {
   try {
-    const promos = await prisma.promotion.findMany({ where: { tenantId: null }, orderBy: { createdAt: 'desc' } });
+    const { audience } = req.query as Record<string, string>;
+    const where: any = { tenantId: null };
+    if (audience) where.audience = audience;
+    const promos = await prisma.promotion.findMany({ where, orderBy: { createdAt: 'desc' } });
     res.json({ promotions: promos });
   } catch (e) { next(e); }
 });
 
 saasRouter.post('/admin/promotions', authenticate, authorize('SUPERADMIN'), async (req, res, next) => {
   try {
-    const body = z.object({ title: z.string().min(2), body: z.string().min(2) }).parse(req.body);
+    const body = z.object({
+      title:     z.string().min(2),
+      body:      z.string().min(2),
+      audience:  z.enum(['CLIENTS', 'OWNERS']).default('CLIENTS'),
+      imageUrl:  z.string().max(700_000).optional(), // ~500KB в base64
+    }).parse(req.body);
     const promo = await prisma.promotion.create({ data: { ...body, tenantId: null } });
     res.status(201).json({ promotion: promo });
   } catch (e) { next(e); }
@@ -373,13 +381,25 @@ saasRouter.delete('/admin/promotions/:id', authenticate, authorize('SUPERADMIN')
   } catch (e) { next(e); }
 });
 
-// GET /api/v1/saas/promotions — публичные активные акции (для клиентского приложения)
+// GET /api/v1/saas/promotions — публичные активные акции для клиентов
 saasRouter.get('/promotions', async (_req, res, next) => {
   try {
     const promos = await prisma.promotion.findMany({
-      where: { tenantId: null, active: true },
+      where: { tenantId: null, active: true, audience: 'CLIENTS' },
       orderBy: { createdAt: 'desc' },
-      select: { id: true, title: true, body: true },
+      select: { id: true, title: true, body: true, imageUrl: true },
+    });
+    res.json({ promotions: promos });
+  } catch (e) { next(e); }
+});
+
+// GET /api/v1/saas/promotions/owners — активные акции/объявления для владельцев автосервисов
+saasRouter.get('/promotions/owners', authenticate, authorize('ADMIN'), async (_req, res, next) => {
+  try {
+    const promos = await prisma.promotion.findMany({
+      where: { tenantId: null, active: true, audience: 'OWNERS' },
+      orderBy: { createdAt: 'desc' },
+      select: { id: true, title: true, body: true, imageUrl: true },
     });
     res.json({ promotions: promos });
   } catch (e) { next(e); }

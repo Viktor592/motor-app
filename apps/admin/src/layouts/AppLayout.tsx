@@ -2,7 +2,7 @@ import { Outlet, NavLink } from 'react-router-dom';
 import { useEffect } from 'react';
 import {
   Gauge, ClipboardList, CalendarDays, Package, Wallet, TrendingUp,
-  BarChart3, FileText, Plug, Users, Gem, Settings, Bot, User, LogOut, Megaphone,
+  BarChart3, FileText, Plug, Users, Gem, Settings, User, LogOut, Megaphone,
 } from 'lucide-react';
 import { connectSocket, disconnectSocket } from '../services/socket';
 import s from './AppLayout.module.css';
@@ -41,7 +41,6 @@ const GROUPS = [
     items: [
       { to: '/edo',         icon: FileText, label: 'ЭДО'         },
       { to: '/integration', icon: Plug,     label: 'Интеграции'  },
-      { to: '/chat',        icon: Bot,      label: 'AI-чат'      },
       { to: '/settings',    icon: Settings, label: 'Настройки'   },
     ],
   },

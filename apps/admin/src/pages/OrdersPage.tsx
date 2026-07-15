@@ -34,7 +34,6 @@ export default function OrdersPage() {
           <div className={s.eye}>// Мои заказы</div>
           <h1 className={s.h1}>ЗАКАЗЫ</h1>
         </div>
-        <Link to="/booking" className={s.newBtn}>+ Новая запись</Link>
       </div>
 
       <input className={s.search} placeholder='Поиск по номеру, марке, клиенту…' value={search} onChange={e => setSearch(e.target.value)} />

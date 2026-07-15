@@ -15,7 +15,6 @@ import PromotionsPage  from './pages/PromotionsPage';
 import OrdersPage      from './pages/OrdersPage';
 import OrderDetailPage from './pages/OrderDetailPage';
 import DiagnosticsPage from './pages/DiagnosticsPage';
-import ChatPage        from './pages/ChatPage';
 import ProfilePage     from './pages/ProfilePage';
 import OwnerLoginPage      from './pages/OwnerLoginPage';
 import SuperAdminLoginPage from './pages/SuperAdminLoginPage';
@@ -65,7 +64,6 @@ function RoleRouter() {
         <Route path="/orders"                   element={<OrdersPage />} />
         <Route path="/orders/:id"               element={<OrderDetailPage />} />
         <Route path="/orders/:id/diagnostics"   element={<DiagnosticsPage />} />
-        <Route path="/chat"                     element={<ChatPage />} />
         <Route path="/profile"                  element={<ProfilePage />} />
         <Route path="*"                         element={<Navigate to="/" replace />} />
       </Route>

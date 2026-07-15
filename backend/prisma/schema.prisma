@@ -30,6 +30,7 @@ model User {
   email        String?
   passwordHash String   @default("")
   role         UserRole @default(CLIENT)
+  commissionPct Int?    // % от суммы закрытых заказов - только для MASTER/RECEPTIONIST
   pushToken    String?
   isActive     Boolean  @default(true)
   createdAt    DateTime @default(now())
@@ -725,8 +726,10 @@ model Promotion {
   id          String   @id @default(uuid())
   tenantId    String?
   tenant      Tenant?  @relation(fields: [tenantId], references: [id])
+  audience    String   @default("CLIENTS") // CLIENTS | OWNERS (только для tenantId=null, платформенных)
   title       String
   body        String
+  imageUrl    String?  @db.Text // base64 data URI
   active      Boolean  @default(true)
   createdAt   DateTime @default(now())
 

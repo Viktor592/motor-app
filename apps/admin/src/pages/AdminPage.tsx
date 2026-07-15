@@ -33,6 +33,9 @@ export default function AdminPage() {
   const [users,      setUsers]   = useState<User[]>([]);
   const [editPct,    setEditPct] = useState<Record<string, number>>({});
   const [saving,     setSaving]  = useState<string | null>(null);
+  const [ownerPromos, setOwnerPromos] = useState<any[]>([]);
+
+  useEffect(() => { api.get('/saas/promotions/owners').then(r => setOwnerPromos(r.data.promotions)).catch(() => {}); }, []);
   const [userSearch, setSearch]  = useState('');
   const [loading,    setLoading] = useState(false);
 
@@ -91,6 +94,22 @@ export default function AdminPage() {
     <div className={s.page}>
       <div className={s.eye}>// Администрирование</div>
       <h1 className={s.h1}>ADMIN-ПАНЕЛЬ</h1>
+
+      {ownerPromos.length > 0 && (
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 10, margin: '16px 0' }}>
+          {ownerPromos.map(p => (
+            <div key={p.id} style={{ display: 'flex', gap: 12, alignItems: 'center',
+              padding: '12px 16px', borderRadius: 10, border: '1px solid var(--wire)',
+              background: 'linear-gradient(135deg, var(--ore-d), var(--plate))' }}>
+              {p.imageUrl && <img src={p.imageUrl} alt="" style={{ width: 44, height: 44, borderRadius: 8, objectFit: 'cover', flexShrink: 0 }} />}
+              <div>
+                <div style={{ fontWeight: 700, color: 'var(--chalk)', fontSize: 13 }}>📣 {p.title}</div>
+                <div style={{ fontSize: 12, color: 'var(--ash)' }}>{p.body}</div>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
 
       {/* Tabs */}
       <div className={s.tabs}>

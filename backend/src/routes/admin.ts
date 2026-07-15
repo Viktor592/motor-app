@@ -126,6 +126,7 @@ adminRouter.post('/staff', authorize('ADMIN'), async (req, res, next) => {
       name:     z.string().min(2).max(100),
       password: z.string().min(6),
       role:     z.enum(['MASTER', 'RECEPTIONIST']),
+      commissionPct: z.number().min(0).max(100).optional(),
     }).parse(req.body);
 
     const exists = await prisma.user.findUnique({ where: { phone: body.phone } });
@@ -137,6 +138,7 @@ adminRouter.post('/staff', authorize('ADMIN'), async (req, res, next) => {
         data: {
           phone: body.phone, phoneMasked: maskPhone(body.phone),
           name: body.name, passwordHash, role: body.role,
+          commissionPct: body.commissionPct ?? null,
         } as any,
       });
       await tx.tenantUser.create({

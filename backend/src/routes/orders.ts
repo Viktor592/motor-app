@@ -115,3 +115,43 @@ ordersRouter.patch(
     }
   }
 );
+
+// POST /api/v1/orders/:id/items — добавить доп. работу к заказу, который уже в работе
+ordersRouter.post('/:id/items', authenticate, authorize('MASTER', 'RECEPTIONIST', 'ADMIN'), async (req, res, next) => {
+  try {
+    const body = z.object({
+      name:        z.string().min(2).max(200),
+      qty:         z.number().int().min(1).default(1),
+      retailPrice: z.number().min(0),
+      type:        z.enum(['WORK', 'PART']).default('WORK'),
+    }).parse(req.body);
+
+    const order = await prisma.order.findUnique({ where: { id: req.params.id } });
+    if (!order) throw new AppError(404, 'Заказ не найден');
+    if (order.status !== 'IN_PROGRESS') throw new AppError(400, 'Добавлять позиции можно только в заказ, который в работе');
+
+    const item = await prisma.orderItem.create({
+      data: {
+        orderId:     order.id,
+        type:        body.type,
+        name:        body.name,
+        qty:         body.qty,
+        costPrice:   0,
+        retailPrice: body.retailPrice,
+        markup:      0,
+      },
+    });
+
+    const addSum = body.qty * body.retailPrice;
+    const updated = await prisma.order.update({
+      where: { id: order.id },
+      data:  { totalRetail: Number(order.totalRetail ?? 0) + addSum },
+    });
+
+    io.to(`user:${order.clientId}`).emit('order:status', {
+      orderId: order.id, orderNumber: order.orderNumber, status: order.status,
+    });
+
+    res.status(201).json({ item, totalRetail: updated.totalRetail });
+  } catch (e) { next(e); }
+});

@@ -8,6 +8,7 @@ interface MasterData {
   summary: {
     totalOrders: number; closedOrders: number; inProgress: number;
     totalRetail: number; margin: number; marginPct: number; avgCheck: number;
+    commissionPct: number; salary: number;
   };
   bySpec:  Record<string, number>;
   daily:   { date: string; orders: number; revenue: number }[];
@@ -60,7 +61,7 @@ export default function MasterAnalyticsPage() {
               { label: 'В работе',    val: data.summary.inProgress,                    color: 'var(--ore)' },
               { label: 'Выручка',     val: data.summary.totalRetail.toLocaleString('ru') + ' ₽', color: 'var(--teal)' },
               { label: 'Средний чек', val: data.summary.avgCheck.toLocaleString('ru') + ' ₽',   color: 'var(--blue)' },
-              { label: 'Маржа',       val: data.summary.marginPct + '%',               color: data.summary.marginPct > 30 ? 'var(--green)' : 'var(--gold)' },
+              { label: 'Зарплата',    val: data.summary.salary.toLocaleString('ru') + ' ₽' + (data.summary.commissionPct ? ` (${data.summary.commissionPct}%)` : ''), color: 'var(--green)' },
             ].map(({ label, val, color }) => (
               <div key={label} className={s.kpi}>
                 <div className={s.kpiVal} style={{ color }}>{val}</div>

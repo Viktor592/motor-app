@@ -2,7 +2,6 @@ import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import AppLayout            from './layouts/AppLayout';
 import ExecOrdersPage       from './pages/ExecOrdersPage';
 import MasterAnalyticsPage  from './pages/MasterAnalyticsPage';
-import ChatPage             from './pages/ChatPage';
 import ProfilePage          from './pages/ProfilePage';
 import OrderDetailPage      from './pages/OrderDetailPage';
 import DiagnosticsPage      from './pages/DiagnosticsPage';
@@ -31,8 +30,6 @@ export default function App() {
                 <Route path="/orders/:id"             element={<OrderDetailPage />} />
                 <Route path="/orders/:id/diagnostics" element={<DiagnosticsPage />} />
                 <Route path="/analytics"              element={<MasterAnalyticsPage />} />
-                <Route path="/chat"                   element={<ChatPage />} />
-                <Route path="/chat/:orderId"          element={<ChatPage />} />
                 <Route path="/profile"                element={<ProfilePage />} />
                 <Route path="*"                       element={<Navigate to="/" replace />} />
               </Route>

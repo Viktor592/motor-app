@@ -30,11 +30,16 @@ analyticsRouter.get('/master/me', authenticate, authorize('MASTER', 'RECEPTIONIS
       }),
     ]);
 
-    // Выручка и маржа
+    // Выручка и маржа (маржа — только для просмотра владельцем, мастеру не показываем)
     const totalRetail = closedOrders.reduce((s, o) => s + Number(o.totalRetail ?? 0), 0);
     const totalCost   = closedOrders.reduce((s, o) => s + Number(o.totalCost   ?? 0), 0);
     const margin      = totalRetail - totalCost;
     const marginPct   = totalRetail > 0 ? Math.round(margin / totalRetail * 100) : 0;
+
+    // Зарплата мастера — % от суммы закрытых заказов
+    const target = await prisma.user.findUnique({ where: { id: targetId }, select: { commissionPct: true } });
+    const commissionPct = target?.commissionPct ?? 0;
+    const salary = Math.round(totalRetail * commissionPct / 100);
 
     // Средний чек
     const avgCheck = closedOrders.length > 0 ? Math.round(totalRetail / closedOrders.length) : 0;
@@ -77,6 +82,8 @@ analyticsRouter.get('/master/me', authenticate, authorize('MASTER', 'RECEPTIONIS
         totalCost:      Math.round(totalCost),
         margin:         Math.round(margin),
         marginPct,
+        commissionPct,
+        salary,
         avgCheck,
       },
       bySpec,

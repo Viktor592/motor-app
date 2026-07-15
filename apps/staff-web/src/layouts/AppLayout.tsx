@@ -1,13 +1,12 @@
 import { Outlet, NavLink } from 'react-router-dom';
 import { useEffect } from 'react';
-import { ClipboardList, BarChart3, Bot, User, LogOut } from 'lucide-react';
+import { ClipboardList, BarChart3, User, LogOut } from 'lucide-react';
 import { connectSocket, disconnectSocket } from '../services/socket';
 import s from './AppLayout.module.css';
 
 const NAV = [
   { to: '/',          icon: ClipboardList, label: 'Заказы'    },
   { to: '/analytics', icon: BarChart3,     label: 'Аналитика' },
-  { to: '/chat',      icon: Bot,           label: 'AI-чат'    },
   { to: '/profile',   icon: User,          label: 'Профиль'   },
 ];
 

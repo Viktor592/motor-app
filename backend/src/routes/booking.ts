@@ -193,3 +193,35 @@ bookingRouter.post('/:id/convert', authenticate, authorize('ADMIN', 'RECEPTIONIS
     res.status(201).json({ ok: true, orderId: order.id, orderNumber: order.orderNumber });
   } catch (e) { next(e); }
 });
+
+// PATCH /api/v1/booking/slots/:id/shift — сдвинуть время слота в графике поста
+// (например, работа затянулась и нужно сдвинуть учёт занятости на посту)
+bookingRouter.patch('/slots/:id/shift', authenticate, authorize('MASTER', 'RECEPTIONIST', 'ADMIN'), async (req, res, next) => {
+  try {
+    const { minutes } = z.object({ minutes: z.number().int().min(-240).max(240) }).parse(req.body);
+
+    const slot = await prisma.calendarSlot.findUnique({ where: { id: req.params.id } });
+    if (!slot) throw new AppError(404, 'Слот не найден');
+
+    const newStart = new Date(slot.startAt.getTime() + minutes * 60000);
+    const newEnd   = new Date(slot.endAt.getTime()   + minutes * 60000);
+
+    const conflict = await prisma.calendarSlot.findFirst({
+      where: {
+        postId: slot.postId,
+        id: { not: slot.id },
+        isBooked: true,
+        startAt: { lt: newEnd },
+        endAt:   { gt: newStart },
+      },
+    });
+    if (conflict) throw new AppError(409, 'На этом посту уже есть запись в новом временном окне');
+
+    const updated = await prisma.calendarSlot.update({
+      where: { id: slot.id },
+      data:  { startAt: newStart, endAt: newEnd },
+    });
+
+    res.json({ ok: true, slot: updated });
+  } catch (e) { next(e); }
+});
