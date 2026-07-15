@@ -367,7 +367,7 @@ saasRouter.post('/admin/promotions', authenticate, authorize('SUPERADMIN'), asyn
       title:     z.string().min(2),
       body:      z.string().min(2),
       audience:  z.enum(['CLIENTS', 'OWNERS']).default('CLIENTS'),
-      imageUrl:  z.string().max(700_000).optional(), // ~500KB в base64
+      imageUrl:  z.string().max(4_000_000).optional(), // ~3MB в base64, под анимированные GIF
     }).parse(req.body);
     const promo = await prisma.promotion.create({ data: { ...body, tenantId: null } });
     res.status(201).json({ promotion: promo });

@@ -35,17 +35,14 @@ export default function HomePage() {
       </div>
 
       {promos.length > 0 && (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 10, margin: '0 0 20px' }}>
+        <div className={s.promoWrap}>
           {promos.map(p => (
-            <div key={p.id} style={{
-              display: 'flex', gap: 12, alignItems: 'center', padding: '14px 16px', borderRadius: 12,
-              background: 'linear-gradient(135deg, var(--ore-d), var(--plate))',
-              border: '1px solid var(--wire)',
-            }}>
-              {p.imageUrl && <img src={p.imageUrl} alt="" style={{ width: 48, height: 48, borderRadius: 8, objectFit: 'cover', flexShrink: 0 }} />}
+            <div key={p.id} className={s.promo}>
+              {p.imageUrl && <img src={p.imageUrl} alt="" className={s.promoImg} />}
               <div>
-                <div style={{ fontWeight: 700, color: 'var(--chalk)', marginBottom: 3 }}>🔥 {p.title}</div>
-                <div style={{ fontSize: 13, color: 'var(--ash)' }}>{p.body}</div>
+                <div className={s.promoBadge}>🔥 Акция</div>
+                <div className={s.promoTitle}>{p.title}</div>
+                <div className={s.promoBody}>{p.body}</div>
               </div>
             </div>
           ))}

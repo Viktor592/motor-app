@@ -17,7 +17,7 @@ export default function SuperAdminPromotionsPage() {
   useEffect(() => { load(); }, []);
 
   const onFile = (f: File) => {
-    if (f.size > 500_000) { setError('Картинка больше 500КБ — выберите файл поменьше'); return; }
+    if (f.size > 3_000_000) { setError('Картинка больше 3МБ — выберите файл поменьше'); return; }
     const reader = new FileReader();
     reader.onload = () => setImage(reader.result as string);
     reader.readAsDataURL(f);
@@ -64,7 +64,7 @@ export default function SuperAdminPromotionsPage() {
         <textarea placeholder="Текст акции" value={body} onChange={e => setBody(e.target.value)} rows={3}
           style={{ padding: 10, borderRadius: 8, border: '1px solid var(--wire)', background: 'var(--cage)', color: 'var(--chalk)', resize: 'vertical' }} />
         <label style={{ fontSize: 13, color: 'var(--dust)' }}>
-          Картинка (необязательно, до 500КБ)
+          Картинка или GIF (необязательно, до 3МБ)
           <input type="file" accept="image/*" style={{ display: 'block', marginTop: 6 }}
             onChange={e => e.target.files?.[0] && onFile(e.target.files[0])} />
         </label>
