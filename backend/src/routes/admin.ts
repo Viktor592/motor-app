@@ -82,15 +82,43 @@ adminRouter.get('/price-audit', authorize('ADMIN'), async (req, res, next) => {
 });
 
 // ── Список пользователей ──────────────────────────────────
+// Владелец не может видеть/менять сотрудников чужого тенанта или супер-админа
+async function resolveOwnTenantId(req: any): Promise<string> {
+  let tenantId = req.tenantId;
+  if (!tenantId) {
+    const tu = await prisma.tenantUser.findFirst({ where: { userId: req.user!.userId } });
+    tenantId = tu?.tenantId;
+  }
+  if (!tenantId) throw new AppError(400, 'Тенант не определён');
+  return tenantId;
+}
+
+async function assertOwnerCanManage(req: any, targetUserId: string) {
+  const target = await prisma.user.findUnique({ where: { id: targetUserId } });
+  if (!target) throw new AppError(404, 'Пользователь не найден');
+  if (target.role === 'SUPERADMIN') throw new AppError(403, 'Недостаточно прав');
+  if (target.role === 'CLIENT') return target;
+  const tenantId = await resolveOwnTenantId(req);
+  const membership = await prisma.tenantUser.findFirst({ where: { userId: targetUserId, tenantId } });
+  if (!membership) throw new AppError(403, 'Этот пользователь не в вашей команде');
+  return target;
+}
+
 adminRouter.get('/users', authorize('ADMIN'), async (req, res, next) => {
   try {
     const { role, page = '1', q } = req.query as Record<string, string>;
-    const where: any = {};
-    if (role) where.role = role;
-    if (q) where.OR = [
+    const tenantId = await resolveOwnTenantId(req);
+    const myStaff = await prisma.tenantUser.findMany({ where: { tenantId }, select: { userId: true } });
+    const myStaffIds = myStaff.map(m => m.userId);
+
+    // Видимость: клиенты (любые) + сотрудники СВОЕГО тенанта. Чужие сотрудники и супер-админ — скрыты.
+    const conditions: any[] = [{ OR: [{ role: 'CLIENT' }, { id: { in: myStaffIds } }] }];
+    if (role) conditions.push({ role });
+    if (q) conditions.push({ OR: [
       { name:  { contains: q, mode: 'insensitive' } },
       { phone: { contains: q } },
-    ];
+    ] });
+    const where: any = { AND: conditions };
 
     const skip = (parseInt(page) - 1) * 30;
     const [users, total] = await Promise.all([
@@ -156,8 +184,7 @@ adminRouter.post('/staff', authorize('ADMIN'), async (req, res, next) => {
 // ── Активировать / деактивировать пользователя ────────────
 adminRouter.patch('/users/:id/toggle', authorize('ADMIN'), async (req, res, next) => {
   try {
-    const user = await prisma.user.findUnique({ where: { id: req.params.id } });
-    if (!user) throw new AppError(404, 'Пользователь не найден');
+    const user = await assertOwnerCanManage(req, req.params.id);
 
     const updated = await prisma.user.update({
       where: { id: req.params.id },
@@ -172,8 +199,10 @@ adminRouter.patch('/users/:id/toggle', authorize('ADMIN'), async (req, res, next
 adminRouter.patch('/users/:id/role', authorize('ADMIN'), async (req, res, next) => {
   try {
     const { role } = z.object({
-      role: z.enum(['CLIENT', 'MASTER', 'RECEPTIONIST', 'ADMIN']),
+      role: z.enum(['CLIENT', 'MASTER', 'RECEPTIONIST']),
     }).parse(req.body);
+
+    await assertOwnerCanManage(req, req.params.id);
 
     const user = await prisma.user.update({
       where: { id: req.params.id },

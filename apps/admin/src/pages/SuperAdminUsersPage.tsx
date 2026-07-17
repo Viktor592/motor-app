@@ -11,12 +11,18 @@ export default function SuperAdminUsersPage() {
   const [users, setUsers]   = useState<any[]>([]);
   const [filter, setFilter] = useState('');
   const [loading, setLoading] = useState(true);
+  const [error, setError]     = useState('');
 
   const load = async (role: string) => {
-    setLoading(true);
+    setLoading(true); setError('');
     try {
       const { data } = await api.get('/saas/admin/users', { params: role ? { role } : {} });
       setUsers(data.users);
+    } catch (e: any) {
+      setError(e.response?.status
+        ? `Ошибка ${e.response.status}: ${e.response.data?.error ?? 'не удалось загрузить'}`
+        : `Нет ответа от сервера: ${e.message}`);
+      setUsers([]);
     } finally { setLoading(false); }
   };
 
@@ -34,6 +40,7 @@ export default function SuperAdminUsersPage() {
         ))}
       </div>
 
+      {error && <div style={{ color: '#e5484d', marginBottom: 16 }}>⚠️ {error}</div>}
       {loading && <div className={s.loading}>Загрузка…</div>}
       {!loading && (
         <div className={s.rulesTable}>
