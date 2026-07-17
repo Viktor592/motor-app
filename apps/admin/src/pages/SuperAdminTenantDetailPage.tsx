@@ -8,8 +8,13 @@ export default function SuperAdminTenantDetailPage() {
   const { id } = useParams();
   const [data, setData] = useState<any>(null);
   const [busy, setBusy] = useState(false);
+  const [error, setError] = useState('');
 
-  const load = () => api.get(`/saas/admin/tenants/${id}`).then(r => setData(r.data));
+  const load = () => api.get(`/saas/admin/tenants/${id}`).then(r => setData(r.data)).catch((e: any) => {
+    setError(e.response?.status
+      ? `Ошибка ${e.response.status}: ${e.response.data?.error ?? 'не удалось загрузить'}`
+      : `Нет ответа от сервера: ${e.message}`);
+  });
   useEffect(() => { load(); }, [id]);
 
   const setStatus = async (status: string) => {
@@ -18,7 +23,11 @@ export default function SuperAdminTenantDetailPage() {
     finally { setBusy(false); }
   };
 
-  if (!data) return <div className={s.page}><div className={s.loading}>Загрузка…</div></div>;
+  if (!data) return (
+    <div className={s.page}>
+      {error ? <div style={{ color: '#e5484d' }}>⚠️ {error}</div> : <div className={s.loading}>Загрузка…</div>}
+    </div>
+  );
   const { tenant, staff } = data;
 
   return (

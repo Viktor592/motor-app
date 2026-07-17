@@ -31,7 +31,15 @@ export default function SuperAdminPromotionsPage() {
       await api.post('/saas/admin/promotions', { title, body, audience, imageUrl: image ?? undefined });
       setTitle(''); setBody(''); setImage(null); await load();
     } catch (e: any) {
-      setError(e.response?.data?.error ?? 'Не удалось опубликовать');
+      const status = e.response?.status;
+      const serverMsg = e.response?.data?.error;
+      const raw = typeof e.response?.data === 'string' ? e.response.data.slice(0, 200) : null;
+      setError(
+        serverMsg ? `Ошибка ${status}: ${serverMsg}` :
+        raw       ? `Ошибка ${status}: ${raw}` :
+        status    ? `Ошибка ${status} (${e.message})` :
+        `Нет ответа от сервера: ${e.message}`
+      );
     } finally { setSaving(false); }
   };
 

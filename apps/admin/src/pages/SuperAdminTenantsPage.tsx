@@ -14,12 +14,17 @@ export default function SuperAdminTenantsPage() {
   const [mrr, setMrr]         = useState(0);
   const [loading, setLoading] = useState(true);
   const [busyId, setBusyId]   = useState<string | null>(null);
+  const [error, setError]     = useState('');
 
   const load = async () => {
-    setLoading(true);
+    setLoading(true); setError('');
     try {
       const { data } = await api.get('/saas/admin/tenants');
       setTenants(data.tenants); setMrr(data.mrr);
+    } catch (e: any) {
+      setError(e.response?.status
+        ? `Ошибка ${e.response.status}: ${e.response.data?.error ?? 'не удалось загрузить'}`
+        : `Нет ответа от сервера: ${e.message}`);
     } finally { setLoading(false); }
   };
 
@@ -51,6 +56,7 @@ export default function SuperAdminTenantsPage() {
         Здравствуйте, {name}. MRR: {mrr.toLocaleString('ru-RU')} ₽
       </p>
 
+      {error && <div style={{ color: '#e5484d', marginBottom: 16 }}>⚠️ {error}</div>}
       {loading && <div className={s.loading}>Загрузка…</div>}
 
       {!loading && (
