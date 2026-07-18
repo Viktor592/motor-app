@@ -55,7 +55,7 @@ export default function AppLayout() {
       <aside className={s.sidebar}>
         <div className={s.sideTop}>
           <div className={s.logo}>
-            <span className={s.hex}>М</span>
+            <img src="/motor_logo.gif" alt="МОТОР" className={s.hex} />
             <span className={s.brand}>МОТОР</span>
           </div>
 

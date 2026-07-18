@@ -42,7 +42,9 @@ export default function SuperAdminLoginPage() {
   return (
     <div className={s.wrap}>
       <form className={s.form} onSubmit={submit}>
-        <div className={s.logo}>⬡ МОТОР · PLATFORM</div>
+        <div className={s.logo} style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+          <img src="/motor_logo.gif" alt="" style={{ width: 24, height: 24, borderRadius: 6 }} /> МОТОР · PLATFORM
+        </div>
         <h1 className={s.title}>Вход супер-админа</h1>
         {error && <div className={s.err}>{error}</div>}
 

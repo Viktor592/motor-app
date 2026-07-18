@@ -17,7 +17,9 @@ export default function AppLayout() {
   return (
     <div className={s.shell}>
       <header className={s.header}>
-        <span className={s.logo}>⬡ МОТОР</span>
+        <span className={s.logo} style={{ display: 'flex', alignItems: 'center', gap: 7 }}>
+          <img src="/motor_logo.gif" alt="" style={{ width: 20, height: 20, borderRadius: 5 }} /> МОТОР
+        </span>
         <span className={s.role}>{role === 'MASTER' ? 'Мастер' : 'Приёмщик'}</span>
         <button className={s.logoutBtn}
           onClick={() => { localStorage.clear(); window.location.replace('/login'); }}>
