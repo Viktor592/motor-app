@@ -1,7 +1,7 @@
 import { Router } from 'express';
 import { z } from 'zod';
 import { prisma } from '../utils/prisma';
-import { authenticate, authorize } from '../middleware/auth';
+import { authenticate, authorize, optionalAuth } from '../middleware/auth';
 import { AppError } from '../middleware/errorHandler';
 import { sendPushToUser } from '../services/notifications';
 
@@ -56,7 +56,7 @@ bookingRouter.get('/slots', async (req, res, next) => {
 });
 
 // POST /api/v1/booking/public — создать запись без авторизации
-bookingRouter.post('/public', async (req, res, next) => {
+bookingRouter.post('/public', optionalAuth, async (req, res, next) => {
   try {
     const data = z.object({
       clientName:   z.string().min(2),
@@ -85,6 +85,7 @@ bookingRouter.post('/public', async (req, res, next) => {
       data: {
         clientName:   data.clientName,
         clientPhone:  data.clientPhone,
+        userId:       req.user?.role === 'CLIENT' ? req.user.userId : null,
         serviceType:  data.serviceType,
         description:  data.description ?? null,
         vehicleMake:  data.vehicleMake ?? null,
@@ -223,5 +224,16 @@ bookingRouter.patch('/slots/:id/shift', authenticate, authorize('MASTER', 'RECEP
     });
 
     res.json({ ok: true, slot: updated });
+  } catch (e) { next(e); }
+});
+
+// GET /api/v1/booking/mine — мои записи (для авторизованного клиента)
+bookingRouter.get('/mine', authenticate, authorize('CLIENT'), async (req, res, next) => {
+  try {
+    const bookings = await prisma.booking.findMany({
+      where:   { userId: req.user!.userId },
+      orderBy: { scheduledAt: 'desc' },
+    });
+    res.json({ bookings });
   } catch (e) { next(e); }
 });

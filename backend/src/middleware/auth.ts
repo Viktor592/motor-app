@@ -35,6 +35,16 @@ export function authenticate(req: Request, res: Response, next: NextFunction) {
   }
 }
 
+export function optionalAuth(req: Request, _res: Response, next: NextFunction) {
+  const header = req.headers.authorization;
+  if (header?.startsWith('Bearer ')) {
+    try {
+      req.user = jwt.verify(header.slice(7), process.env.JWT_ACCESS_SECRET!) as JwtPayload;
+    } catch { /* игнорируем невалидный токен - просто работаем как гость */ }
+  }
+  next();
+}
+
 export function authorize(...roles: UserRole[]) {
   return (req: Request, res: Response, next: NextFunction) => {
     if (!req.user) {

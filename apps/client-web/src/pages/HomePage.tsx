@@ -12,9 +12,11 @@ export default function HomePage() {
   const { name }  = useSelector((st: RootState) => st.auth);
   const { list, loading } = useSelector((st: RootState) => st.orders);
   const [promos, setPromos] = useState<{ id: string; title: string; body: string; imageUrl?: string }[]>([]);
+  const [myBookings, setMyBookings] = useState<any[]>([]);
 
   useEffect(() => { dispatch(fetchOrders()); }, []);
   useEffect(() => { api.get('/saas/promotions').then(r => setPromos(r.data.promotions)).catch(() => {}); }, []);
+  useEffect(() => { api.get('/booking/mine').then(r => setMyBookings(r.data.bookings)).catch(() => {}); }, []);
 
   const active = list.filter(o => !['CLOSED','CANCELLED'].includes(o.status));
   const closed = list.filter(o => o.status === 'CLOSED').slice(0, 3);
@@ -46,6 +48,40 @@ export default function HomePage() {
               </div>
             </div>
           ))}
+        </div>
+      )}
+
+      {myBookings.length > 0 && (
+        <div style={{ marginBottom: 24 }}>
+          <div style={{ fontSize: 13, fontWeight: 700, color: 'var(--dust)', marginBottom: 10, textTransform: 'uppercase', letterSpacing: '.08em' }}>
+            📅 Мои записи
+          </div>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+            {myBookings.slice(0, 3).map(b => {
+              const statusLabel: Record<string, string> = {
+                PENDING: 'Ожидает подтверждения', CONFIRMED: 'Подтверждена',
+                COMPLETED: 'Завершена', CANCELLED: 'Отменена', NO_SHOW: 'Не явился',
+              };
+              const statusColor: Record<string, string> = {
+                PENDING: 'var(--gold)', CONFIRMED: 'var(--green)',
+                COMPLETED: 'var(--dust)', CANCELLED: 'var(--red)', NO_SHOW: 'var(--red)',
+              };
+              return (
+                <div key={b.id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+                  padding: '12px 16px', borderRadius: 10, border: '1px solid var(--wire)', background: 'var(--plate)' }}>
+                  <div>
+                    <div style={{ fontSize: 13.5, color: 'var(--chalk)', fontWeight: 600 }}>
+                      {new Date(b.scheduledAt).toLocaleString('ru', { day: '2-digit', month: 'long', hour: '2-digit', minute: '2-digit' })}
+                    </div>
+                    <div style={{ fontSize: 12, color: 'var(--dust)' }}>{b.vehicleMake ?? ''}</div>
+                  </div>
+                  <div style={{ fontSize: 12, fontWeight: 700, color: statusColor[b.status] ?? 'var(--dust)' }}>
+                    {statusLabel[b.status] ?? b.status}
+                  </div>
+                </div>
+              );
+            })}
+          </div>
         </div>
       )}
 

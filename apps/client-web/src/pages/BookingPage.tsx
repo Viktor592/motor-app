@@ -12,36 +12,52 @@ const SPECS = [
 ];
 
 const TIMES = ['09:00','10:00','11:00','12:00','13:00','14:00','15:00','16:00','17:00','18:00'];
-const BUSY   = ['10:00','13:00','16:00'];
 
 export default function BookingPage() {
   const navigate = useNavigate();
   const [spec,      setSpec]      = useState<SpecType | ''>('');
   const [dates,     setDates]     = useState<string[]>([]);
+  const [dateObjs,  setDateObjs]  = useState<Date[]>([]);
   const [selDate,   setSelDate]   = useState('');
   const [selTime,   setSelTime]   = useState('');
   const [brand,     setBrand]     = useState('');
   const [year,      setYear]      = useState('');
   const [mileage,   setMileage]   = useState('');
   const [complaint, setComplaint] = useState('');
-  const [clientName, setName]     = useState('');
-  const [phone,     setPhone]     = useState('');
+  const [clientName, setName]     = useState(localStorage.getItem('motor_user_name') ?? '');
+  const [phone,     setPhone]     = useState(localStorage.getItem('motor_user_phone') ?? '');
   const [loading,   setLoading]   = useState(false);
   const [done,      setDone]      = useState<string | null>(null);
   const [error,     setError]     = useState('');
+  const [busyTimes, setBusyTimes] = useState<string[]>([]);
 
   useEffect(() => {
     // Сгенерировать ближайшие 7 рабочих дней
     const days: string[] = [];
+    const dateList: Date[] = [];
     const d = new Date();
     while (days.length < 7) {
       d.setDate(d.getDate() + 1);
       if (d.getDay() !== 0) {
         days.push(d.toLocaleDateString('ru', { weekday: 'short', day: '2-digit', month: 'short' }));
+        dateList.push(new Date(d));
       }
     }
     setDates(days);
+    setDateObjs(dateList);
   }, []);
+
+  useEffect(() => {
+    if (!selDate || !spec) { setBusyTimes([]); return; }
+    setSelTime('');
+    const idx = dates.indexOf(selDate);
+    const d = dateObjs[idx];
+    if (!d) return;
+    const dateStr = d.toISOString().slice(0, 10);
+    api.get('/booking/slots', { params: { date: dateStr, serviceType: spec } })
+      .then(r => setBusyTimes(r.data.slots.filter((s: any) => !s.available).map((s: any) => s.time)))
+      .catch(() => setBusyTimes([]));
+  }, [selDate, spec]);
 
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -50,12 +66,25 @@ export default function BookingPage() {
     }
     setLoading(true); setError('');
     try {
-      // В реальном приложении — POST /booking + реальный slotId
-      await new Promise(r => setTimeout(r, 900));
-      const num = 'ЗН-' + new Date().getFullYear() + '-' + (Math.random()*9000+1000|0);
-      setDone(num);
-    } catch {
-      setError('Ошибка при записи. Попробуйте снова.');
+      // Собираем дату+время в ISO. selDate — короткая строка вида "пн, 21 июл",
+      // поэтому ищём соответствующую реальную дату из dateObjs.
+      const realDate = dateObjs[dates.indexOf(selDate)];
+      const [hh, mm] = selTime.split(':').map(Number);
+      const scheduledAt = new Date(realDate);
+      scheduledAt.setHours(hh, mm, 0, 0);
+
+      const { data } = await api.post('/booking/public', {
+        clientName,
+        clientPhone:  phone,
+        serviceType:  spec,
+        description:  complaint,
+        vehicleMake:  brand,
+        vehicleModel: year ? `${year} г.в.` : undefined,
+        scheduledAt:  scheduledAt.toISOString(),
+      });
+      setDone(data.bookingId.slice(0, 8).toUpperCase());
+    } catch (e: any) {
+      setError(e.response?.data?.error ?? 'Ошибка при записи. Попробуйте снова.');
     } finally { setLoading(false); }
   };
 
@@ -71,7 +100,7 @@ export default function BookingPage() {
           <div className={s.confRow}><span>Автомобиль</span><b>{brand}</b></div>
           <div className={s.confRow}><span>Клиент</span><b>{clientName}</b></div>
         </div>
-        <p className={s.confHint}>СМС с подтверждением отправлено. Агент «Снабженец» резервирует запчасти.</p>
+        <p className={s.confHint}>Мы свяжемся с вами для подтверждения записи.</p>
         <button className={s.confBtn} onClick={() => navigate('/')}>← На главную</button>
       </div>
     </div>
@@ -146,9 +175,9 @@ export default function BookingPage() {
             <div className={s.timeGrid}>
               {TIMES.map(t => (
                 <button type="button" key={t}
-                  className={`${s.timeBtn} ${BUSY.includes(t) ? s.timeBusy : ''} ${selTime === t ? s.timeSel : ''}`}
-                  onClick={() => !BUSY.includes(t) && setSelTime(t)}
-                  disabled={BUSY.includes(t)}
+                  className={`${s.timeBtn} ${busyTimes.includes(t) ? s.timeBusy : ''} ${selTime === t ? s.timeSel : ''}`}
+                  onClick={() => !busyTimes.includes(t) && setSelTime(t)}
+                  disabled={busyTimes.includes(t)}
                 >{t}</button>
               ))}
             </div>
