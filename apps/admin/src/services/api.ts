@@ -12,6 +12,11 @@ api.interceptors.request.use(cfg => {
   return cfg;
 });
 
+function decodeRole(token: string): string | null {
+  try { return JSON.parse(atob(token.split('.')[1])).role ?? null; }
+  catch { return null; }
+}
+
 let refreshing = false;
 let queue: Array<(t: string) => void> = [];
 
@@ -29,14 +34,20 @@ api.interceptors.response.use(
         const refresh = localStorage.getItem('motor_refresh');
         const { data } = await axios.post('/api/v1/auth/refresh', { refresh });
         localStorage.setItem('motor_access', data.access);
+        // Роль могла устареть в localStorage (например, из-за другой вкладки/сессии) -
+        // всегда синхронизируем её с тем, что реально лежит в свежем токене.
+        const freshRole = decodeRole(data.access);
+        if (freshRole) localStorage.setItem('motor_user_role', freshRole);
         api.defaults.headers.common.Authorization = `Bearer ${data.access}`;
         queue.forEach(cb => cb(data.access)); queue = [];
         return api(orig);
       } catch {
+        const wasRole = localStorage.getItem('motor_user_role');
         localStorage.clear();
-        window.location.href = '/login';
+        window.location.href = wasRole === 'SUPERADMIN' ? '/admin/login' : '/owner/login';
       } finally { refreshing = false; }
     }
     return Promise.reject(err);
   }
 );
+
