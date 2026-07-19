@@ -13,6 +13,15 @@ async function resolveStaffTenantId(req: any): Promise<string | null> {
   return tu?.tenantId ?? null;
 }
 
+// Для публичных запросов (без входа): если поддомен не резолвился (например, доступ
+// напрямую по IP:порту, без мульти-тенантного роутинга), но на платформе активен
+// только один автосервис — используем его. Так записи не "теряются в никуда".
+async function resolvePublicTenantId(req: any): Promise<string | null> {
+  if (req.tenantId) return req.tenantId;
+  const activeTenants = await prisma.tenant.findMany({ where: { status: 'ACTIVE' }, select: { id: true }, take: 2 });
+  return activeTenants.length === 1 ? activeTenants[0].id : null;
+}
+
 // GET /api/v1/booking/slots?date=2024-01-15&serviceType=MECHANIC
 bookingRouter.get('/slots', async (req, res, next) => {
   try {
@@ -24,9 +33,10 @@ bookingRouter.get('/slots', async (req, res, next) => {
     const dayStart = new Date(date + 'T00:00:00');
     const dayEnd   = new Date(date + 'T23:59:59');
 
+    const tenantId = await resolvePublicTenantId(req);
     const existing = await prisma.booking.findMany({
       where: {
-        tenantId:    req.tenantId ?? undefined,
+        tenantId:    tenantId ?? undefined,
         scheduledAt: { gte: dayStart, lte: dayEnd },
         status:      { notIn: ['CANCELLED'] },
         ...(serviceType ? { serviceType } : {}),
@@ -79,9 +89,10 @@ bookingRouter.post('/public', optionalAuth, async (req, res, next) => {
     const slotStart = new Date(data.scheduledAt);
     const slotEnd   = new Date(slotStart.getTime() + 60 * 60000);
 
+    const tenantId = await resolvePublicTenantId(req);
     const conflict = await prisma.booking.findFirst({
       where: {
-        tenantId:    req.tenantId ?? undefined,
+        tenantId:    tenantId ?? undefined,
         scheduledAt: { gte: slotStart, lt: slotEnd },
         status:      { notIn: ['CANCELLED'] },
         serviceType: data.serviceType,
@@ -91,7 +102,7 @@ bookingRouter.post('/public', optionalAuth, async (req, res, next) => {
 
     const booking = await prisma.booking.create({
       data: {
-        tenantId:     req.tenantId ?? null,
+        tenantId:     tenantId,
         clientName:   data.clientName,
         clientPhone:  data.clientPhone,
         userId:       req.user?.role === 'CLIENT' ? req.user.userId : null,
