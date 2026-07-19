@@ -1,17 +1,17 @@
 import { Outlet, NavLink } from 'react-router-dom';
 import { useEffect } from 'react';
-import { ClipboardList, BarChart3, User, LogOut } from 'lucide-react';
+import { ClipboardList, CalendarDays, BarChart3, User, LogOut } from 'lucide-react';
 import { connectSocket, disconnectSocket } from '../services/socket';
 import s from './AppLayout.module.css';
 
-const NAV = [
-  { to: '/',          icon: ClipboardList, label: 'Заказы'    },
-  { to: '/analytics', icon: BarChart3,     label: 'Аналитика' },
-  { to: '/profile',   icon: User,          label: 'Профиль'   },
-];
-
 export default function AppLayout() {
   const role = localStorage.getItem('motor_user_role');
+  const NAV = [
+    { to: '/',          icon: ClipboardList, label: 'Заказы'    },
+    ...(role === 'RECEPTIONIST' ? [{ to: '/bookings', icon: CalendarDays, label: 'Записи' }] : []),
+    { to: '/analytics', icon: BarChart3,     label: 'Аналитика' },
+    { to: '/profile',   icon: User,          label: 'Профиль'   },
+  ];
   useEffect(() => { connectSocket(); return disconnectSocket; }, []);
 
   return (

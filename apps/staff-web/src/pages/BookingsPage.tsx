@@ -68,12 +68,6 @@ export default function BookingsPage() {
           <h1 className={styles.title}>Онлайн-записи</h1>
           <p className={styles.sub}>Управление записями с сайта и приложения</p>
         </div>
-        <a
-          href="/booking-widget.html" target="_blank"
-          className={styles.widgetLink}
-        >
-          🔗 Виджет для сайта
-        </a>
       </div>
 
       {/* Фильтры */}

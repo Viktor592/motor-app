@@ -48,14 +48,14 @@ export default function AdminPage() {
         const [s, p] = await Promise.all([api.get('/admin/stats'), api.get('/admin/posts/load')]);
         setStats(s.data); setPosts(p.data);
       } else if (t === 'prices') {
-        const r = await api.get('/admin/price-rules');
+        const { data: r } = await api.get('/admin/price-rules');
         setRules(r.data);
         setEditPct(Object.fromEntries(r.data.map((x: PriceRule) => [x.category, x.markupPct])));
       } else if (t === 'users') {
-        const r = await api.get('/admin/users');
+        const { data: r } = await api.get('/admin/users');
         setUsers(r.data.users);
       } else if (t === 'posts') {
-        const r = await api.get('/admin/posts/load');
+        const { data: r } = await api.get('/admin/posts/load');
         setPosts(r.data);
       }
     } catch {}
@@ -73,7 +73,7 @@ export default function AdminPage() {
 
   const toggleUser = async (id: string) => {
     try {
-      const r = await api.patch(`/admin/users/${id}/toggle`);
+      const { data: r } = await api.patch(`/admin/users/${id}/toggle`);
       setUsers(prev => prev.map(u => u.id === id ? { ...u, isActive: r.data.isActive } : u));
     } catch {}
   };

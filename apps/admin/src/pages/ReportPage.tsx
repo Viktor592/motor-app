@@ -71,14 +71,14 @@ export default function ReportPage() {
   const [loading, setLoading] = useState(false);
 
   const loadKpi = useCallback(async () => {
-    const data = await api.get('/analytics/kpi');
+    const { data } = await api.get('/analytics/kpi');
     setKpi(data);
   }, []);
 
   const loadReport = useCallback(async () => {
     setLoading(true);
     try {
-      const data = await api.get(`/analytics/report?period=${period}`);
+      const { data } = await api.get(`/analytics/report?period=${period}`);
       setReport(data);
     } finally { setLoading(false); }
   }, [period]);

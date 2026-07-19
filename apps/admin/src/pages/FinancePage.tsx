@@ -56,7 +56,7 @@ export default function FinancePage() {
   const loadCurrentShift = useCallback(async () => {
     setLoadingShift(true);
     try {
-      const data = await api.get('/finance/shifts/current');
+      const { data } = await api.get('/finance/shifts/current');
       setCurrentShift(data);
     } finally { setLoadingShift(false); }
   }, []);
@@ -105,7 +105,7 @@ export default function FinancePage() {
   const [shiftsPage, setShiftsPage]   = useState(1);
 
   const loadShifts = useCallback(async () => {
-    const data = await api.get(`/finance/shifts?page=${shiftsPage}&limit=20`);
+    const { data } = await api.get(`/finance/shifts?page=${shiftsPage}&limit=20`);
     setShifts(data.shifts);
     setShiftsTotal(data.total);
   }, [shiftsPage]);
@@ -117,7 +117,7 @@ export default function FinancePage() {
   const [pnlPeriod, setPnlPeriod] = useState('month');
 
   const loadPnl = useCallback(async () => {
-    const data = await api.get(`/finance/pnl?period=${pnlPeriod}`);
+    const { data } = await api.get(`/finance/pnl?period=${pnlPeriod}`);
     setPnl(data);
   }, [pnlPeriod]);
 
@@ -128,7 +128,7 @@ export default function FinancePage() {
   const [editBudget, setEditBudget] = useState<Record<string, string>>({});
 
   const loadBudgets = async () => {
-    const data = await api.get('/finance/budget');
+    const { data } = await api.get('/finance/budget');
     setBudgets(data);
     const map: Record<string, string> = {};
     data.forEach((b: Budget) => { map[b.category] = String(b.monthlyAmount); });

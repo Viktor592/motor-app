@@ -59,7 +59,7 @@ export default function EdoPage() {
   const runTaxAnalysis = async () => {
     setTaxLoading(true);
     try {
-      const data = await api.post('/edo/tax/analyze', {
+      const { data } = await api.post('/edo/tax/analyze', {
         revenue:       parseFloat(taxForm.revenue) || 0,
         expenses:      parseFloat(taxForm.expenses) || 0,
         employees:     parseInt(taxForm.employees) || 0,
@@ -79,7 +79,7 @@ export default function EdoPage() {
   const loadDocs = useCallback(async () => {
     setDocsLoading(true);
     try {
-      const data = await api.get('/edo/documents?limit=30');
+      const { data } = await api.get('/edo/documents?limit=30');
       setDocs(data.docs); setDocsTotal(data.total);
     } finally { setDocsLoading(false); }
   }, []);
@@ -94,7 +94,7 @@ export default function EdoPage() {
   const loadKudir = async () => {
     setKudirLoading(true);
     try {
-      const data = await api.get(`/edo/kudir?year=${kudirYear}`);
+      const { data } = await api.get(`/edo/kudir?year=${kudirYear}`);
       setKudirData(data);
     } finally { setKudirLoading(false); }
   };
@@ -106,7 +106,7 @@ export default function EdoPage() {
   const [taxSystem, setTaxSystem] = useState('');
 
   const loadDeadlines = async () => {
-    const data = await api.get('/edo/deadlines');
+    const { data } = await api.get('/edo/deadlines');
     setDeadlines(data.deadlines); setTaxSystem(data.taxSystem);
   };
   useEffect(() => { if (tab === 'deadlines') loadDeadlines(); }, [tab]);
@@ -116,7 +116,7 @@ export default function EdoPage() {
   const [settingsSaving, setSettingsSaving] = useState(false);
 
   const loadSettings = async () => {
-    const data = await api.get('/edo/settings'); setSettings(data);
+    const { data } = await api.get('/edo/settings'); setSettings(data);
   };
   const saveSettings = async () => {
     setSettingsSaving(true);

@@ -50,7 +50,7 @@ export default function ProfilePage() {
         mileage: vForm.mileage ? parseInt(vForm.mileage) : undefined,
         plateNum: vForm.plateNum || undefined,
       });
-      const r = await api.get('/auth/me');
+      const { data: r } = await api.get('/auth/me');
       setVehicles(r.data.vehicles ?? []);
       setVForm({ brand: '', model: '', year: '', mileage: '', plateNum: '' });
       setShowForm(false);

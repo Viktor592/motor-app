@@ -1,6 +1,7 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import AppLayout            from './layouts/AppLayout';
 import ExecOrdersPage       from './pages/ExecOrdersPage';
+import BookingsPage         from './pages/BookingsPage';
 import MasterAnalyticsPage  from './pages/MasterAnalyticsPage';
 import ProfilePage          from './pages/ProfilePage';
 import OrderDetailPage      from './pages/OrderDetailPage';
@@ -27,6 +28,7 @@ export default function App() {
               <Route element={<AppLayout />}>
                 <Route path="/"                       element={<ExecOrdersPage />} />
                 <Route path="/orders"                 element={<ExecOrdersPage />} />
+                <Route path="/bookings"               element={<BookingsPage />} />
                 <Route path="/orders/:id"             element={<OrderDetailPage />} />
                 <Route path="/orders/:id/diagnostics" element={<DiagnosticsPage />} />
                 <Route path="/analytics"              element={<MasterAnalyticsPage />} />

@@ -51,7 +51,7 @@ export default function WarehousePage() {
     try {
       const params = new URLSearchParams({ page: String(stockPage), limit: '30' });
       if (stockQ) params.set('q', stockQ);
-      const data = await api.get(`/warehouse/stock?${params}`);
+      const { data } = await api.get(`/warehouse/stock?${params}`);
       setStock(data.parts);
       setStockTotal(data.total);
     } finally { setLoadingStock(false); }
@@ -65,12 +65,12 @@ export default function WarehousePage() {
   const [autoOrderSupplier, setAutoOrderSupplier] = useState('');
 
   const loadLowStock = useCallback(async () => {
-    const data = await api.get('/warehouse/low-stock?threshold=3');
+    const { data } = await api.get('/warehouse/low-stock?threshold=3');
     setLowStock(data);
   }, []);
 
   const loadSuppliers = useCallback(async () => {
-    const data = await api.get('/warehouse/suppliers');
+    const { data } = await api.get('/warehouse/suppliers');
     setSuppliers(data);
   }, []);
 
@@ -92,7 +92,7 @@ export default function WarehousePage() {
   const [expandedOrder, setExpandedOrder] = useState<string | null>(null);
 
   const loadOrders = async () => {
-    const data = await api.get('/warehouse/supplier-orders');
+    const { data } = await api.get('/warehouse/supplier-orders');
     setOrders(data);
   };
 

@@ -35,7 +35,7 @@ export default function PlansPage() {
   const upgrade = async (planId: string) => {
     setUpgrading(planId);
     try {
-      const data = await api.post('/saas/billing/upgrade', { plan: planId });
+      const { data } = await api.post('/saas/billing/upgrade', { plan: planId });
       if (data.confirmUrl) window.location.href = data.confirmUrl;
     } catch (e: any) {
       alert('Ошибка: ' + e.message);

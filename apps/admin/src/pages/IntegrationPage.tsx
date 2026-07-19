@@ -62,13 +62,13 @@ export default function IntegrationPage() {
   const loadSettings = async () => {
     setLoading(true);
     try {
-      const data = await api.get('/integration/settings');
+      const { data } = await api.get('/integration/settings');
       setSettings(data);
     } finally { setLoading(false); }
   };
 
   const loadLogs = async () => {
-    const data = await api.get('/integration/logs?limit=30');
+    const { data } = await api.get('/integration/logs?limit=30');
     setLogs(data.logs);
     setLogsTotal(data.total);
   };
@@ -86,7 +86,7 @@ export default function IntegrationPage() {
     setTesting(true);
     setTestResult(null);
     try {
-      const data = await api.post('/integration/test', {});
+      const { data } = await api.post('/integration/test', {});
       setTestResult({ ok: data.ok, msg: data.ok ? 'Соединение успешно' : 'Соединение не установлено' });
     } catch (e: any) {
       setTestResult({ ok: false, msg: e.message ?? 'Ошибка соединения' });
@@ -96,7 +96,7 @@ export default function IntegrationPage() {
   const syncBulk = async () => {
     setSyncing(true);
     try {
-      const data = await api.post('/integration/sync/bulk', {});
+      const { data } = await api.post('/integration/sync/bulk', {});
       alert(`✅ Синхронизировано: ${data.synced} заказов. Ошибок: ${data.errors}`);
       loadLogs();
     } catch (e: any) {
@@ -106,7 +106,7 @@ export default function IntegrationPage() {
 
   const syncPriceList = async () => {
     try {
-      const data = await api.get('/integration/price-list');
+      const { data } = await api.get('/integration/price-list');
       alert(`✅ Обновлено ${data.updated} позиций прайс-листа`);
     } catch (e: any) {
       alert(`❌ ${e.message}`);
