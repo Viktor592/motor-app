@@ -51,7 +51,7 @@ export default function ProfilePage() {
         plateNum: vForm.plateNum || undefined,
       });
       const { data: r } = await api.get('/auth/me');
-      setVehicles(r.data.vehicles ?? []);
+      setVehicles(r.vehicles ?? []);
       setVForm({ brand: '', model: '', year: '', mileage: '', plateNum: '' });
       setShowForm(false);
     } catch {}

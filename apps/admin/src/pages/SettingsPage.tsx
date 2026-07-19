@@ -86,7 +86,7 @@ export default function SettingsPage() {
     setAddingPost(true);
     try {
       const { data: r } = await api.post('/settings/posts', newPost);
-      setPosts(p => [...p, r.data]);
+      setPosts(p => [...p, r]);
       setNewPost({ name: '', type: 'MECHANIC' });
     } catch {}
     finally { setAddingPost(false); }

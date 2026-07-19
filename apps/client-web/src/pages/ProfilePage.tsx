@@ -53,7 +53,7 @@ export default function ProfilePage() {
         vin:      vForm.vin ? vForm.vin.toUpperCase() : undefined,
       });
       const { data: r } = await api.get('/auth/me');
-      setVehicles(r.data.vehicles ?? []);
+      setVehicles(r.vehicles ?? []);
       setVForm({ brand: '', model: '', year: '', mileage: '', plateNum: '', vin: '' });
       setShowForm(false);
     } catch (e: any) {
