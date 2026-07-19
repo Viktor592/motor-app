@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
-import { getTheme, setTheme } from '../services/theme';
-import { getLocale, setLocale } from '../services/i18n';
+import { useTheme } from '../services/theme';
+import { useLocale } from '../services/i18n';
 import { api } from '../services/api';
 import s from './SettingsPage.module.css';
 
@@ -323,6 +323,8 @@ export default function SettingsPage() {
             </div>
           )}
 
+          {/* ── Экспорт ── */}
+          {tab === 'export' && (
             <div className={s.section}>
               <h2 className={s.sectionTitle}>Экспорт данных</h2>
               <div className={s.exportGrid}>
@@ -353,6 +355,7 @@ export default function SettingsPage() {
                 </div>
               </div>
             </div>
+          )}
         </div>
       </div>
     </div>
