@@ -7,7 +7,7 @@ import s from './ProfilePage.module.css';
 
 interface Vehicle {
   id: string; brand: string; model: string;
-  year: number; mileage?: number; plateNum?: string;
+  year: number; mileage?: number; plateNum?: string; vin?: string;
 }
 
 const ROLE_LABEL: Record<string, string> = {
@@ -23,7 +23,8 @@ export default function ProfilePage() {
   const [savingName, setSaving]    = useState(false);
   const [showForm,   setShowForm]  = useState(false);
   const [addingV,    setAddingV]   = useState(false);
-  const [vForm, setVForm] = useState({ brand: '', model: '', year: '', mileage: '', plateNum: '' });
+  const [vError,     setVError]    = useState('');
+  const [vForm, setVForm] = useState({ brand: '', model: '', year: '', mileage: '', plateNum: '', vin: '' });
 
   useEffect(() => {
     api.get('/auth/me').then(r => setVehicles(r.data.vehicles ?? []));
@@ -34,7 +35,7 @@ export default function ProfilePage() {
     setSaving(true);
     try {
       await api.patch('/auth/name', { name: editName.trim() });
-      localStorage.setItem('user_name', editName.trim());
+      localStorage.setItem('motor_user_name', editName.trim());
     } catch {}
     finally { setSaving(false); }
   };
@@ -42,19 +43,22 @@ export default function ProfilePage() {
   const addVehicle = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!vForm.brand || !vForm.model || !vForm.year) return;
-    setAddingV(true);
+    setAddingV(true); setVError('');
     try {
       await api.post('/users/vehicles', {
         brand: vForm.brand, model: vForm.model,
         year:    parseInt(vForm.year),
         mileage: vForm.mileage ? parseInt(vForm.mileage) : undefined,
         plateNum: vForm.plateNum || undefined,
+        vin:      vForm.vin ? vForm.vin.toUpperCase() : undefined,
       });
       const { data: r } = await api.get('/auth/me');
       setVehicles(r.data.vehicles ?? []);
-      setVForm({ brand: '', model: '', year: '', mileage: '', plateNum: '' });
+      setVForm({ brand: '', model: '', year: '', mileage: '', plateNum: '', vin: '' });
       setShowForm(false);
-    } catch {}
+    } catch (e: any) {
+      setVError(e.response?.data?.error ?? 'Не удалось сохранить. Проверьте данные.');
+    }
     finally { setAddingV(false); }
   };
 
@@ -111,6 +115,7 @@ export default function ProfilePage() {
           {/* Форма добавления */}
           {showForm && (
             <form className={s.vForm} onSubmit={addVehicle}>
+              {vError && <div style={{ color: '#e5484d', fontSize: 13, marginBottom: 8 }}>⚠️ {vError}</div>}
               <div className={s.vFormGrid}>
                 {([
                   { key: 'brand',    label: 'МАРКА',   ph: 'Toyota',    type: 'text'   },
@@ -118,6 +123,7 @@ export default function ProfilePage() {
                   { key: 'year',     label: 'ГОД',     ph: '2021',      type: 'number' },
                   { key: 'mileage',  label: 'ПРОБЕГ',  ph: '50000',     type: 'number' },
                   { key: 'plateNum', label: 'ГОЗНАК',  ph: 'А123ВС799', type: 'text'   },
+                  { key: 'vin',      label: 'VIN',     ph: 'XW8ZZZ61ZFG123456', type: 'text' },
                 ] as const).map(f => (
                   <div key={f.key} className={s.vField}>
                     <label className={s.vLabel}>{f.label}</label>
@@ -125,6 +131,7 @@ export default function ProfilePage() {
                       className={s.input}
                       type={f.type}
                       placeholder={f.ph}
+                      maxLength={f.key === 'vin' ? 17 : undefined}
                       value={(vForm as any)[f.key]}
                       onChange={e => setVForm(p => ({ ...p, [f.key]: e.target.value }))}
                     />
@@ -154,6 +161,7 @@ export default function ProfilePage() {
                     {v.mileage && <span>{v.mileage.toLocaleString('ru')} км</span>}
                     {v.plateNum && <span>{v.plateNum}</span>}
                   </div>
+                  {v.vin && <div style={{ fontSize: 11, color: 'var(--dust)', marginTop: 4, fontFamily: 'monospace' }}>VIN: {v.vin}</div>}
                 </div>
                 <button className={s.delBtn} onClick={() => deleteVehicle(v.id)}>✕</button>
               </div>

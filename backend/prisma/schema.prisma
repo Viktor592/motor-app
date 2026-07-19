@@ -64,7 +64,8 @@ model Vehicle {
   model     String
   year      Int
   mileage   Int?
-  vinHash   String?   // VIN зашифрован
+  vin       String?   // VIN-код
+  vinHash   String?   // (устарело, не используется)
   plateNum  String?
   createdAt DateTime @default(now())
 
@@ -490,6 +491,8 @@ enum BookingStatus {
 
 model Booking {
   id               String        @id @default(uuid())
+  tenantId         String?
+  tenant           Tenant?       @relation(fields: [tenantId], references: [id])
   clientName       String
   clientPhone      String
   userId           String?       // Если клиент зарегистрирован
@@ -509,6 +512,7 @@ model Booking {
 
   @@index([scheduledAt])
   @@index([status])
+  @@index([tenantId])
   @@index([clientPhone])
   @@map("bookings")
 }
@@ -674,6 +678,7 @@ model Tenant {
   users        TenantUser[]
   subscription Subscription?
   promotions   Promotion[]
+  bookings     Booking[]
 
   @@index([slug])
   @@index([status])

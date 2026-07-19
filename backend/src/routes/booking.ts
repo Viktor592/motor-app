@@ -7,6 +7,12 @@ import { sendPushToUser } from '../services/notifications';
 
 export const bookingRouter = Router();
 
+async function resolveStaffTenantId(req: any): Promise<string | null> {
+  if (req.tenantId) return req.tenantId;
+  const tu = await prisma.tenantUser.findFirst({ where: { userId: req.user!.userId } });
+  return tu?.tenantId ?? null;
+}
+
 // GET /api/v1/booking/slots?date=2024-01-15&serviceType=MECHANIC
 bookingRouter.get('/slots', async (req, res, next) => {
   try {
@@ -20,6 +26,7 @@ bookingRouter.get('/slots', async (req, res, next) => {
 
     const existing = await prisma.booking.findMany({
       where: {
+        tenantId:    req.tenantId ?? undefined,
         scheduledAt: { gte: dayStart, lte: dayEnd },
         status:      { notIn: ['CANCELLED'] },
         ...(serviceType ? { serviceType } : {}),
@@ -74,6 +81,7 @@ bookingRouter.post('/public', optionalAuth, async (req, res, next) => {
 
     const conflict = await prisma.booking.findFirst({
       where: {
+        tenantId:    req.tenantId ?? undefined,
         scheduledAt: { gte: slotStart, lt: slotEnd },
         status:      { notIn: ['CANCELLED'] },
         serviceType: data.serviceType,
@@ -83,6 +91,7 @@ bookingRouter.post('/public', optionalAuth, async (req, res, next) => {
 
     const booking = await prisma.booking.create({
       data: {
+        tenantId:     req.tenantId ?? null,
         clientName:   data.clientName,
         clientPhone:  data.clientPhone,
         userId:       req.user?.role === 'CLIENT' ? req.user.userId : null,
@@ -114,8 +123,10 @@ bookingRouter.post('/public', optionalAuth, async (req, res, next) => {
 // GET /api/v1/booking — список записей
 bookingRouter.get('/', authenticate, authorize('ADMIN', 'RECEPTIONIST'), async (req, res, next) => {
   try {
+    const tenantId = await resolveStaffTenantId(req);
     const { date, status, page = '1', limit = '30' } = req.query as Record<string, string>;
     const where: any = {};
+    if (tenantId) where.tenantId = tenantId;
     if (status) where.status = status;
     if (date) {
       const d = new Date(date);
@@ -141,6 +152,13 @@ bookingRouter.patch('/:id/status', authenticate, authorize('ADMIN', 'RECEPTIONIS
       masterId: z.string().uuid().optional(),
     }).parse(req.body);
 
+    const tenantId = await resolveStaffTenantId(req);
+    const existing = await prisma.booking.findUnique({ where: { id: req.params.id } });
+    if (!existing) throw new AppError(404, 'Запись не найдена');
+    if (tenantId && existing.tenantId && existing.tenantId !== tenantId) {
+      throw new AppError(403, 'Эта запись принадлежит другому автосервису');
+    }
+
     const booking = await prisma.booking.update({
       where: { id: req.params.id },
       data:  { status, ...(masterId ? { masterId } : {}) },
@@ -158,8 +176,12 @@ bookingRouter.patch('/:id/status', authenticate, authorize('ADMIN', 'RECEPTIONIS
 // POST /api/v1/booking/:id/convert — конвертировать запись в заказ
 bookingRouter.post('/:id/convert', authenticate, authorize('ADMIN', 'RECEPTIONIST'), async (req, res, next) => {
   try {
+    const tenantId = await resolveStaffTenantId(req);
     const booking = await prisma.booking.findUnique({ where: { id: req.params.id } });
     if (!booking) throw new AppError(404, 'Запись не найдена');
+    if (tenantId && booking.tenantId && booking.tenantId !== tenantId) {
+      throw new AppError(403, 'Эта запись принадлежит другому автосервису');
+    }
 
     let client = await prisma.user.findFirst({ where: { phone: booking.clientPhone } });
     if (!client) {

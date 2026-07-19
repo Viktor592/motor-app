@@ -31,7 +31,6 @@ export default function BookingsPage() {
   const [status, setStatus]       = useState('');
   const [page, setPage]           = useState(1);
   const [loading, setLoading]     = useState(false);
-  const [converting, setConverting] = useState<string | null>(null);
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -47,26 +46,12 @@ export default function BookingsPage() {
 
   useEffect(() => { load(); }, [load]);
 
-  const updateStatus = async (id: string, newStatus: string) => {
-    await api.patch(`/booking/${id}/status`, { status: newStatus });
-    load();
-  };
-
-  const convertToOrder = async (id: string) => {
-    setConverting(id);
-    try {
-      const { data } = await api.post(`/booking/${id}/convert`, {});
-      alert(`✅ Заказ #${data.orderNumber} создан!`);
-      load();
-    } finally { setConverting(null); }
-  };
-
   return (
     <div className={styles.page}>
       <div className={styles.header}>
         <div>
           <h1 className={styles.title}>Онлайн-записи</h1>
-          <p className={styles.sub}>Управление записями с сайта и приложения</p>
+          <p className={styles.sub}>Просмотр записей с сайта и приложения. Подтверждение и обработку ведёт приёмщик.</p>
         </div>
         <a
           href="/booking-widget.html" target="_blank"
@@ -95,7 +80,7 @@ export default function BookingsPage() {
             <thead>
               <tr>
                 <th>Время</th><th>Клиент</th><th>Услуга</th>
-                <th>Автомобиль</th><th>Статус</th><th>Действия</th>
+                <th>Автомобиль</th><th>Статус</th>
               </tr>
             </thead>
             <tbody>
@@ -129,35 +114,10 @@ export default function BookingsPage() {
                     </span>
                     <div className={styles.source}>{b.source === 'WIDGET' ? '🌐 Сайт' : '📱 Приложение'}</div>
                   </td>
-                  <td>
-                    <div className={styles.actions}>
-                      {b.status === 'PENDING' && (
-                        <>
-                          <button className={styles.btnConfirm} onClick={() => updateStatus(b.id, 'CONFIRMED')}>✅ Подтвердить</button>
-                          <button className={styles.btnCancel}  onClick={() => updateStatus(b.id, 'CANCELLED')}>✕</button>
-                        </>
-                      )}
-                      {b.status === 'CONFIRMED' && !b.convertedOrderId && (
-                        <button
-                          className={styles.btnConvert}
-                          onClick={() => convertToOrder(b.id)}
-                          disabled={converting === b.id}
-                        >
-                          {converting === b.id ? '…' : '📋 В заказ'}
-                        </button>
-                      )}
-                      {b.status === 'CONFIRMED' && (
-                        <button className={styles.btnNoShow} onClick={() => updateStatus(b.id, 'NO_SHOW')}>Не явился</button>
-                      )}
-                      {b.convertedOrderId && (
-                        <span className={styles.orderLink}>Заказ создан ✅</span>
-                      )}
-                    </div>
-                  </td>
                 </tr>
               ))}
               {bookings.length === 0 && (
-                <tr><td colSpan={6} className={styles.empty}>Записей за выбранный день нет</td></tr>
+                <tr><td colSpan={5} className={styles.empty}>Записей за выбранный день нет</td></tr>
               )}
             </tbody>
           </table>

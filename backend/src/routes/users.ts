@@ -43,11 +43,33 @@ usersRouter.post('/vehicles', authenticate, async (req, res, next) => {
       brand: z.string().min(1), model: z.string().min(1),
       year: z.number().int().min(1990).max(2026),
       mileage: z.number().optional(), plateNum: z.string().optional(),
+      vin: z.string().regex(/^[A-HJ-NPR-Z0-9]{17}$/i, 'VIN должен содержать 17 символов (без I, O, Q)').optional().or(z.literal('')),
     }).parse(req.body);
     const vehicle = await prisma.vehicle.create({
-      data: { ...body, clientId: req.user!.userId },
+      data: { ...body, vin: body.vin || null, clientId: req.user!.userId },
     });
     res.status(201).json(vehicle);
+  } catch (e) { next(e); }
+});
+
+// PATCH /api/v1/users/vehicles/:id
+usersRouter.patch('/vehicles/:id', authenticate, async (req, res, next) => {
+  try {
+    const existing = await prisma.vehicle.findFirst({ where: { id: req.params.id, clientId: req.user!.userId } });
+    if (!existing) throw new AppError(404, 'Автомобиль не найден');
+
+    const body = z.object({
+      brand: z.string().min(1).optional(), model: z.string().min(1).optional(),
+      year: z.number().int().min(1990).max(2026).optional(),
+      mileage: z.number().optional(), plateNum: z.string().optional(),
+      vin: z.string().regex(/^[A-HJ-NPR-Z0-9]{17}$/i, 'VIN должен содержать 17 символов (без I, O, Q)').optional().or(z.literal('')),
+    }).parse(req.body);
+
+    const vehicle = await prisma.vehicle.update({
+      where: { id: req.params.id },
+      data:  { ...body, vin: body.vin === '' ? null : body.vin },
+    });
+    res.json(vehicle);
   } catch (e) { next(e); }
 });
 
