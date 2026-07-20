@@ -21,6 +21,7 @@ export default function BookingPage() {
   const [selDate,   setSelDate]   = useState('');
   const [selTime,   setSelTime]   = useState('');
   const [brand,     setBrand]     = useState('');
+  const [carModel,  setCarModel]  = useState('');
   const [year,      setYear]      = useState('');
   const [mileage,   setMileage]   = useState('');
   const [complaint, setComplaint] = useState('');
@@ -61,7 +62,7 @@ export default function BookingPage() {
 
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!spec || !selDate || !selTime || !brand || !complaint || !clientName || !phone) {
+    if (!spec || !selDate || !selTime || !brand || !carModel || !complaint || !clientName || !phone) {
       setError('Заполните все обязательные поля'); return;
     }
     setLoading(true); setError('');
@@ -79,7 +80,8 @@ export default function BookingPage() {
         serviceType:  spec,
         description:  complaint,
         vehicleMake:  brand,
-        vehicleModel: year ? `${year} г.в.` : undefined,
+        vehicleModel: carModel || undefined,
+        vehicleYear:  year ? parseInt(year) : undefined,
         scheduledAt:  scheduledAt.toISOString(),
       });
       setDone(data.bookingId.slice(0, 8).toUpperCase());
@@ -97,7 +99,7 @@ export default function BookingPage() {
         <div className={s.confDetail}>
           <div className={s.confRow}><span>Специалист</span><b>{SPECS.find(x=>x.type===spec)?.name}</b></div>
           <div className={s.confRow}><span>Дата и время</span><b>{selDate}, {selTime}</b></div>
-          <div className={s.confRow}><span>Автомобиль</span><b>{brand}</b></div>
+          <div className={s.confRow}><span>Автомобиль</span><b>{brand} {carModel}</b></div>
           <div className={s.confRow}><span>Клиент</span><b>{clientName}</b></div>
         </div>
         <p className={s.confHint}>Мы свяжемся с вами для подтверждения записи.</p>
@@ -138,8 +140,12 @@ export default function BookingPage() {
           {/* Авто */}
           <div className={s.block}>
             <div className={s.blockTitle}><span className={s.req}>*</span> Автомобиль</div>
-            <input className={s.input} placeholder="Toyota Camry 2021" value={brand}
-              onChange={e => setBrand(e.target.value)} />
+            <div className={s.row2}>
+              <input className={s.input} placeholder="Марка (Toyota)" value={brand}
+                onChange={e => setBrand(e.target.value)} />
+              <input className={s.input} placeholder="Модель (Camry)" value={carModel}
+                onChange={e => setCarModel(e.target.value)} />
+            </div>
             <div className={s.row2}>
               <input className={s.input} type="number" placeholder="Год" value={year}
                 onChange={e => setYear(e.target.value)} min={1990} max={2026} />

@@ -500,6 +500,7 @@ model Booking {
   description      String?
   vehicleMake      String?
   vehicleModel     String?
+  vehicleYear      Int?
   vehiclePlate     String?
   scheduledAt      DateTime
   durationMin      Int           @default(60)

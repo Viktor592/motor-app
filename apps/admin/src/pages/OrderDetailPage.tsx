@@ -1,17 +1,28 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import { fetchOrder } from '../slices/ordersSlice';
 import { AppDispatch, RootState } from '../store';
 import { StatusBadge } from '../components/StatusBadge';
+import { api } from '../services/api';
 import s from './OrderDetailPage.module.css';
 
 export default function OrderDetailPage() {
   const { id }    = useParams<{ id: string }>();
   const dispatch  = useDispatch<AppDispatch>();
   const { current } = useSelector((st: RootState) => st.orders);
+  const [masters, setMasters]   = useState<any[]>([]);
+  const [assigning, setAssigning] = useState(false);
 
   useEffect(() => { if (id) dispatch(fetchOrder(id)); }, [id]);
+  useEffect(() => { api.get('/admin/users', { params: { role: 'MASTER' } }).then(r => setMasters(r.data.users)).catch(() => {}); }, []);
+
+  const assign = async (staffId: string) => {
+    if (!id) return;
+    setAssigning(true);
+    try { await api.patch(`/orders/${id}/assign`, { staffId: staffId || null }); dispatch(fetchOrder(id)); }
+    finally { setAssigning(false); }
+  };
 
   if (!current) return <div className={s.loading}>Загрузка…</div>;
   const o = current as any;
@@ -30,6 +41,31 @@ export default function OrderDetailPage() {
       </div>
 
       <div className={s.grid}>
+        {/* Клиент */}
+        {o.client && (
+          <div className={s.card}>
+            <div className={s.cardTitle}>👤 Клиент</div>
+            <div className={s.cardRow}><span>Имя</span><b>{o.client.name}</b></div>
+            <div className={s.cardRow}><span>Телефон</span><b>{o.client.phoneMasked}</b></div>
+          </div>
+        )}
+
+        {/* Мастер */}
+        <div className={s.card}>
+          <div className={s.cardTitle}>🧑‍🔧 Мастер</div>
+          <select
+            value={o.staffId ?? ''}
+            disabled={assigning}
+            onChange={e => assign(e.target.value)}
+            style={{ width: '100%', padding: 8, borderRadius: 6, border: '1px solid var(--wire)', background: 'var(--cage)', color: 'var(--chalk)' }}
+          >
+            <option value="">— Не назначен —</option>
+            {masters.map((m: any) => (
+              <option key={m.id} value={m.id}>{m.name} ({m.phoneMasked})</option>
+            ))}
+          </select>
+        </div>
+
         {/* Авто */}
         <div className={s.card}>
           <div className={s.cardTitle}>🚗 Автомобиль</div>
@@ -95,7 +131,6 @@ export default function OrderDetailPage() {
       {/* Действия */}
       <div className={s.actions}>
         <Link to={`/orders/${o.id}/diagnostics`} className={s.actBtn}>🤖 AI-диагностика и смета</Link>
-        <Link to={`/chat/${o.id}`} className={s.actBtn}>💬 AI-чат по заказу</Link>
         <a href={`/api/v1/export/orders/${o.id}/pdf`} target='_blank' rel='noreferrer' className={s.actBtn}>📄 Скачать PDF</a>
       </div>
     </div>

@@ -201,14 +201,24 @@ bookingRouter.post('/:id/convert', authenticate, authorize('ADMIN', 'RECEPTIONIS
       });
     }
 
-    let vehicleId: string | undefined;
-    if (booking.vehiclePlate) {
-      const vehicle = await prisma.vehicle.upsert({
-        where:  { id: '_nonexistent_' }, // placeholder — логика ниже
-        update: {},
-        create: { clientId: client.id, brand: booking.vehicleMake ?? '', model: booking.vehicleModel ?? '', year: 0, plateNum: booking.vehiclePlate ?? null },
+    let vehicle = await prisma.vehicle.findFirst({
+      where: {
+        clientId: client.id,
+        ...(booking.vehiclePlate ? { plateNum: booking.vehiclePlate } : {
+          brand: booking.vehicleMake ?? '', model: booking.vehicleModel ?? '',
+        }),
+      },
+    });
+    if (!vehicle) {
+      vehicle = await prisma.vehicle.create({
+        data: {
+          clientId: client.id,
+          brand:    booking.vehicleMake  ?? 'Не указано',
+          model:    booking.vehicleModel ?? '',
+          year:     booking.vehicleYear  ?? new Date().getFullYear(),
+          plateNum: booking.vehiclePlate ?? null,
+        },
       });
-      vehicleId = vehicle.id;
     }
 
     const lastOrder = await prisma.order.findFirst({ orderBy: { createdAt: 'desc' }, select: { orderNumber: true } });
@@ -217,7 +227,8 @@ bookingRouter.post('/:id/convert', authenticate, authorize('ADMIN', 'RECEPTIONIS
     const order = await prisma.order.create({
       data: {
         orderNumber: String(nextNum), clientId: client.id,
-        vehicleId: vehicleId ?? '', specialistType: booking.serviceType as any,
+        vehicleId: vehicle.id, specialistType: booking.serviceType as any,
+        staffId: booking.masterId ?? undefined,
         complaintRaw: booking.description ?? '', status: 'NEW',
       },
     });

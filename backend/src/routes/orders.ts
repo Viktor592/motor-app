@@ -155,3 +155,27 @@ ordersRouter.post('/:id/items', authenticate, authorize('MASTER', 'RECEPTIONIST'
     res.status(201).json({ item, totalRetail: updated.totalRetail });
   } catch (e) { next(e); }
 });
+
+// PATCH /api/v1/orders/:id/assign — назначить/переназначить мастера на заказ
+ordersRouter.patch('/:id/assign', authenticate, authorize('ADMIN', 'RECEPTIONIST'), async (req, res, next) => {
+  try {
+    const { staffId } = z.object({ staffId: z.string().uuid().nullable() }).parse(req.body);
+
+    if (staffId) {
+      const staff = await prisma.user.findUnique({ where: { id: staffId } });
+      if (!staff || staff.role !== 'MASTER') throw new AppError(400, 'Указанный пользователь не является мастером');
+    }
+
+    const order = await prisma.order.update({
+      where: { id: req.params.id },
+      data:  { staffId },
+      include: { client: { select: { name: true } } },
+    });
+
+    if (staffId) {
+      io.to(`user:${staffId}`).emit('order:assigned', { orderId: order.id, orderNumber: order.orderNumber });
+    }
+
+    res.json(order);
+  } catch (e) { next(e); }
+});
