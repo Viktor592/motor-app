@@ -1,6 +1,8 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useDispatch } from 'react-redux';
 import { api } from '../services/api';
+import { syncFromStorage } from '../slices/authSlice';
 import s from './Auth.module.css';
 
 const SAAS = import.meta.env.VITE_SAAS_URL ?? 'http://localhost:3000';
@@ -11,6 +13,7 @@ export default function LoginPage() {
   const [error, setError]       = useState('');
   const [loading, setLoading]   = useState(false);
   const navigate = useNavigate();
+  const dispatch = useDispatch();
 
   const fmtPhone = (v: string) => {
     const d = v.replace(/\D/g, '');
@@ -35,6 +38,7 @@ export default function LoginPage() {
       localStorage.setItem('motor_user_name',  data.user.name);
       localStorage.setItem('motor_user_role',  data.user.role);
       localStorage.setItem('motor_user_phone', data.user.phone ?? phone);
+      dispatch(syncFromStorage());
       navigate('/');
     } catch (e: any) {
       setError(e.response?.data?.error ?? 'Неверный телефон или пароль');
