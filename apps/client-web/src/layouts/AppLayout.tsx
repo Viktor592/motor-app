@@ -1,6 +1,6 @@
 import { Outlet, NavLink } from 'react-router-dom';
 import { useEffect } from 'react';
-import { Hexagon, CalendarPlus, ClipboardList, Bot, User, LogOut } from 'lucide-react';
+import { Hexagon, CalendarPlus, ClipboardList, PackageSearch, Bot, User, LogOut } from 'lucide-react';
 import { connectSocket, disconnectSocket } from '../services/socket';
 import s from './AppLayout.module.css';
 
@@ -8,6 +8,7 @@ const NAV = [
   { to: '/',        icon: Hexagon,      label: 'Главная' },
   { to: '/booking', icon: CalendarPlus, label: 'Запись'  },
   { to: '/orders',  icon: ClipboardList,label: 'Заказы'  },
+  { to: '/parts',   icon: PackageSearch,label: 'Запчасти'},
   { to: '/chat',    icon: Bot,          label: 'AI-чат'  },
   { to: '/profile', icon: User,         label: 'Профиль' },
 ];

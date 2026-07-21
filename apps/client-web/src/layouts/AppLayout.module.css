@@ -32,11 +32,11 @@
 }
 .navItem {
   display: flex; flex-direction: column; align-items: center; gap: 3px;
-  padding: 6px 10px; border-radius: 8px;
+  padding: 6px 4px; border-radius: 8px;
   text-decoration: none; color: var(--dust);
-  font-size: 10.5px; font-weight: 600;
+  font-size: 10px; font-weight: 600;
   transition: color .15s;
-  flex: 1; max-width: 84px;
+  flex: 1; max-width: 76px;
 }
 .navItem:hover { color: var(--ash); }
 .navActive { color: var(--ore); }

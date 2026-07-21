@@ -134,6 +134,7 @@ enum SpecialistTypeOrder {
   MECHANIC
   ELECTRICIAN
   DIAGNOSTICS
+  PARTS
 }
 
 model Order {

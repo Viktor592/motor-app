@@ -4,6 +4,7 @@ import HomePage        from './pages/HomePage';
 import BookingPage     from './pages/BookingPage';
 import OrdersPage      from './pages/OrdersPage';
 import OrderDetailPage from './pages/OrderDetailPage';
+import PartsPage       from './pages/PartsPage';
 import ChatPage        from './pages/ChatPage';
 import ProfilePage     from './pages/ProfilePage';
 import LoginPage       from './pages/LoginPage';
@@ -28,6 +29,7 @@ export default function App() {
                 <Route path="/booking"    element={<BookingPage />} />
                 <Route path="/orders"     element={<OrdersPage />} />
                 <Route path="/orders/:id" element={<OrderDetailPage />} />
+                <Route path="/parts"      element={<PartsPage />} />
                 <Route path="/chat"       element={<ChatPage />} />
                 <Route path="/chat/:orderId" element={<ChatPage />} />
                 <Route path="/profile"    element={<ProfilePage />} />
