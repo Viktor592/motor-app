@@ -222,7 +222,7 @@ authRouter.get('/me', authenticate, async (req, res, next) => {
 authRouter.patch('/avatar', authenticate, async (req, res, next) => {
   try {
     const { avatarUrl } = z.object({
-      avatarUrl: z.string().max(500_000).nullable(),
+      avatarUrl: z.string().max(600_000).nullable(),
     }).parse(req.body);
     const user = await prisma.user.update({
       where: { id: req.user!.userId },

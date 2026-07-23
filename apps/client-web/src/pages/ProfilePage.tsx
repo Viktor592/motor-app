@@ -40,6 +40,8 @@ export default function ProfilePage() {
       try {
         const { data } = await api.patch('/auth/avatar', { avatarUrl: reader.result as string });
         setAvatarUrl(data.avatarUrl);
+      } catch (err: any) {
+        alert(err.response?.data?.error ?? 'Не удалось сохранить фото. Попробуйте файл поменьше.');
       } finally { setAvatarBusy(false); }
     };
     reader.readAsDataURL(file);
