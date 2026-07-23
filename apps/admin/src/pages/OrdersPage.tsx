@@ -62,7 +62,7 @@ export default function OrdersPage() {
             <div className={s.rowNum}>{o.orderNumber}</div>
             <div className={s.rowCar}>{o.vehicle.brand} {o.vehicle.model} <span>{o.vehicle.year}</span></div>
             <div className={s.rowSpec}>{
-              { MECHANIC: '🔧 Слесарь', ELECTRICIAN: '⚡ Электрик', DIAGNOSTICS: '🔍 Диагност' }[o.specialistType] ?? o.specialistType
+              { MECHANIC: '🔧 Слесарь', ELECTRICIAN: '⚡ Электрик', DIAGNOSTICS: '🔍 Диагност', PARTS: '📦 Запчасти' }[o.specialistType] ?? o.specialistType
             }</div>
             {o.slot
               ? <div className={s.rowDate}>{new Date(o.slot.startAt).toLocaleDateString('ru',{day:'2-digit',month:'short'})}</div>

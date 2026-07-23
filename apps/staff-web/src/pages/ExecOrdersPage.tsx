@@ -14,7 +14,7 @@ const COLUMNS = [
 ];
 
 const SPEC_ICO: Record<string, string> = {
-  MECHANIC: '🔧', ELECTRICIAN: '⚡', DIAGNOSTICS: '🔍',
+  MECHANIC: '🔧', ELECTRICIAN: '⚡', DIAGNOSTICS: '🔍', PARTS: '📦',
 };
 
 export default function ExecOrdersPage() {

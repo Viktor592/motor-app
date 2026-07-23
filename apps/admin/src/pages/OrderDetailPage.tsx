@@ -88,7 +88,7 @@ export default function OrderDetailPage() {
         <div className={s.card}>
           <div className={s.cardTitle}>🔧 Специализация</div>
           <div className={s.specPill}>
-            {{ MECHANIC:'🔧 Автослесарь', ELECTRICIAN:'⚡ Автоэлектрик', DIAGNOSTICS:'🔍 Диагност' }[o.specialistType as string] ?? o.specialistType}
+            {{ MECHANIC:'🔧 Автослесарь', ELECTRICIAN:'⚡ Автоэлектрик', DIAGNOSTICS:'🔍 Диагност', PARTS:'📦 Запчасти' }[o.specialistType as string] ?? o.specialistType}
           </div>
         </div>
 
