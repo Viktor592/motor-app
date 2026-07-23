@@ -19,6 +19,8 @@ export default function ProfilePage() {
   const { name, role } = useSelector((st: RootState) => st.auth);
 
   const [vehicles,   setVehicles]  = useState<Vehicle[]>([]);
+  const [avatarUrl,  setAvatarUrl] = useState<string | null>(null);
+  const [avatarBusy, setAvatarBusy] = useState(false);
   const [editName,   setEditName]  = useState(name ?? '');
   const [savingName, setSaving]    = useState(false);
   const [showForm,   setShowForm]  = useState(false);
@@ -27,8 +29,27 @@ export default function ProfilePage() {
   const [vForm, setVForm] = useState({ brand: '', model: '', year: '', mileage: '', plateNum: '', vin: '' });
 
   useEffect(() => {
-    api.get('/auth/me').then(r => setVehicles(r.data.vehicles ?? []));
+    api.get('/auth/me').then(r => { setVehicles(r.data.vehicles ?? []); setAvatarUrl(r.data.avatarUrl ?? null); });
   }, []);
+
+  const onAvatarFile = async (file: File) => {
+    if (file.size > 400_000) { alert('Фото слишком большое — выберите файл до 400КБ'); return; }
+    const reader = new FileReader();
+    reader.onload = async () => {
+      setAvatarBusy(true);
+      try {
+        const { data } = await api.patch('/auth/avatar', { avatarUrl: reader.result as string });
+        setAvatarUrl(data.avatarUrl);
+      } finally { setAvatarBusy(false); }
+    };
+    reader.readAsDataURL(file);
+  };
+
+  const removeAvatar = async () => {
+    setAvatarBusy(true);
+    try { await api.patch('/auth/avatar', { avatarUrl: null }); setAvatarUrl(null); }
+    finally { setAvatarBusy(false); }
+  };
 
   const saveName = async () => {
     if (editName.trim().length < 2 || editName === name) return;
@@ -77,10 +98,17 @@ export default function ProfilePage() {
 
       {/* Hero */}
       <div className={s.hero}>
-        <div className={s.ava}>{name?.[0] ?? '?'}</div>
+        <label className={s.ava} style={{ backgroundImage: avatarUrl ? `url(${avatarUrl})` : undefined, cursor: 'pointer', position: 'relative' }}>
+          {!avatarUrl && (name?.[0] ?? '?')}
+          <input type="file" accept="image/*" style={{ display: 'none' }} disabled={avatarBusy}
+            onChange={e => e.target.files?.[0] && onAvatarFile(e.target.files[0])} />
+        </label>
         <div>
           <div className={s.heroName}>{name}</div>
           <div className={s.heroRole}>{ROLE_LABEL[role ?? ''] ?? role}</div>
+          {avatarUrl
+            ? <button onClick={removeAvatar} disabled={avatarBusy} style={{ background: 'none', border: 'none', color: 'var(--dust)', fontSize: 11.5, cursor: 'pointer', padding: 0, marginTop: 4 }}>Удалить фото</button>
+            : <div style={{ fontSize: 11.5, color: 'var(--dust)', marginTop: 4 }}>Нажмите на кружок, чтобы добавить фото</div>}
         </div>
       </div>
 

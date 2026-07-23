@@ -26,6 +26,7 @@ model User {
   id           String   @id @default(uuid())
   phone        String   @unique
   phoneMasked  String
+  avatarUrl    String?  @db.Text // base64 data URI
   name         String
   email        String?
   passwordHash String   @default("")

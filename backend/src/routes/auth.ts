@@ -213,8 +213,23 @@ authRouter.get('/me', authenticate, async (req, res, next) => {
       phone:    user.phoneMasked,
       email:    user.email,
       role:     user.role,
+      avatarUrl: user.avatarUrl,
       vehicles: user.vehicles,
     });
+  } catch (e) { next(e); }
+});
+
+// PATCH /api/v1/auth/avatar — загрузить/сменить аватар
+authRouter.patch('/avatar', authenticate, async (req, res, next) => {
+  try {
+    const { avatarUrl } = z.object({
+      avatarUrl: z.string().max(500_000).nullable(),
+    }).parse(req.body);
+    const user = await prisma.user.update({
+      where: { id: req.user!.userId },
+      data:  { avatarUrl },
+    });
+    res.json({ avatarUrl: user.avatarUrl });
   } catch (e) { next(e); }
 });
 
