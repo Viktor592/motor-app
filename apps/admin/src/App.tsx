@@ -41,6 +41,7 @@ function RoleRouter() {
           <Route path="/tenants/:id"   element={<SuperAdminTenantDetailPage />} />
           <Route path="/users"         element={<SuperAdminUsersPage />} />
           <Route path="/promotions"    element={<SuperAdminPromotionsPage />} />
+          <Route path="/profile"       element={<ProfilePage />} />
           <Route path="*"              element={<Navigate to="/" replace />} />
         </Route>
       </Routes>

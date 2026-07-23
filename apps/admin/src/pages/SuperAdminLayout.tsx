@@ -36,13 +36,13 @@ export default function SuperAdminLayout() {
           </nav>
         </div>
         <div className={s.sideBot}>
-          <div className={s.userRow}>
+          <NavLink to="/profile" className={s.userRow}>
             <span className={s.userAva}>{name.slice(0,1).toUpperCase() || 'S'}</span>
             <span>
               <div className={s.userName}>{name || 'Супер-админ'}</div>
               <div className={s.userRole}>Платформа</div>
             </span>
-          </div>
+          </NavLink>
           <button className={s.logoutBtn}
             onClick={() => { localStorage.clear(); window.location.replace('/admin/login'); }}>
             <LogOut size={13} /> Выйти

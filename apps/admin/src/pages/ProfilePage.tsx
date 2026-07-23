@@ -11,7 +11,7 @@ interface Vehicle {
 }
 
 const ROLE_LABEL: Record<string, string> = {
-  CLIENT: 'Клиент', MASTER: 'Мастер', RECEPTIONIST: 'Приёмщик', ADMIN: 'Администратор',
+  CLIENT: 'Клиент', MASTER: 'Мастер', RECEPTIONIST: 'Приёмщик', ADMIN: 'Администратор', SUPERADMIN: 'Супер-админ',
 };
 
 export default function ProfilePage() {
