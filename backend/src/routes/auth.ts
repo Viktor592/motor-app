@@ -232,20 +232,6 @@ authRouter.patch('/avatar', authenticate, async (req, res, next) => {
   } catch (e) { next(e); }
 });
 
-// PATCH /api/v1/auth/avatar — загрузить/сменить аватар
-authRouter.patch('/avatar', authenticate, async (req, res, next) => {
-  try {
-    const { avatarUrl } = z.object({
-      avatarUrl: z.string().max(500_000).nullable(),
-    }).parse(req.body);
-    const user = await prisma.user.update({
-      where: { id: req.user!.userId },
-      data:  { avatarUrl },
-    });
-    res.json({ avatarUrl: user.avatarUrl });
-  } catch (e) { next(e); }
-});
-
 // PATCH /api/v1/auth/name — обновить имя после OTP-регистрации
 authRouter.patch('/name', authenticate, async (req, res, next) => {
   try {
