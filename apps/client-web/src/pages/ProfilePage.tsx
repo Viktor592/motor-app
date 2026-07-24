@@ -27,6 +27,27 @@ export default function ProfilePage() {
   const [addingV,    setAddingV]   = useState(false);
   const [vError,     setVError]    = useState('');
   const [vForm, setVForm] = useState({ brand: '', model: '', year: '', mileage: '', plateNum: '', vin: '' });
+  const [vinLoading, setVinLoading] = useState(false);
+
+  useEffect(() => {
+    const vin = vForm.vin.trim().toUpperCase();
+    if (vin.length !== 17) return;
+    let cancelled = false;
+    setVinLoading(true);
+    api.get(`/users/vin/${vin}`)
+      .then(({ data }) => {
+        if (cancelled) return;
+        setVForm(p => ({
+          ...p,
+          brand: p.brand || data.brand || p.brand,
+          model: p.model || data.model || p.model,
+          year:  p.year  || (data.year ? String(data.year) : p.year),
+        }));
+      })
+      .catch(() => {})
+      .finally(() => !cancelled && setVinLoading(false));
+    return () => { cancelled = true; };
+  }, [vForm.vin]);
 
   useEffect(() => {
     api.get('/auth/me').then(r => { setVehicles(r.data.vehicles ?? []); setAvatarUrl(r.data.avatarUrl ?? null); });
@@ -156,7 +177,9 @@ export default function ProfilePage() {
                   { key: 'vin',      label: 'VIN',     ph: 'XW8ZZZ61ZFG123456', type: 'text' },
                 ] as const).map(f => (
                   <div key={f.key} className={s.vField}>
-                    <label className={s.vLabel}>{f.label}</label>
+                    <label className={s.vLabel}>
+                      {f.label}{f.key === 'vin' && vinLoading && <span style={{ color: 'var(--ore)', marginLeft: 6, textTransform: 'none' }}>распознаём…</span>}
+                    </label>
                     <input
                       className={s.input}
                       type={f.type}

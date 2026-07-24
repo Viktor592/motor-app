@@ -82,3 +82,21 @@ usersRouter.delete('/vehicles/:id', authenticate, async (req, res, next) => {
     res.json({ ok: true });
   } catch (e) { next(e); }
 });
+
+// GET /api/v1/users/vin/:vin — расшифровка VIN (марка/модель/год)
+usersRouter.get('/vin/:vin', authenticate, async (req, res, next) => {
+  try {
+    const vin = req.params.vin.toUpperCase();
+    if (!/^[A-HJ-NPR-Z0-9]{17}$/.test(vin)) throw new AppError(400, 'Неверный формат VIN');
+
+    const r = await fetch(`https://vpic.nhtsa.dot.gov/api/vehicles/decodevinvalues/${vin}?format=json`);
+    const data = await r.json();
+    const info = data.Results?.[0] ?? {};
+
+    res.json({
+      brand: info.Make || null,
+      model: info.Model || null,
+      year:  info.ModelYear ? parseInt(info.ModelYear) : null,
+    });
+  } catch (e) { next(e); }
+});
