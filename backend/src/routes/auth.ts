@@ -199,6 +199,60 @@ authRouter.post('/refresh', async (req, res, next) => {
   } catch (e) { next(e); }
 });
 
+// POST /api/v1/auth/password/forgot — отправить SMS-код для сброса пароля (любая роль)
+authRouter.post('/password/forgot', async (req, res, next) => {
+  try {
+    const { phone } = z.object({
+      phone: z.string().regex(/^\+7\d{10}$/, 'Формат: +79001234567'),
+    }).parse(req.body);
+
+    const user = await prisma.user.findUnique({ where: { phone } });
+    if (!user) throw new AppError(404, 'Пользователь с таким телефоном не найден');
+
+    if (user.otpExpiresAt && user.otpExpiresAt.getTime() - OTP_TTL_MS > Date.now() - 60_000) {
+      throw new AppError(429, 'Повторная отправка доступна через минуту');
+    }
+
+    const otp     = generateOtp();
+    const expires = new Date(Date.now() + OTP_TTL_MS);
+    await prisma.user.update({
+      where: { id: user.id },
+      data:  { otpCode: otp, otpExpiresAt: expires, otpAttempts: 0 },
+    });
+
+    await sendSms(phone, `Код для сброса пароля МОТОР: ${otp}. Действителен 5 минут.`);
+    res.json({ message: 'Код отправлен', phone: maskPhone(phone) });
+  } catch (e) { next(e); }
+});
+
+// POST /api/v1/auth/password/reset — подтвердить код и задать новый пароль
+authRouter.post('/password/reset', async (req, res, next) => {
+  try {
+    const { phone, code, newPassword } = z.object({
+      phone:       z.string().regex(/^\+7\d{10}$/),
+      code:        z.string().length(4),
+      newPassword: z.string().min(6, 'Пароль должен быть от 6 символов'),
+    }).parse(req.body);
+
+    const user = await prisma.user.findUnique({ where: { phone } });
+    if (!user || !user.otpCode || !user.otpExpiresAt) throw new AppError(400, 'Сначала запросите код');
+    if (user.otpAttempts >= OTP_MAX_ATTEMPTS) throw new AppError(429, 'Превышено число попыток. Запросите новый код.');
+    if (user.otpExpiresAt < new Date()) throw new AppError(400, 'Код истёк. Запросите новый.');
+    if (user.otpCode !== code) {
+      await prisma.user.update({ where: { id: user.id }, data: { otpAttempts: { increment: 1 } } });
+      throw new AppError(400, `Неверный код. Осталось попыток: ${OTP_MAX_ATTEMPTS - user.otpAttempts - 1}`);
+    }
+
+    const passwordHash = await bcrypt.hash(newPassword, 12);
+    await prisma.user.update({
+      where: { id: user.id },
+      data:  { passwordHash, otpCode: null, otpExpiresAt: null, otpAttempts: 0 },
+    });
+
+    res.json({ ok: true });
+  } catch (e) { next(e); }
+});
+
 authRouter.get('/me', authenticate, async (req, res, next) => {
   try {
     const user = await prisma.user.findUnique({
@@ -229,6 +283,28 @@ authRouter.patch('/avatar', authenticate, async (req, res, next) => {
       data:  { avatarUrl },
     });
     res.json({ avatarUrl: user.avatarUrl });
+  } catch (e) { next(e); }
+});
+
+// PATCH /api/v1/auth/password — сменить пароль из личного кабинета
+authRouter.patch('/password', authenticate, async (req, res, next) => {
+  try {
+    const { currentPassword, newPassword } = z.object({
+      currentPassword: z.string().optional(),
+      newPassword:     z.string().min(6, 'Пароль должен быть от 6 символов'),
+    }).parse(req.body);
+
+    const user = await prisma.user.findUnique({ where: { id: req.user!.userId } });
+    if (!user) throw new AppError(404, 'Пользователь не найден');
+
+    if (user.passwordHash) {
+      const ok = currentPassword ? await bcrypt.compare(currentPassword, user.passwordHash) : false;
+      if (!ok) throw new AppError(400, 'Текущий пароль указан неверно');
+    }
+
+    const passwordHash = await bcrypt.hash(newPassword, 12);
+    await prisma.user.update({ where: { id: user.id }, data: { passwordHash } });
+    res.json({ ok: true });
   } catch (e) { next(e); }
 });
 
