@@ -43,7 +43,7 @@ usersRouter.post('/vehicles', authenticate, async (req, res, next) => {
       brand: z.string().min(1), model: z.string().min(1),
       year: z.number().int().min(1990).max(2026),
       mileage: z.number().optional(), plateNum: z.string().optional(),
-      vin: z.string().regex(/^[A-HJ-NPR-Z0-9]{17}$/i, 'VIN должен содержать 17 символов (без I, O, Q)').optional().or(z.literal('')),
+      vin: z.string().regex(/^[A-HJ-NPR-Z0-9]{11,17}$/i, 'VIN должен содержать от 11 до 17 символов (без I, O, Q)').optional().or(z.literal('')),
     }).parse(req.body);
     const vehicle = await prisma.vehicle.create({
       data: { ...body, vin: body.vin || null, clientId: req.user!.userId },
@@ -62,7 +62,7 @@ usersRouter.patch('/vehicles/:id', authenticate, async (req, res, next) => {
       brand: z.string().min(1).optional(), model: z.string().min(1).optional(),
       year: z.number().int().min(1990).max(2026).optional(),
       mileage: z.number().optional(), plateNum: z.string().optional(),
-      vin: z.string().regex(/^[A-HJ-NPR-Z0-9]{17}$/i, 'VIN должен содержать 17 символов (без I, O, Q)').optional().or(z.literal('')),
+      vin: z.string().regex(/^[A-HJ-NPR-Z0-9]{11,17}$/i, 'VIN должен содержать от 11 до 17 символов (без I, O, Q)').optional().or(z.literal('')),
     }).parse(req.body);
 
     const vehicle = await prisma.vehicle.update({
@@ -87,7 +87,7 @@ usersRouter.delete('/vehicles/:id', authenticate, async (req, res, next) => {
 usersRouter.get('/vin/:vin', authenticate, async (req, res, next) => {
   try {
     const vin = req.params.vin.toUpperCase();
-    if (!/^[A-HJ-NPR-Z0-9]{17}$/.test(vin)) throw new AppError(400, 'Неверный формат VIN');
+    if (!/^[A-HJ-NPR-Z0-9]{11,17}$/.test(vin)) throw new AppError(400, 'Неверный формат VIN');
 
     const r = await fetch(`https://vpic.nhtsa.dot.gov/api/vehicles/decodevinvalues/${vin}?format=json`);
     const data = await r.json();

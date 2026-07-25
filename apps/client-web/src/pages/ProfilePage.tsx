@@ -31,22 +31,24 @@ export default function ProfilePage() {
 
   useEffect(() => {
     const vin = vForm.vin.trim().toUpperCase();
-    if (vin.length !== 17) return;
+    if (vin.length < 11 || vin.length > 17) return;
     let cancelled = false;
-    setVinLoading(true);
-    api.get(`/users/vin/${vin}`)
-      .then(({ data }) => {
-        if (cancelled) return;
-        setVForm(p => ({
-          ...p,
-          brand: p.brand || data.brand || p.brand,
-          model: p.model || data.model || p.model,
-          year:  p.year  || (data.year ? String(data.year) : p.year),
-        }));
-      })
-      .catch(() => {})
-      .finally(() => !cancelled && setVinLoading(false));
-    return () => { cancelled = true; };
+    const timer = setTimeout(() => {
+      setVinLoading(true);
+      api.get(`/users/vin/${vin}`)
+        .then(({ data }) => {
+          if (cancelled) return;
+          setVForm(p => ({
+            ...p,
+            brand: p.brand || data.brand || p.brand,
+            model: p.model || data.model || p.model,
+            year:  p.year  || (data.year ? String(data.year) : p.year),
+          }));
+        })
+        .catch(() => {})
+        .finally(() => !cancelled && setVinLoading(false));
+    }, 500);
+    return () => { cancelled = true; clearTimeout(timer); };
   }, [vForm.vin]);
 
   useEffect(() => {
