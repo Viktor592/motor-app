@@ -22,7 +22,7 @@ export function generateOtp(): string {
 }
 
 // ── Email через Gmail SMTP ────────────────────────────────────────────────────
-async function sendEmail(to: string, otp: string): Promise<void> {
+export async function sendEmail(to: string, otp: string): Promise<void> {
   let nodemailer: any;
   try { nodemailer = require('nodemailer'); }
   catch { throw new Error('nodemailer не установлен: npm install nodemailer'); }

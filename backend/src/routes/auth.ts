@@ -6,7 +6,7 @@ import { prisma } from '../utils/prisma';
 import { AppError } from '../middleware/errorHandler';
 import { authenticate } from '../middleware/auth';
 import { maskPhone } from '../utils/maskPhone';
-import { sendSms, generateOtp, OTP_TTL_MS, OTP_MAX_ATTEMPTS } from '../services/sms';
+import { sendSms, sendEmail, generateOtp, OTP_TTL_MS, OTP_MAX_ATTEMPTS } from '../services/sms';
 
 export const authRouter = Router();
 
@@ -220,8 +220,13 @@ authRouter.post('/password/forgot', async (req, res, next) => {
       data:  { otpCode: otp, otpExpiresAt: expires, otpAttempts: 0 },
     });
 
-    await sendSms(phone, `Код для сброса пароля МОТОР: ${otp}. Действителен 5 минут.`);
-    res.json({ message: 'Код отправлен', phone: maskPhone(phone) });
+    if (user.email) {
+      await sendEmail(user.email, otp);
+      res.json({ message: 'Код отправлен на email', channel: 'email', target: user.email.replace(/(?<=.{2}).(?=[^@]*@)/g, '*') });
+    } else {
+      await sendSms(phone, `Код для сброса пароля МОТОР: ${otp}. Действителен 5 минут.`);
+      res.json({ message: 'Код отправлен', phone: maskPhone(phone) });
+    }
   } catch (e) { next(e); }
 });
 
@@ -283,6 +288,20 @@ authRouter.patch('/avatar', authenticate, async (req, res, next) => {
       data:  { avatarUrl },
     });
     res.json({ avatarUrl: user.avatarUrl });
+  } catch (e) { next(e); }
+});
+
+// PATCH /api/v1/auth/email — задать email (для восстановления пароля)
+authRouter.patch('/email', authenticate, async (req, res, next) => {
+  try {
+    const { email } = z.object({
+      email: z.string().email('Некорректный email').nullable(),
+    }).parse(req.body);
+    const user = await prisma.user.update({
+      where: { id: req.user!.userId },
+      data:  { email },
+    });
+    res.json({ email: user.email });
   } catch (e) { next(e); }
 });
 

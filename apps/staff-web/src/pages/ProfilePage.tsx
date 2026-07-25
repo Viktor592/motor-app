@@ -28,7 +28,7 @@ export default function ProfilePage() {
   const [vForm, setVForm] = useState({ brand: '', model: '', year: '', mileage: '', plateNum: '' });
 
   useEffect(() => {
-    api.get('/auth/me').then(r => { setVehicles(r.data.vehicles ?? []); setAvatarUrl(r.data.avatarUrl ?? null); });
+    api.get('/auth/me').then(r => { setVehicles(r.data.vehicles ?? []); setAvatarUrl(r.data.avatarUrl ?? null); setEmail(r.data.email ?? ''); });
   }, []);
 
   const onAvatarFile = async (file: File) => {
@@ -56,6 +56,19 @@ export default function ProfilePage() {
   const [newPwd,  setNewPwd]  = useState('');
   const [pwdSaving, setPwdSaving] = useState(false);
   const [pwdMsg,    setPwdMsg]    = useState('');
+  const [email,      setEmail]      = useState('');
+  const [emailSaving, setEmailSaving] = useState(false);
+  const [emailMsg,    setEmailMsg]    = useState('');
+
+  const saveEmail = async () => {
+    setEmailSaving(true); setEmailMsg('');
+    try {
+      await api.patch('/auth/email', { email: email.trim() || null });
+      setEmailMsg('✓ Email сохранён');
+    } catch (e: any) {
+      setEmailMsg(e.response?.data?.error ?? 'Не удалось сохранить email');
+    } finally { setEmailSaving(false); }
+  };
 
   const changePassword = async () => {
     if (newPwd.length < 6) { setPwdMsg('Новый пароль должен быть от 6 символов'); return; }
@@ -211,6 +224,14 @@ export default function ProfilePage() {
       {/* Безопасность */}
       <div className={s.section}>
         <div className={s.sTitle}>БЕЗОПАСНОСТЬ</div>
+        <div className={s.nameRow} style={{ marginBottom: 10 }}>
+          <input className={s.input} type="email" placeholder="Email для восстановления пароля"
+            value={email} onChange={e => setEmail(e.target.value)} />
+          <button className={s.saveBtn} onClick={saveEmail} disabled={emailSaving}>
+            {emailSaving ? '…' : '✓ Сохранить email'}
+          </button>
+        </div>
+        {emailMsg && <p style={{ fontSize: 12.5, color: emailMsg.startsWith('✓') ? 'var(--green)' : 'var(--red)', marginBottom: 10 }}>{emailMsg}</p>}
         <div className={s.nameRow} style={{ flexWrap: 'wrap' }}>
           <input className={s.input} type="password" placeholder="Текущий пароль (если есть)"
             value={curPwd} onChange={e => setCurPwd(e.target.value)} style={{ minWidth: 160 }} />
