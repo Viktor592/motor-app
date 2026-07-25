@@ -76,6 +76,22 @@ export default function ProfilePage() {
     finally { setAvatarBusy(false); }
   };
 
+  const [curPwd,  setCurPwd]  = useState('');
+  const [newPwd,  setNewPwd]  = useState('');
+  const [pwdSaving, setPwdSaving] = useState(false);
+  const [pwdMsg,    setPwdMsg]    = useState('');
+
+  const changePassword = async () => {
+    if (newPwd.length < 6) { setPwdMsg('Новый пароль должен быть от 6 символов'); return; }
+    setPwdSaving(true); setPwdMsg('');
+    try {
+      await api.patch('/auth/password', { currentPassword: curPwd || undefined, newPassword: newPwd });
+      setPwdMsg('✓ Пароль изменён'); setCurPwd(''); setNewPwd('');
+    } catch (e: any) {
+      setPwdMsg(e.response?.data?.error ?? 'Не удалось сменить пароль');
+    } finally { setPwdSaving(false); }
+  };
+
   const saveName = async () => {
     if (editName.trim().length < 2 || editName === name) return;
     setSaving(true);
@@ -224,6 +240,21 @@ export default function ProfilePage() {
           </div>
         </div>
       )}
+
+      {/* Безопасность */}
+      <div className={s.section}>
+        <div className={s.sTitle}>БЕЗОПАСНОСТЬ</div>
+        <div className={s.nameRow} style={{ flexWrap: 'wrap' }}>
+          <input className={s.input} type="password" placeholder="Текущий пароль (если есть)"
+            value={curPwd} onChange={e => setCurPwd(e.target.value)} style={{ minWidth: 160 }} />
+          <input className={s.input} type="password" placeholder="Новый пароль"
+            value={newPwd} onChange={e => setNewPwd(e.target.value)} style={{ minWidth: 160 }} />
+          <button className={s.saveBtn} onClick={changePassword} disabled={pwdSaving || newPwd.length < 6}>
+            {pwdSaving ? '…' : '✓ Сменить пароль'}
+          </button>
+        </div>
+        {pwdMsg && <p style={{ fontSize: 12.5, color: pwdMsg.startsWith('✓') ? 'var(--green)' : 'var(--red)', marginTop: 6 }}>{pwdMsg}</p>}
+      </div>
 
       {/* Инфо */}
       <div className={s.section}>
