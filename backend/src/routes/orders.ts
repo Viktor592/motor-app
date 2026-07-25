@@ -116,6 +116,38 @@ ordersRouter.patch(
   }
 );
 
+// PATCH /api/v1/orders/:id/cancel — клиент отменяет свой заказ (пока работа не началась)
+ordersRouter.patch('/:id/cancel', authenticate, authorize('CLIENT'), async (req, res, next) => {
+  try {
+    const order = await prisma.order.findUnique({ where: { id: req.params.id } });
+    if (!order) throw new AppError(404, 'Заказ не найден');
+    if (order.clientId !== req.user!.userId) throw new AppError(403, 'Нет доступа');
+
+    const cancellable = ['NEW', 'ASSESSED', 'CONFIRMED'];
+    if (!cancellable.includes(order.status)) {
+      throw new AppError(400, 'Заказ уже в работе или закрыт — отмена недоступна. Свяжитесь с сервисом.');
+    }
+
+    const updated = await prisma.$transaction(async tx => {
+      if (order.slotId) {
+        await tx.calendarSlot.update({ where: { id: order.slotId }, data: { isBooked: false } });
+      }
+      return tx.order.update({
+        where: { id: order.id },
+        data:  { status: 'CANCELLED', slotId: null },
+      });
+    });
+
+    if (order.staffId) {
+      io.to(`user:${order.staffId}`).emit('order:status', {
+        orderId: order.id, orderNumber: order.orderNumber, status: 'CANCELLED',
+      });
+    }
+
+    res.json({ status: updated.status });
+  } catch (e) { next(e); }
+});
+
 // POST /api/v1/orders/:id/items — добавить доп. работу к заказу, который уже в работе
 ordersRouter.post('/:id/items', authenticate, authorize('MASTER', 'RECEPTIONIST', 'ADMIN'), async (req, res, next) => {
   try {

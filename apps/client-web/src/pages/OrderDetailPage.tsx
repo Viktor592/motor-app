@@ -1,17 +1,34 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import { fetchOrder } from '../slices/ordersSlice';
 import { AppDispatch, RootState } from '../store';
 import { StatusBadge } from '../components/StatusBadge';
+import { api } from '../services/api';
 import s from './OrderDetailPage.module.css';
+
+const CANCELLABLE = ['NEW', 'ASSESSED', 'CONFIRMED'];
 
 export default function OrderDetailPage() {
   const { id }    = useParams<{ id: string }>();
   const dispatch  = useDispatch<AppDispatch>();
   const { current } = useSelector((st: RootState) => st.orders);
+  const [cancelling, setCancelling] = useState(false);
+  const [cancelError, setCancelError] = useState('');
 
   useEffect(() => { if (id) dispatch(fetchOrder(id)); }, [id]);
+
+  const cancelOrder = async () => {
+    if (!id) return;
+    if (!confirm('Отменить этот заказ? Действие необратимо.')) return;
+    setCancelling(true); setCancelError('');
+    try {
+      await api.patch(`/orders/${id}/cancel`);
+      dispatch(fetchOrder(id));
+    } catch (e: any) {
+      setCancelError(e.response?.data?.error ?? 'Не удалось отменить заказ');
+    } finally { setCancelling(false); }
+  };
 
   if (!current) return <div className={s.loading}>Загрузка…</div>;
   const o = current as any;
@@ -97,7 +114,18 @@ export default function OrderDetailPage() {
         <Link to={`/orders/${o.id}/diagnostics`} className={s.actBtn}>🤖 AI-диагностика и смета</Link>
         <Link to={`/chat/${o.id}`} className={s.actBtn}>💬 AI-чат по заказу</Link>
         <a href={`/api/v1/export/orders/${o.id}/pdf`} target='_blank' rel='noreferrer' className={s.actBtn}>📄 Скачать PDF</a>
+        {CANCELLABLE.includes(o.status) && (
+          <button
+            className={s.actBtn}
+            disabled={cancelling}
+            style={{ color: 'var(--red)', borderColor: 'var(--red)' }}
+            onClick={cancelOrder}
+          >
+            {cancelling ? '…' : '✕ Отменить заказ'}
+          </button>
+        )}
       </div>
+      {cancelError && <p style={{ color: 'var(--red)', fontSize: 13, marginTop: 8 }}>{cancelError}</p>}
     </div>
   );
 }

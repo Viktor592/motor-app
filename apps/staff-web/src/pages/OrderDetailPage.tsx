@@ -11,6 +11,9 @@ export default function OrderDetailPage() {
   const { id }    = useParams<{ id: string }>();
   const dispatch  = useDispatch<AppDispatch>();
   const { current } = useSelector((st: RootState) => st.orders);
+  const { role } = useSelector((st: RootState) => st.auth);
+  const [masters, setMasters]     = useState<any[]>([]);
+  const [assigning, setAssigning] = useState(false);
   const [showAdd, setShowAdd] = useState(false);
   const [name, setName]       = useState('');
   const [price, setPrice]     = useState('');
@@ -21,6 +24,17 @@ export default function OrderDetailPage() {
   const [shiftMsg, setShiftMsg]   = useState('');
 
   useEffect(() => { if (id) dispatch(fetchOrder(id)); }, [id]);
+  useEffect(() => {
+    if (role !== 'RECEPTIONIST' && role !== 'ADMIN') return;
+    api.get('/admin/users', { params: { role: 'MASTER' } }).then(r => setMasters(r.data.users)).catch(() => {});
+  }, [role]);
+
+  const assignMaster = async (staffId: string) => {
+    if (!id) return;
+    setAssigning(true);
+    try { await api.patch(`/orders/${id}/assign`, { staffId: staffId || null }); dispatch(fetchOrder(id)); }
+    finally { setAssigning(false); }
+  };
 
   const addItem = async () => {
     if (!id || name.length < 2 || !price) { setError('Заполните название и цену'); return; }
@@ -63,6 +77,24 @@ export default function OrderDetailPage() {
       </div>
 
       <div className={s.grid}>
+        {/* Мастер (назначение — только приёмщик/владелец) */}
+        {(role === 'RECEPTIONIST' || role === 'ADMIN') && (
+          <div className={s.card}>
+            <div className={s.cardTitle}>🧑‍🔧 Мастер</div>
+            <select
+              value={o.staffId ?? ''}
+              disabled={assigning}
+              onChange={e => assignMaster(e.target.value)}
+              style={{ width: '100%', padding: 8, borderRadius: 6, border: '1px solid var(--wire)', background: 'var(--cage)', color: 'var(--chalk)' }}
+            >
+              <option value="">— Не назначен —</option>
+              {masters.map((m: any) => (
+                <option key={m.id} value={m.id}>{m.name} ({m.phoneMasked})</option>
+              ))}
+            </select>
+          </div>
+        )}
+
         {/* Авто */}
         <div className={s.card}>
           <div className={s.cardTitle}>🚗 Автомобиль</div>

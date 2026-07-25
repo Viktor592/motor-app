@@ -104,7 +104,7 @@ async function assertOwnerCanManage(req: any, targetUserId: string) {
   return target;
 }
 
-adminRouter.get('/users', authorize('ADMIN'), async (req, res, next) => {
+adminRouter.get('/users', authorize('ADMIN', 'RECEPTIONIST'), async (req, res, next) => {
   try {
     const { role, page = '1', q } = req.query as Record<string, string>;
     const tenantId = await resolveOwnTenantId(req);
