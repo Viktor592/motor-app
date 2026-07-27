@@ -1,9 +1,9 @@
 /**
  * МОТОР — Простая i18n система без внешних зависимостей
- * Поддерживаемые языки: ru (по умолчанию), kk (казахский), uk (украинский)
+ * Поддерживаемые языки: ru (по умолчанию), kk (казахский), en (английский)
  */
 
-export type Locale = 'ru' | 'kk' | 'uk';
+export type Locale = 'ru' | 'kk' | 'en';
 
 // ── Словари ───────────────────────────────────────────────────
 const translations: Record<Locale, Record<string, string>> = {
@@ -97,44 +97,44 @@ const translations: Record<Locale, Record<string, string>> = {
     'warehouse.low':      'Жетіспеушілік',
   },
 
-  uk: {
-    'nav.home':        'Головна',
-    'nav.orders':      'Замовлення',
-    'nav.bookings':    'Записи',
-    'nav.warehouse':   'Склад',
-    'nav.finance':     'Фінанси',
-    'nav.report':      'Звіти',
-    'nav.integration': 'Інтеграції',
-    'nav.plans':       'Тариф',
-    'nav.settings':    'Налаштування',
-    'order.status.PENDING':       'Очікує',
-    'order.status.IN_PROGRESS':   'В роботі',
-    'order.status.WAITING_PARTS': 'Чекає запчастини',
-    'order.status.QUALITY_CHECK': 'Перевірка',
-    'order.status.DONE':          'Готово',
-    'order.status.CLOSED':        'Закрито',
-    'common.save':    'Зберегти',
-    'common.cancel':  'Скасувати',
-    'common.delete':  'Видалити',
-    'common.edit':    'Редагувати',
-    'common.add':     'Додати',
-    'common.search':  'Пошук',
-    'common.loading': 'Завантаження…',
-    'common.empty':   'Немає даних',
-    'common.total':   'Разом',
-    'common.yes':     'Так',
-    'common.no':      'Ні',
-    'finance.revenue':    'Виручка',
-    'finance.expenses':   'Витрати',
-    'finance.profit':     'Прибуток',
-    'finance.shift':      'Зміна',
-    'finance.open_shift': 'Відкрити зміну',
-    'finance.close_shift':'Закрити зміну',
-    'warehouse.stock':    'Залишки',
-    'warehouse.reserve':  'Резерв',
-    'warehouse.supplier': 'Постачальник',
-    'warehouse.order':    'Замовлення постачальнику',
-    'warehouse.low':      'Нестача',
+  en: {
+    'nav.home':        'Home',
+    'nav.orders':      'Orders',
+    'nav.bookings':    'Bookings',
+    'nav.warehouse':   'Warehouse',
+    'nav.finance':     'Finance',
+    'nav.report':      'Reports',
+    'nav.integration': 'Integrations',
+    'nav.plans':       'Plan',
+    'nav.settings':    'Settings',
+    'order.status.PENDING':       'Pending',
+    'order.status.IN_PROGRESS':   'In progress',
+    'order.status.WAITING_PARTS': 'Awaiting parts',
+    'order.status.QUALITY_CHECK': 'Quality check',
+    'order.status.DONE':          'Done',
+    'order.status.CLOSED':        'Closed',
+    'common.save':    'Save',
+    'common.cancel':  'Cancel',
+    'common.delete':  'Delete',
+    'common.edit':    'Edit',
+    'common.add':     'Add',
+    'common.search':  'Search',
+    'common.loading': 'Loading…',
+    'common.empty':   'No data',
+    'common.total':   'Total',
+    'common.yes':     'Yes',
+    'common.no':      'No',
+    'finance.revenue':    'Revenue',
+    'finance.expenses':   'Expenses',
+    'finance.profit':     'Profit',
+    'finance.shift':      'Shift',
+    'finance.open_shift': 'Open shift',
+    'finance.close_shift':'Close shift',
+    'warehouse.stock':    'Stock',
+    'warehouse.reserve':  'Reserved',
+    'warehouse.supplier': 'Supplier',
+    'warehouse.order':    'Order from supplier',
+    'warehouse.low':      'Low stock',
   },
 };
 
@@ -183,9 +183,9 @@ export function useLocale() {
     setLocale,
     t,
     locales: [
-      { code: 'ru' as Locale, name: 'Русский',    flag: '🇷🇺' },
-      { code: 'kk' as Locale, name: 'Қазақша',    flag: '🇰🇿' },
-      { code: 'uk' as Locale, name: 'Українська', flag: '🇺🇦' },
+      { code: 'ru' as Locale, name: 'Русский', flag: '🇷🇺' },
+      { code: 'kk' as Locale, name: 'Қазақша', flag: '🇰🇿' },
+      { code: 'en' as Locale, name: 'English', flag: '🇬🇧' },
     ],
   };
 }
