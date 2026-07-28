@@ -3,6 +3,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { logout } from '../slices/authSlice';
 import { AppDispatch, RootState } from '../store';
 import { api } from '../services/api';
+import { useLocale } from '../services/i18n';
 import s from './ProfilePage.module.css';
 
 interface Vehicle {
@@ -17,6 +18,7 @@ const ROLE_LABEL: Record<string, string> = {
 export default function ProfilePage() {
   const dispatch = useDispatch<AppDispatch>();
   const { name, role } = useSelector((st: RootState) => st.auth);
+  const { locale, setLocale, locales } = useLocale();
 
   const [vehicles,   setVehicles]  = useState<Vehicle[]>([]);
   const [avatarUrl,  setAvatarUrl] = useState<string | null>(null);
@@ -275,6 +277,28 @@ export default function ProfilePage() {
           </button>
         </div>
         {pwdMsg && <p style={{ fontSize: 12.5, color: pwdMsg.startsWith('✓') ? 'var(--green)' : 'var(--red)', marginTop: 6 }}>{pwdMsg}</p>}
+      </div>
+
+      {/* Язык интерфейса */}
+      <div className={s.section}>
+        <div className={s.sTitle}>ЯЗЫК ИНТЕРФЕЙСА</div>
+        <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+          {locales.map(l => (
+            <button
+              key={l.code}
+              onClick={() => setLocale(l.code)}
+              style={{
+                display: 'flex', alignItems: 'center', gap: 6, padding: '8px 14px',
+                borderRadius: 6, cursor: 'pointer', fontSize: 13,
+                border: locale === l.code ? '1px solid var(--ore)' : '1px solid var(--wire)',
+                background: locale === l.code ? 'var(--ore-d)' : 'var(--plate2)',
+                color: locale === l.code ? 'var(--ore)' : 'var(--chalk)',
+              }}
+            >
+              <span>{l.flag}</span><span>{l.name}</span>
+            </button>
+          ))}
+        </div>
       </div>
 
       {/* Инфо */}
