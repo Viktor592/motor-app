@@ -5,10 +5,15 @@ import { fetchOrders } from '../slices/ordersSlice';
 import { AppDispatch, RootState } from '../store';
 import { StatusBadge } from '../components/StatusBadge';
 import { api } from '../services/api';
+import { useLocale } from '../services/i18n';
 import s from './HomePage.module.css';
+
+const INTL: Record<string, string> = { ru: 'ru', kk: 'kk-KZ', en: 'en-US' };
 
 export default function HomePage() {
   const dispatch = useDispatch<AppDispatch>();
+  const { t, locale } = useLocale();
+  const intl = INTL[locale] ?? 'ru';
   const { name }  = useSelector((st: RootState) => st.auth);
   const { list, loading } = useSelector((st: RootState) => st.orders);
   const [promos, setPromos] = useState<{ id: string; title: string; body: string; imageUrl?: string }[]>([]);
@@ -26,13 +31,13 @@ export default function HomePage() {
       {/* Hero */}
       <div className={s.hero}>
         <div className={s.heroText}>
-          <div className={s.eye}>// ДАШБОРД КЛИЕНТА</div>
-          <h1 className={s.h1}>Привет, <em>{name?.split(' ')[0] ?? 'клиент'}</em></h1>
-          <p className={s.sub}>Управляйте заказами и общайтесь с AI-агентами МОТОР.</p>
+          <div className={s.eye}>{t('home.eyebrow')}</div>
+          <h1 className={s.h1}>{t('home.greeting')} <em>{name?.split(' ')[0] ?? t('home.greeting_fallback')}</em></h1>
+          <p className={s.sub}>{t('home.subtitle')}</p>
         </div>
         <div className={s.livePill}>
           <span className={s.liveDot} />
-          AI-агенты онлайн
+          {t('home.ai_online')}
         </div>
       </div>
 
@@ -42,7 +47,7 @@ export default function HomePage() {
             <div key={p.id} className={s.promo}>
               {p.imageUrl && <img src={p.imageUrl} alt="" className={s.promoImg} />}
               <div>
-                <div className={s.promoBadge}>🔥 Акция</div>
+                <div className={s.promoBadge}>{t('home.promo_badge')}</div>
                 <div className={s.promoTitle}>{p.title}</div>
                 <div className={s.promoBody}>{p.body}</div>
               </div>
@@ -54,14 +59,10 @@ export default function HomePage() {
       {myBookings.length > 0 && (
         <div style={{ marginBottom: 24 }}>
           <div style={{ fontSize: 13, fontWeight: 700, color: 'var(--dust)', marginBottom: 10, textTransform: 'uppercase', letterSpacing: '.08em' }}>
-            📅 Мои записи
+            {t('home.my_bookings')}
           </div>
           <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
             {myBookings.slice(0, 3).map(b => {
-              const statusLabel: Record<string, string> = {
-                PENDING: 'Ожидает подтверждения', CONFIRMED: 'Подтверждена',
-                COMPLETED: 'Завершена', CANCELLED: 'Отменена', NO_SHOW: 'Не явился',
-              };
               const statusColor: Record<string, string> = {
                 PENDING: 'var(--gold)', CONFIRMED: 'var(--green)',
                 COMPLETED: 'var(--dust)', CANCELLED: 'var(--red)', NO_SHOW: 'var(--red)',
@@ -71,12 +72,12 @@ export default function HomePage() {
                   padding: '12px 16px', borderRadius: 10, border: '1px solid var(--wire)', background: 'var(--plate)' }}>
                   <div>
                     <div style={{ fontSize: 13.5, color: 'var(--chalk)', fontWeight: 600 }}>
-                      {new Date(b.scheduledAt).toLocaleString('ru', { day: '2-digit', month: 'long', hour: '2-digit', minute: '2-digit' })}
+                      {new Date(b.scheduledAt).toLocaleString(intl, { day: '2-digit', month: 'long', hour: '2-digit', minute: '2-digit' })}
                     </div>
                     <div style={{ fontSize: 12, color: 'var(--dust)' }}>{b.vehicleMake ?? ''}</div>
                   </div>
                   <div style={{ fontSize: 12, fontWeight: 700, color: statusColor[b.status] ?? 'var(--dust)' }}>
-                    {statusLabel[b.status] ?? b.status}
+                    {t(`booking.status.${b.status}`)}
                   </div>
                 </div>
               );
@@ -89,29 +90,29 @@ export default function HomePage() {
       <div className={s.qaGrid}>
         <Link to="/booking" className={`${s.qa} ${s.qaOre}`}>
           <span className={s.qaIco}>📅</span>
-          <span className={s.qaLabel}>Записаться</span>
-          <span className={s.qaSub}>Слесарь · Электрик · Диагност</span>
+          <span className={s.qaLabel}>{t('home.qa.book')}</span>
+          <span className={s.qaSub}>{t('home.qa.book_sub')}</span>
         </Link>
         <Link to="/chat" className={s.qa}>
           <span className={s.qaIco}>🤖</span>
-          <span className={s.qaLabel}>AI-чат</span>
-          <span className={s.qaSub}>Агент «Приёмщик» онлайн</span>
+          <span className={s.qaLabel}>{t('home.qa.chat')}</span>
+          <span className={s.qaSub}>{t('home.qa.chat_sub')}</span>
         </Link>
         <Link to="/orders" className={s.qa}>
           <span className={s.qaIco}>📋</span>
-          <span className={s.qaLabel}>Все заказы</span>
-          <span className={s.qaSub}>{list.length} заказов в истории</span>
+          <span className={s.qaLabel}>{t('home.qa.orders')}</span>
+          <span className={s.qaSub}>{t('home.qa.orders_sub', { count: list.length })}</span>
         </Link>
       </div>
 
       {/* Active orders */}
       <section className={s.section}>
-        <h2 className={s.sectionTitle}>АКТИВНЫЕ ЗАКАЗЫ</h2>
-        {loading && <p className={s.loading}>Загрузка…</p>}
+        <h2 className={s.sectionTitle}>{t('home.active_orders')}</h2>
+        {loading && <p className={s.loading}>{t('common.loading')}</p>}
         {!loading && active.length === 0 && (
           <div className={s.empty}>
-            <p>Нет активных заказов</p>
-            <Link to="/booking" className={s.emptyLink}>Записаться →</Link>
+            <p>{t('home.no_active')}</p>
+            <Link to="/booking" className={s.emptyLink}>{t('home.book_link')}</Link>
           </div>
         )}
         <div className={s.orderGrid}>
@@ -124,12 +125,12 @@ export default function HomePage() {
               <p className={s.cardCar}>{o.vehicle.brand} {o.vehicle.model} · {o.vehicle.year}</p>
               {o.slot && (
                 <p className={s.cardSlot}>
-                  📅 {new Date(o.slot.startAt).toLocaleString('ru',{day:'2-digit',month:'short',hour:'2-digit',minute:'2-digit'})}
+                  📅 {new Date(o.slot.startAt).toLocaleString(intl,{day:'2-digit',month:'short',hour:'2-digit',minute:'2-digit'})}
                   {' · '}{o.slot.post.name}
                 </p>
               )}
               {o.totalRetail && (
-                <p className={s.cardPrice}>Смета: {Number(o.totalRetail).toLocaleString('ru')} ₽</p>
+                <p className={s.cardPrice}>{t('home.estimate')} {Number(o.totalRetail).toLocaleString(intl)} ₽</p>
               )}
             </Link>
           ))}
@@ -139,7 +140,7 @@ export default function HomePage() {
       {/* History */}
       {closed.length > 0 && (
         <section className={s.section}>
-          <h2 className={s.sectionTitle}>ИСТОРИЯ</h2>
+          <h2 className={s.sectionTitle}>{t('home.history')}</h2>
           <div className={s.orderGrid}>
             {closed.map(o => (
               <Link to={`/orders/${o.id}`} key={o.id} className={`${s.card} ${s.cardClosed}`}>

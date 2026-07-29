@@ -3,11 +3,13 @@ import { Link, useNavigate } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import { AppDispatch, RootState } from '../store';
 import { api } from '../services/api';
+import { useLocale } from '../services/i18n';
 import s from './OtpPage.module.css';
 
 type Step = 'phone' | 'code';
 
 export default function OtpPage() {
+  const { t } = useLocale();
   const [step,  setStep]  = useState<Step>('phone');
   const [phone, setPhone] = useState('');
   const [code,  setCode]  = useState(['', '', '', '']);
@@ -44,7 +46,7 @@ export default function OtpPage() {
   const sendCode = async (e: React.FormEvent) => {
     e.preventDefault();
     const p = rawPhone();
-    if (p.length !== 12) { setError('Введите номер полностью'); return; }
+    if (p.length !== 12) { setError(t('otp.err.full_phone')); return; }
     setLoading(true); setError('');
     try {
       await api.post('/auth/otp/send', { phone: p });
@@ -52,7 +54,7 @@ export default function OtpPage() {
       setCode(['', '', '', '']);
       setTimeout(() => codeRefs[0].current?.focus(), 100);
     } catch (e: any) {
-      setError(e.response?.data?.error ?? 'Ошибка отправки');
+      setError(e.response?.data?.error ?? t('otp.err.send'));
     } finally { setLoading(false); }
   };
 
@@ -82,7 +84,7 @@ export default function OtpPage() {
       // Reload store
       window.location.href = '/';
     } catch (e: any) {
-      setError(e.response?.data?.error ?? 'Неверный код');
+      setError(e.response?.data?.error ?? t('otp.err.code'));
       setCode(['', '', '', '']);
       setTimeout(() => codeRefs[0].current?.focus(), 100);
     } finally { setLoading(false); }
@@ -95,7 +97,7 @@ export default function OtpPage() {
       await api.post('/auth/otp/send', { phone: rawPhone() });
       setTimer(60); setCode(['', '', '', '']);
       setTimeout(() => codeRefs[0].current?.focus(), 100);
-    } catch (e: any) { setError(e.response?.data?.error ?? 'Ошибка'); }
+    } catch (e: any) { setError(e.response?.data?.error ?? t('otp.err.generic')); }
     finally { setLoading(false); }
   };
 
@@ -103,11 +105,11 @@ export default function OtpPage() {
     <div className={s.wrap}>
       {step === 'phone' && (
         <form className={s.form} onSubmit={sendCode}>
-          <h2 className={s.title}>ВХОД</h2>
-          <p className={s.sub}>Введите номер — отправим SMS с кодом</p>
+          <h2 className={s.title}>{t('otp.title')}</h2>
+          <p className={s.sub}>{t('otp.subtitle')}</p>
           {error && <div className={s.err}>{error}</div>}
           <div className={s.field}>
-            <label className={s.label}>ТЕЛЕФОН</label>
+            <label className={s.label}>{t('otp.phone_label')}</label>
             <input
               className={s.input}
               type="tel"
@@ -118,18 +120,18 @@ export default function OtpPage() {
             />
           </div>
           <button className={s.btn} type="submit" disabled={loading}>
-            {loading ? 'Отправляем…' : 'Получить код →'}
+            {loading ? t('otp.sending') : t('otp.get_code')}
           </button>
-          <p className={s.hint}>Новый аккаунт создаётся автоматически</p>
-          <p className={s.or}>— или —</p>
-          <Link to="/login" className={s.pwdLink}>Войти с паролем (персонал)</Link>
+          <p className={s.hint}>{t('otp.hint')}</p>
+          <p className={s.or}>{t('otp.or')}</p>
+          <Link to="/login" className={s.pwdLink}>{t('otp.password_login')}</Link>
         </form>
       )}
 
       {step === 'code' && (
         <div className={s.form}>
-          <h2 className={s.title}>КОД</h2>
-          <p className={s.sub}>Отправили SMS на <strong>{phone}</strong></p>
+          <h2 className={s.title}>{t('otp.code_title')}</h2>
+          <p className={s.sub}>{t('otp.code_subtitle')} <strong>{phone}</strong></p>
           {error && <div className={s.err}>{error}</div>}
 
           <div className={s.codeRow}>
@@ -148,7 +150,7 @@ export default function OtpPage() {
             ))}
           </div>
 
-          {loading && <p className={s.verifying}>Проверяем код…</p>}
+          {loading && <p className={s.verifying}>{t('otp.verifying')}</p>}
 
           <button
             className={`${s.resend} ${timer > 0 ? s.resendDisabled : ''}`}
@@ -156,11 +158,11 @@ export default function OtpPage() {
             disabled={timer > 0 || loading}
             type="button"
           >
-            {timer > 0 ? `Повторная отправка через ${timer} с` : 'Отправить снова'}
+            {timer > 0 ? t('otp.resend_in', { sec: timer }) : t('otp.resend')}
           </button>
 
           <button className={s.backLink} onClick={() => setStep('phone')} type="button">
-            ← Изменить номер
+            {t('otp.change_number')}
           </button>
         </div>
       )}
