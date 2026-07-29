@@ -139,6 +139,7 @@ const translations: Record<Locale, Record<string, string>> = {
     'orderDetail.cancel':        '✕ Отменить заказ',
     'orderDetail.confirm_cancel':'Отменить этот заказ? Действие необратимо.',
     'orderDetail.cancel_error':  'Не удалось отменить заказ',
+    'unit.km': 'км',
   },
 
   kk: {
@@ -273,6 +274,7 @@ const translations: Record<Locale, Record<string, string>> = {
     'orderDetail.cancel':        '✕ Тапсырысты болдырмау',
     'orderDetail.confirm_cancel':'Бұл тапсырысты болдырасыз ба? Кері қайтарылмайды.',
     'orderDetail.cancel_error':  'Тапсырысты болдыру мүмкін болмады',
+    'unit.km': 'км',
   },
 
   en: {
@@ -402,6 +404,7 @@ const translations: Record<Locale, Record<string, string>> = {
     'orderDetail.cancel':        '✕ Cancel order',
     'orderDetail.confirm_cancel':'Cancel this order? This cannot be undone.',
     'orderDetail.cancel_error':  'Failed to cancel the order',
+    'unit.km': 'km',
   },
 };
 
