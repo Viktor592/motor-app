@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { api } from '../services/api';
+import { useLocale } from '../services/i18n';
 import s from './PartsPage.module.css';
 
 interface Part {
@@ -8,17 +9,13 @@ interface Part {
   isOriginal: boolean; localStock: number; retailPrice: number;
 }
 
-const CATEGORIES: Record<string, string> = {
-  OIL_FILTERS: '🛢️ Масло и фильтры',
-  OEM:         '🏭 Оригинал (OEM)',
-  AFTERMARKET: '🔁 Аналоги',
-  BRAKES:      '🛑 Тормоза',
-  BODY:        '🚗 Кузов',
-  CHEMICALS:   '🧴 Химия, расходники',
-};
+const CATEGORY_KEYS = ['OIL_FILTERS','OEM','AFTERMARKET','BRAKES','BODY','CHEMICALS'];
+const INTL: Record<string, string> = { ru: 'ru', kk: 'kk-KZ', en: 'en-US' };
 
 export default function PartsPage() {
   const navigate = useNavigate();
+  const { t, locale } = useLocale();
+  const intl = INTL[locale] ?? 'ru';
   const [parts, setParts]     = useState<Part[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch]   = useState('');
@@ -56,7 +53,7 @@ export default function PartsPage() {
   const cartCount  = Object.values(cart).reduce((a, b) => a + b, 0);
 
   const placeOrder = async () => {
-    if (!vehicleId) { setError('Выберите автомобиль'); return; }
+    if (!vehicleId) { setError(t('parts.err.select_vehicle')); return; }
     if (cartItems.length === 0) return;
     setPlacing(true); setError('');
     try {
@@ -67,7 +64,7 @@ export default function PartsPage() {
       setDone(data.orderNumber);
       setCart({});
     } catch (e: any) {
-      setError(e.response?.data?.error ?? 'Не удалось оформить заказ');
+      setError(e.response?.data?.error ?? t('parts.err.generic'));
     } finally { setPlacing(false); }
   };
 
@@ -75,11 +72,11 @@ export default function PartsPage() {
     <div className={s.page}>
       <div className={s.doneBox}>
         <div className={s.doneIcon}>✅</div>
-        <h2 className={s.doneTitle}>Заказ оформлен</h2>
-        <p className={s.doneSub}>Мы свяжемся с вами по готовности запчастей.</p>
+        <h2 className={s.doneTitle}>{t('parts.done_title')}</h2>
+        <p className={s.doneSub}>{t('parts.done_sub')}</p>
         <div className={s.doneRow}>
-          <button className={s.btn} onClick={() => navigate('/orders')}>Мои заказы →</button>
-          <button className={s.btnGhost} onClick={() => setDone(null)}>Продолжить покупки</button>
+          <button className={s.btn} onClick={() => navigate('/orders')}>{t('parts.my_orders')}</button>
+          <button className={s.btnGhost} onClick={() => setDone(null)}>{t('parts.continue')}</button>
         </div>
       </div>
     </div>
@@ -87,33 +84,33 @@ export default function PartsPage() {
 
   return (
     <div className={s.page}>
-      <div className={s.eye}>// КАТАЛОГ</div>
-      <h1 className={s.h1}>Запчасти</h1>
+      <div className={s.eye}>{t('parts.eyebrow')}</div>
+      <h1 className={s.h1}>{t('parts.title')}</h1>
 
-      <input className={s.search} placeholder="Поиск по названию или артикулу…"
+      <input className={s.search} placeholder={t('parts.search')}
         value={search} onChange={e => setSearch(e.target.value)} />
 
       <div className={s.chips}>
-        <button className={s.chip} data-active={category === ''} onClick={() => setCategory('')}>Все</button>
-        {Object.entries(CATEGORIES).map(([key, label]) => (
-          <button key={key} className={s.chip} data-active={category === key} onClick={() => setCategory(key)}>{label}</button>
+        <button className={s.chip} data-active={category === ''} onClick={() => setCategory('')}>{t('parts.filter_all')}</button>
+        {CATEGORY_KEYS.map(key => (
+          <button key={key} className={s.chip} data-active={category === key} onClick={() => setCategory(key)}>{t(`parts.category.${key}`)}</button>
         ))}
       </div>
 
-      {loading && <div className={s.loading}>Загрузка…</div>}
+      {loading && <div className={s.loading}>{t('parts.loading')}</div>}
 
       {!loading && (
         <div className={s.grid}>
           {parts.map(p => (
             <div key={p.id} className={s.card}>
-              <div className={s.cardCat}>{CATEGORIES[p.category]?.split(' ')[0] ?? ''}</div>
+              <div className={s.cardCat}>{t(`parts.category.${p.category}`).split(' ')[0] ?? ''}</div>
               <div className={s.cardName}>{p.name}</div>
-              <div className={s.cardArticle}>Артикул: {p.article}</div>
+              <div className={s.cardArticle}>{t('parts.article')} {p.article}</div>
               <div className={s.cardStock} data-in={p.localStock > 0}>
-                {p.localStock > 0 ? `В наличии: ${p.localStock}` : 'Под заказ'}
+                {p.localStock > 0 ? `${t('parts.in_stock')} ${p.localStock}` : t('parts.on_order')}
               </div>
               <div className={s.cardBottom}>
-                <div className={s.cardPrice}>{p.retailPrice.toLocaleString('ru')} ₽</div>
+                <div className={s.cardPrice}>{p.retailPrice.toLocaleString(intl)} ₽</div>
                 {cart[p.id] ? (
                   <div className={s.qty}>
                     <button onClick={() => removeFromCart(p.id)}>−</button>
@@ -121,32 +118,32 @@ export default function PartsPage() {
                     <button onClick={() => addToCart(p.id)}>+</button>
                   </div>
                 ) : (
-                  <button className={s.addBtn} onClick={() => addToCart(p.id)}>+ В корзину</button>
+                  <button className={s.addBtn} onClick={() => addToCart(p.id)}>{t('parts.add_to_cart')}</button>
                 )}
               </div>
             </div>
           ))}
-          {parts.length === 0 && <div className={s.empty}>Ничего не найдено</div>}
+          {parts.length === 0 && <div className={s.empty}>{t('parts.empty')}</div>}
         </div>
       )}
 
       {cartCount > 0 && (
         <div className={s.cartBar}>
           <div className={s.cartInfo}>
-            <b>{cartCount}</b> шт. на <b>{cartTotal.toLocaleString('ru')} ₽</b>
+            <b>{cartCount}</b> {t('parts.cart_units')} <b>{cartTotal.toLocaleString(intl)} ₽</b>
           </div>
           {vehicles.length > 1 && (
             <select className={s.vehicleSelect} value={vehicleId} onChange={e => setVehicleId(e.target.value)}>
-              <option value="">Выберите авто</option>
+              <option value="">{t('parts.select_vehicle')}</option>
               {vehicles.map(v => <option key={v.id} value={v.id}>{v.brand} {v.model}</option>)}
             </select>
           )}
           {vehicles.length === 0 && (
-            <span className={s.noVehicle}>Сначала добавьте авто в профиле</span>
+            <span className={s.noVehicle}>{t('parts.no_vehicle')}</span>
           )}
           {error && <span className={s.cartError}>{error}</span>}
           <button className={s.btn} disabled={placing || !vehicleId} onClick={placeOrder}>
-            {placing ? '…' : 'Оформить заказ →'}
+            {placing ? '…' : t('parts.place_order')}
           </button>
         </div>
       )}
