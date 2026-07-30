@@ -189,6 +189,10 @@ const translations: Record<Locale, Record<string, string>> = {
     'booking.done.client':    'Клиент',
     'booking.done.hint':      'Мы свяжемся с вами для подтверждения записи.',
     'booking.back_home':      '← На главную',
+    'booking.post1': 'Пост #1 — Слесарный',
+    'booking.post2': 'Пост #2 — Слесарный',
+    'booking.post3': 'Пост #3 — Электрик',
+    'booking.post4': 'Пост #4 — Диагностика',
   },
 
   kk: {
@@ -373,6 +377,10 @@ const translations: Record<Locale, Record<string, string>> = {
     'booking.done.client':    'Клиент',
     'booking.done.hint':      'Жазбаны растау үшін сізбен байланысамыз.',
     'booking.back_home':      '← Басты бетке',
+    'booking.post1': 'Пост #1 — Слесарь',
+    'booking.post2': 'Пост #2 — Слесарь',
+    'booking.post3': 'Пост #3 — Электрик',
+    'booking.post4': 'Пост #4 — Диагностика',
   },
 
   en: {
@@ -552,6 +560,10 @@ const translations: Record<Locale, Record<string, string>> = {
     'booking.done.client':    'Client',
     'booking.done.hint':      'We’ll contact you to confirm the booking.',
     'booking.back_home':      '← Back home',
+    'booking.post1': 'Bay #1 — Mechanic',
+    'booking.post2': 'Bay #2 — Mechanic',
+    'booking.post3': 'Bay #3 — Electrician',
+    'booking.post4': 'Bay #4 — Diagnostics',
   },
 };
 
