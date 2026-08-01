@@ -85,6 +85,17 @@ const translations: Record<Locale, Record<string, string>> = {
     'nav.staff.profile':   'Профиль',
     'role.master':         'Мастер',
     'role.receptionist':   'Приёмщик',
+    // Чат с AI-агентом
+    'chat.agent_name':        'Агент «Приёмщик»',
+    'chat.online':             'Онлайн',
+    'chat.loading_history':    'Загрузка истории…',
+    'chat.agent_ready':        'Агент готов к работе',
+    'chat.welcome_text':       'Опишите проблему с вашим автомобилем — я задам уточняющие вопросы, помогу разобраться и запишу к нужному специалисту.',
+    'chat.prompt_suspension':  'Стук в подвеске при повороте',
+    'chat.prompt_check_engine':'Горит чек двигателя',
+    'chat.prompt_battery':     'Не заряжается аккумулятор',
+    'chat.prompt_maintenance': 'Нужно ТО',
+    'chat.placeholder':        'Опишите проблему…',
   },
 
   kk: {
@@ -165,6 +176,17 @@ const translations: Record<Locale, Record<string, string>> = {
     'nav.staff.profile':   'Профиль',
     'role.master':         'Шебер',
     'role.receptionist':   'Қабылдаушы',
+    // Чат с AI-агентом
+    'chat.agent_name':        'Агент «Қабылдаушы»',
+    'chat.online':             'Онлайн',
+    'chat.loading_history':    'Тарих жүктелуде…',
+    'chat.agent_ready':        'Агент жұмысқа дайын',
+    'chat.welcome_text':       'Көлігіңіздегі ақауды сипаттаңыз — мен нақтылау сұрақтарын қоямын, анықтауға көмектесемін және қажетті маманға жазамын.',
+    'chat.prompt_suspension':  'Бұрылғанда аспа тарсылдайды',
+    'chat.prompt_check_engine':'Двигательдің чек шамы жанып тұр',
+    'chat.prompt_battery':     'Аккумулятор зарядталмайды',
+    'chat.prompt_maintenance': 'ТО керек',
+    'chat.placeholder':        'Ақауды сипаттаңыз…',
   },
 
   en: {
@@ -240,6 +262,17 @@ const translations: Record<Locale, Record<string, string>> = {
     'nav.staff.profile':   'Profile',
     'role.master':         'Master',
     'role.receptionist':   'Receptionist',
+    // AI agent chat
+    'chat.agent_name':        'Agent "Receptionist"',
+    'chat.online':             'Online',
+    'chat.loading_history':    'Loading history…',
+    'chat.agent_ready':        'Agent ready to help',
+    'chat.welcome_text':       "Describe the issue with your vehicle — I'll ask clarifying questions, help figure it out, and book you with the right specialist.",
+    'chat.prompt_suspension':  'Knocking suspension when turning',
+    'chat.prompt_check_engine':'Check engine light is on',
+    'chat.prompt_battery':     "Battery won't charge",
+    'chat.prompt_maintenance': 'Need maintenance',
+    'chat.placeholder':        'Describe the issue…',
   },
 };
 
