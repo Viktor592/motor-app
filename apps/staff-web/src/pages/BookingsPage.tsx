@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import styles from './BookingsPage.module.css';
 import { api } from '../services/api';
+import { useLocale } from '../services/i18n';
 
 interface Booking {
   id: string; clientName: string; clientPhone: string;
@@ -10,21 +11,22 @@ interface Booking {
   convertedOrderId: string | null;
 }
 
-const STATUS_LABELS: Record<string, string> = {
-  PENDING: 'Ожидает', CONFIRMED: 'Подтверждена',
-  COMPLETED: 'Конвертирована', CANCELLED: 'Отменена', NO_SHOW: 'Не явился',
-};
 const STATUS_COLORS: Record<string, string> = {
   PENDING: '#d97706', CONFIRMED: '#2563eb',
   COMPLETED: '#16a34a', CANCELLED: '#dc2626', NO_SHOW: '#6b7280',
 };
-const SERVICE_LABELS: Record<string, string> = {
-  MECHANIC: '🔩 Механик', AUTO_ELECTRICIAN: '⚡ Электрик',
-  TIRE_FITTER: '🔧 Шиномонтаж', DIAGNOSTICIAN: '🖥 Диагностика',
-  BODY: '🚗 Кузовной', OTHER: '🛠 Другое',
-};
 
 export default function BookingsPage() {
+  const { t } = useLocale();
+  const STATUS_LABELS: Record<string, string> = {
+    PENDING: t('bookings.status.PENDING'), CONFIRMED: t('bookings.status.CONFIRMED'),
+    COMPLETED: t('bookings.status.COMPLETED'), CANCELLED: t('bookings.status.CANCELLED'), NO_SHOW: t('bookings.status.NO_SHOW'),
+  };
+  const SERVICE_LABELS: Record<string, string> = {
+    MECHANIC: `🔩 ${t('bookings.service.MECHANIC')}`, AUTO_ELECTRICIAN: `⚡ ${t('bookings.service.AUTO_ELECTRICIAN')}`,
+    TIRE_FITTER: `🔧 ${t('bookings.service.TIRE_FITTER')}`, DIAGNOSTICIAN: `🖥 ${t('bookings.service.DIAGNOSTICIAN')}`,
+    BODY: `🚗 ${t('bookings.service.BODY')}`, OTHER: `🛠 ${t('bookings.service.OTHER')}`,
+  };
   const [bookings, setBookings]   = useState<Booking[]>([]);
   const [total, setTotal]         = useState(0);
   const [date, setDate]           = useState(new Date().toISOString().slice(0, 10));
@@ -56,7 +58,7 @@ export default function BookingsPage() {
     setConverting(id);
     try {
       const { data } = await api.post(`/booking/${id}/convert`, {});
-      alert(`✅ Заказ #${data.orderNumber} создан!`);
+      alert('✅ ' + t('bookings.order_created', { num: data.orderNumber }));
       load();
     } finally { setConverting(null); }
   };
@@ -65,8 +67,8 @@ export default function BookingsPage() {
     <div className={styles.page}>
       <div className={styles.header}>
         <div>
-          <h1 className={styles.title}>Онлайн-записи</h1>
-          <p className={styles.sub}>Управление записями с сайта и приложения</p>
+          <h1 className={styles.title}>{t('bookings.title')}</h1>
+          <p className={styles.sub}>{t('bookings.subtitle')}</p>
         </div>
       </div>
 
@@ -76,20 +78,20 @@ export default function BookingsPage() {
           onChange={e => { setDate(e.target.value); setPage(1); }} />
         <select className={styles.select} value={status}
           onChange={e => { setStatus(e.target.value); setPage(1); }}>
-          <option value="">Все статусы</option>
+          <option value="">{t('bookings.all_statuses')}</option>
           {Object.entries(STATUS_LABELS).map(([v, l]) => <option key={v} value={v}>{l}</option>)}
         </select>
-        <span className={styles.total}>Записей: {total}</span>
+        <span className={styles.total}>{t('bookings.count', { n: total })}</span>
       </div>
 
       {/* Таблица */}
       <div className={styles.tableWrap}>
-        {loading ? <div className={styles.loading}>Загрузка…</div> : (
+        {loading ? <div className={styles.loading}>{t('common.loading')}</div> : (
           <table className={styles.table}>
             <thead>
               <tr>
-                <th>Время</th><th>Клиент</th><th>Услуга</th>
-                <th>Автомобиль</th><th>Статус</th><th>Действия</th>
+                <th>{t('bookings.th_time')}</th><th>{t('bookings.th_client')}</th><th>{t('bookings.th_service')}</th>
+                <th>{t('bookings.th_vehicle')}</th><th>{t('bookings.th_status')}</th><th>{t('bookings.th_actions')}</th>
               </tr>
             </thead>
             <tbody>
@@ -121,13 +123,13 @@ export default function BookingsPage() {
                     <span className={styles.badge} style={{ background: STATUS_COLORS[b.status] + '22', color: STATUS_COLORS[b.status] }}>
                       {STATUS_LABELS[b.status] ?? b.status}
                     </span>
-                    <div className={styles.source}>{b.source === 'WIDGET' ? '🌐 Сайт' : '📱 Приложение'}</div>
+                    <div className={styles.source}>{b.source === 'WIDGET' ? `🌐 ${t('bookings.source_site')}` : `📱 ${t('bookings.source_app')}`}</div>
                   </td>
                   <td>
                     <div className={styles.actions}>
                       {b.status === 'PENDING' && (
                         <>
-                          <button className={styles.btnConfirm} onClick={() => updateStatus(b.id, 'CONFIRMED')}>✅ Подтвердить</button>
+                          <button className={styles.btnConfirm} onClick={() => updateStatus(b.id, 'CONFIRMED')}>✅ {t('bookings.confirm_btn')}</button>
                           <button className={styles.btnCancel}  onClick={() => updateStatus(b.id, 'CANCELLED')}>✕</button>
                         </>
                       )}
@@ -137,21 +139,21 @@ export default function BookingsPage() {
                           onClick={() => convertToOrder(b.id)}
                           disabled={converting === b.id}
                         >
-                          {converting === b.id ? '…' : '📋 В заказ'}
+                          {converting === b.id ? '…' : `📋 ${t('bookings.to_order_btn')}`}
                         </button>
                       )}
                       {b.status === 'CONFIRMED' && (
-                        <button className={styles.btnNoShow} onClick={() => updateStatus(b.id, 'NO_SHOW')}>Не явился</button>
+                        <button className={styles.btnNoShow} onClick={() => updateStatus(b.id, 'NO_SHOW')}>{t('bookings.status.NO_SHOW')}</button>
                       )}
                       {b.convertedOrderId && (
-                        <span className={styles.orderLink}>Заказ создан ✅</span>
+                        <span className={styles.orderLink}>{t('bookings.order_created_badge')} ✅</span>
                       )}
                     </div>
                   </td>
                 </tr>
               ))}
               {bookings.length === 0 && (
-                <tr><td colSpan={6} className={styles.empty}>Записей за выбранный день нет</td></tr>
+                <tr><td colSpan={6} className={styles.empty}>{t('bookings.empty_day')}</td></tr>
               )}
             </tbody>
           </table>
@@ -159,9 +161,9 @@ export default function BookingsPage() {
       </div>
 
       <div className={styles.pagination}>
-        <button disabled={page === 1} onClick={() => setPage(p => p - 1)}>← Назад</button>
-        <span>Стр. {page}</span>
-        <button disabled={bookings.length < 30} onClick={() => setPage(p => p + 1)}>Вперёд →</button>
+        <button disabled={page === 1} onClick={() => setPage(p => p - 1)}>← {t('bookings.back')}</button>
+        <span>{t('bookings.page', { n: page })}</span>
+        <button disabled={bookings.length < 30} onClick={() => setPage(p => p + 1)}>{t('bookings.forward')} →</button>
       </div>
     </div>
   );
