@@ -96,6 +96,13 @@ const translations: Record<Locale, Record<string, string>> = {
     'chat.prompt_battery':     'Не заряжается аккумулятор',
     'chat.prompt_maintenance': 'Нужно ТО',
     'chat.placeholder':        'Опишите проблему…',
+    // Канбан заказов (исполнитель)
+    'exec.eyebrow_label': 'Исполнительская панель',
+    'exec.title':         'КАНБАН ЗАКАЗОВ',
+    'exec.col.new':       'Новые',
+    'exec.col.confirmed': 'Подтверждены',
+    'exec.col.ready':     'Готовы',
+    'exec.no_orders':     'Нет заказов',
   },
 
   kk: {
@@ -187,6 +194,13 @@ const translations: Record<Locale, Record<string, string>> = {
     'chat.prompt_battery':     'Аккумулятор зарядталмайды',
     'chat.prompt_maintenance': 'ТО керек',
     'chat.placeholder':        'Ақауды сипаттаңыз…',
+    // Канбан заказов (исполнитель)
+    'exec.eyebrow_label': 'Атқарушы панель',
+    'exec.title':         'ТАПСЫРЫСТАР КАНБАНЫ',
+    'exec.col.new':       'Жаңа',
+    'exec.col.confirmed': 'Расталған',
+    'exec.col.ready':     'Дайын',
+    'exec.no_orders':     'Тапсырыстар жоқ',
   },
 
   en: {
@@ -273,6 +287,13 @@ const translations: Record<Locale, Record<string, string>> = {
     'chat.prompt_battery':     "Battery won't charge",
     'chat.prompt_maintenance': 'Need maintenance',
     'chat.placeholder':        'Describe the issue…',
+    // Orders kanban (exec)
+    'exec.eyebrow_label': 'Executive panel',
+    'exec.title':         'ORDERS KANBAN',
+    'exec.col.new':       'New',
+    'exec.col.confirmed': 'Confirmed',
+    'exec.col.ready':     'Ready',
+    'exec.no_orders':     'No orders',
   },
 };
 
