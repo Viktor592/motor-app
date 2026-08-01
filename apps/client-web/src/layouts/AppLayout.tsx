@@ -2,18 +2,20 @@ import { Outlet, NavLink } from 'react-router-dom';
 import { useEffect } from 'react';
 import { Hexagon, CalendarPlus, ClipboardList, PackageSearch, Bot, User, LogOut } from 'lucide-react';
 import { connectSocket, disconnectSocket } from '../services/socket';
+import { useLocale } from '../services/i18n';
 import s from './AppLayout.module.css';
 
 const NAV = [
-  { to: '/',        icon: Hexagon,      label: 'Главная' },
-  { to: '/booking', icon: CalendarPlus, label: 'Запись'  },
-  { to: '/orders',  icon: ClipboardList,label: 'Заказы'  },
-  { to: '/parts',   icon: PackageSearch,label: 'Запчасти'},
-  { to: '/chat',    icon: Bot,          label: 'AI-чат'  },
-  { to: '/profile', icon: User,         label: 'Профиль' },
+  { to: '/',        icon: Hexagon,      key: 'nav.client.home'    },
+  { to: '/booking', icon: CalendarPlus, key: 'nav.client.booking' },
+  { to: '/orders',  icon: ClipboardList,key: 'nav.client.orders'  },
+  { to: '/parts',   icon: PackageSearch,key: 'nav.client.parts'   },
+  { to: '/chat',    icon: Bot,          key: 'nav.client.chat'    },
+  { to: '/profile', icon: User,         key: 'nav.client.profile'},
 ];
 
 export default function AppLayout() {
+  const { t } = useLocale();
   useEffect(() => { connectSocket(); return disconnectSocket; }, []);
 
   return (
@@ -22,7 +24,7 @@ export default function AppLayout() {
         <span className={s.logo} style={{ display: 'flex', alignItems: 'center', gap: 7 }}>
           <img src="/motor_logo.gif" alt="" style={{ width: 20, height: 20, borderRadius: 5 }} /> МОТОР
         </span>
-        <span className={s.role}>Клиент</span>
+        <span className={s.role}>{t('profile.role.client')}</span>
         <button className={s.logoutBtn}
           onClick={() => { localStorage.clear(); window.location.replace('/login'); }}>
           <LogOut size={14} />
@@ -36,7 +38,7 @@ export default function AppLayout() {
             <NavLink key={n.to} to={n.to} end={n.to === '/'}
               className={({ isActive }) => [s.navItem, isActive ? s.navActive : ''].join(' ')}>
               <Icon size={20} className={s.navIcon} />
-              <span className={s.navLabel}>{n.label}</span>
+              <span className={s.navLabel}>{t(n.key)}</span>
             </NavLink>
           );
         })}
