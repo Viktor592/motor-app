@@ -4,33 +4,34 @@ import { useDispatch, useSelector } from 'react-redux';
 import { fetchOrders } from '../slices/ordersSlice';
 import { AppDispatch, RootState } from '../store';
 import { StatusBadge } from '../components/StatusBadge';
+import { useLocale } from '../services/i18n';
 import s from './ExecOrdersPage.module.css';
-
-const COLUMNS = [
-  { status: 'NEW',         label: 'Новые',      color: 'var(--blue)' },
-  { status: 'CONFIRMED',   label: 'Подтверждены', color: 'var(--teal)' },
-  { status: 'IN_PROGRESS', label: 'В работе',   color: 'var(--ore)' },
-  { status: 'READY',       label: 'Готовы',     color: 'var(--green)' },
-];
 
 const SPEC_ICO: Record<string, string> = {
   MECHANIC: '🔧', ELECTRICIAN: '⚡', DIAGNOSTICS: '🔍', PARTS: '📦',
 };
 
 export default function ExecOrdersPage() {
+  const { t } = useLocale();
   const dispatch = useDispatch<AppDispatch>();
   const { list, loading } = useSelector((st: RootState) => st.orders);
+  const COLUMNS = [
+    { status: 'NEW',         label: t('exec.col.new'),       color: 'var(--blue)' },
+    { status: 'CONFIRMED',   label: t('exec.col.confirmed'), color: 'var(--teal)' },
+    { status: 'IN_PROGRESS', label: t('order.status.IN_PROGRESS'), color: 'var(--ore)' },
+    { status: 'READY',       label: t('exec.col.ready'),     color: 'var(--green)' },
+  ];
 
   useEffect(() => { dispatch(fetchOrders()); }, []);
 
   return (
     <div className={s.page}>
       <div className={s.header}>
-        <div className={s.eye}>// Исполнительская панель</div>
-        <h1 className={s.h1}>КАНБАН ЗАКАЗОВ</h1>
+        <div className={s.eye}>// {t('exec.eyebrow_label')}</div>
+        <h1 className={s.h1}>{t('exec.title')}</h1>
       </div>
 
-      {loading && <p className={s.loading}>Загрузка…</p>}
+      {loading && <p className={s.loading}>{t('common.loading')}</p>}
 
       <div className={s.board}>
         {COLUMNS.map(col => {
@@ -43,7 +44,7 @@ export default function ExecOrdersPage() {
               </div>
               <div className={s.colCards}>
                 {orders.length === 0 && (
-                  <div className={s.colEmpty}>Нет заказов</div>
+                  <div className={s.colEmpty}>{t('exec.no_orders')}</div>
                 )}
                 {orders.map(o => (
                   <Link to={`/orders/${o.id}`} key={o.id} className={s.card}>
