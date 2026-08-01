@@ -73,6 +73,13 @@ const translations: Record<Locale, Record<string, string>> = {
     'auth.err.fill_all':       'Введите телефон и пароль',
     'auth.err.staff_only':     'Этот вход только для сотрудников автосервиса',
     'auth.err.bad_creds':      'Неверный телефон или пароль',
+    // Меню и роли (AppLayout)
+    'nav.staff.orders':    'Заказы',
+    'nav.staff.bookings':  'Записи',
+    'nav.staff.analytics': 'Аналитика',
+    'nav.staff.profile':   'Профиль',
+    'role.master':         'Мастер',
+    'role.receptionist':   'Приёмщик',
   },
 
   kk: {
@@ -141,6 +148,13 @@ const translations: Record<Locale, Record<string, string>> = {
     'auth.err.fill_all':       'Телефон мен құпия сөзді енгізіңіз',
     'auth.err.staff_only':     'Бұл кіру тек автосервис қызметкерлеріне арналған',
     'auth.err.bad_creds':      'Қате телефон немесе құпия сөз',
+    // Меню и роли (AppLayout)
+    'nav.staff.orders':    'Тапсырыстар',
+    'nav.staff.bookings':  'Жазбалар',
+    'nav.staff.analytics': 'Аналитика',
+    'nav.staff.profile':   'Профиль',
+    'role.master':         'Шебер',
+    'role.receptionist':   'Қабылдаушы',
   },
 
   en: {
@@ -204,6 +218,13 @@ const translations: Record<Locale, Record<string, string>> = {
     'auth.err.fill_all':       'Enter your phone and password',
     'auth.err.staff_only':     'This login is for auto shop staff only',
     'auth.err.bad_creds':      'Incorrect phone or password',
+    // Menu and roles (AppLayout)
+    'nav.staff.orders':    'Orders',
+    'nav.staff.bookings':  'Bookings',
+    'nav.staff.analytics': 'Analytics',
+    'nav.staff.profile':   'Profile',
+    'role.master':         'Master',
+    'role.receptionist':   'Receptionist',
   },
 };
 
