@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
+import { useLocale } from '../services/i18n';
 import s from './Auth.module.css';
 
 const ROLE_URLS: Record<string, string> = {
@@ -11,6 +12,7 @@ const ROLE_URLS: Record<string, string> = {
 };
 
 export default function LoginPage() {
+  const { t } = useLocale();
   const [phone, setPhone]       = useState('');
   const [password, setPassword] = useState('');
   const [error, setError]       = useState('');
@@ -25,7 +27,7 @@ export default function LoginPage() {
 
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!phone || !password) { setError('Введите телефон и пароль'); return; }
+    if (!phone || !password) { setError(t('auth.err.fill_all')); return; }
     setLoading(true); setError('');
     try {
       const res  = await fetch('/api/v1/auth/login', {
@@ -34,7 +36,7 @@ export default function LoginPage() {
         body: JSON.stringify({ phone, password }),
       });
       const data = await res.json();
-      if (!res.ok) throw new Error(data.error ?? 'Ошибка входа');
+      if (!res.ok) throw new Error(data.error ?? t('auth.err.login_failed'));
 
       // Редирект по роли — токены передаём через URL, т.к. localStorage
       // не общий между разными портами (разные origin для браузера)
@@ -61,24 +63,24 @@ export default function LoginPage() {
         <div className={s.logo} style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
           <img src="/motor_logo.gif" alt="" style={{ width: 24, height: 24, borderRadius: 6 }} /> МОТОР
         </div>
-        <h1 className={s.title}>Вход</h1>
+        <h1 className={s.title}>{t('auth.title')}</h1>
 
         {error && <div className={s.err}>{error}</div>}
 
-        <label className={s.label}>Телефон</label>
+        <label className={s.label}>{t('auth.phone_label')}</label>
         <input className={s.input} type="tel" placeholder="+79001234567"
           value={phone} onChange={e => setPhone(fmtPhone(e.target.value))} autoFocus />
 
-        <label className={s.label}>Пароль</label>
-        <input className={s.input} type="password" placeholder="Пароль"
+        <label className={s.label}>{t('auth.password_label')}</label>
+        <input className={s.input} type="password" placeholder={t('auth.password_label')}
           value={password} onChange={e => setPassword(e.target.value)} />
 
         <button className={s.btn} type="submit" disabled={loading}>
-          {loading ? '…' : 'Войти →'}
+          {loading ? '…' : t('auth.login_btn')}
         </button>
 
         <p className={s.hint}>
-          Нет аккаунта? <Link to="/register">Зарегистрировать автосервис</Link>
+          {t('auth.no_account')} <Link to="/register">{t('auth.register_link')}</Link>
         </p>
       </form>
     </div>
