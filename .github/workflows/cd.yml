@@ -15,37 +15,6 @@ jobs:
     environment: production
 
     steps:
-      - uses: actions/checkout@v4
-
-      - name: Log in to Docker Hub
-        uses: docker/login-action@v3
-        with:
-          username: ${{ secrets.DOCKER_USER }}
-          password: ${{ secrets.DOCKER_TOKEN }}
-
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v3
-
-      - name: Build & push backend
-        uses: docker/build-push-action@v5
-        with:
-          context:    ./backend
-          push:       true
-          tags:       ${{ secrets.DOCKER_USER }}/motor-backend:latest
-          cache-from: type=gha
-          cache-to:   type=gha,mode=max
-
-      - name: Build & push web
-        uses: docker/build-push-action@v5
-        with:
-          context:   ./web
-          push:      true
-          tags:      ${{ secrets.DOCKER_USER }}/motor-web:latest
-          build-args: |
-            VITE_API_URL=https://${{ secrets.DOMAIN }}/api/v1
-          cache-from: type=gha
-          cache-to:   type=gha,mode=max
-
       - name: Deploy to server
         uses: appleboy/ssh-action@v1
         with:
@@ -55,10 +24,11 @@ jobs:
           port:     ${{ secrets.SSH_PORT || 22 }}
           script: |
             set -e
-            cd /opt/motor-app
-            docker compose pull backend web
+            cd ~/motor-app
+            git pull origin main
+            docker compose build backend saas client-web staff-web admin
             docker compose run --rm backend npx prisma migrate deploy
-            docker compose up -d --no-deps backend web nginx
+            docker compose up -d --no-deps backend saas client-web staff-web admin nginx
             docker image prune -f
             sleep 5
             curl -sf http://localhost/health || exit 1
