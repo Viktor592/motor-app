@@ -4,9 +4,11 @@ import { useDispatch, useSelector } from 'react-redux';
 import { sendMessage, fetchMessages, addMessage } from '../slices/chatSlice';
 import { AppDispatch, RootState } from '../store';
 import { getSocket, joinOrder } from '../services/socket';
+import { useLocale } from '../services/i18n';
 import s from './ChatPage.module.css';
 
 export default function ChatPage() {
+  const { t } = useLocale();
   const { orderId } = useParams<{ orderId?: string }>();
   const dispatch = useDispatch<AppDispatch>();
   const { messages, sending, loading } = useSelector((st: RootState) => st.chat);
@@ -39,21 +41,21 @@ export default function ChatPage() {
       <div className={s.header}>
         <div className={s.agentDot} />
         <div>
-          <div className={s.agentName}>Агент «Приёмщик»</div>
-          <div className={s.agentStatus}>● Онлайн · Powered by Claude AI · claude-sonnet-4-6</div>
+          <div className={s.agentName}>{t('chat.agent_name')}</div>
+          <div className={s.agentStatus}>● {t('chat.online')} · Powered by Claude AI · claude-sonnet-4-6</div>
         </div>
       </div>
 
       {/* Messages */}
       <div className={s.messages}>
-        {loading && <p className={s.loading}>Загрузка истории…</p>}
+        {loading && <p className={s.loading}>{t('chat.loading_history')}</p>}
         {!loading && messages.length === 0 && (
           <div className={s.welcome}>
             <div className={s.welcomeIco}>🤖</div>
-            <h3 className={s.welcomeTitle}>Агент готов к работе</h3>
-            <p className={s.welcomeText}>Опишите проблему с вашим автомобилем — я задам уточняющие вопросы, помогу разобраться и запишу к нужному специалисту.</p>
+            <h3 className={s.welcomeTitle}>{t('chat.agent_ready')}</h3>
+            <p className={s.welcomeText}>{t('chat.welcome_text')}</p>
             <div className={s.prompts}>
-              {['Стук в подвеске при повороте', 'Горит чек двигателя', 'Не заряжается аккумулятор', 'Нужно ТО'].map(p => (
+              {[t('chat.prompt_suspension'), t('chat.prompt_check_engine'), t('chat.prompt_battery'), t('chat.prompt_maintenance')].map(p => (
                 <button key={p} className={s.promptBtn} onClick={() => { setText(p); }}>
                   {p}
                 </button>
@@ -86,7 +88,7 @@ export default function ChatPage() {
       {/* Input */}
       <form className={s.inputRow} onSubmit={submit}>
         <textarea className={s.input} value={text} onChange={e => setText(e.target.value)}
-          placeholder="Опишите проблему…" rows={1} maxLength={2000}
+          placeholder={t('chat.placeholder')} rows={1} maxLength={2000}
           onKeyDown={e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); submit(e as any); } }}
         />
         <button className={s.sendBtn} type="submit" disabled={!text.trim() || sending}>↑</button>
