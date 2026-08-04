@@ -41,6 +41,13 @@ const translations: Record<Locale, Record<string, string>> = {
     'chat.prompt_battery':     'Не заряжается аккумулятор',
     'chat.prompt_maintenance': 'Нужно ТО',
     'chat.placeholder':        'Опишите проблему…',
+    // Акции (PromotionsPage)
+    'promotions.title':            'Акции для клиентов',
+    'promotions.subtitle':         'Простое объявление об акции — видно только вашим клиентам. Запуском рекламы на платформе занимается администрация МОТОР.',
+    'promotions.title_placeholder':'Заголовок (например: Скидка 15% на ТО)',
+    'promotions.body_placeholder': 'Текст акции',
+    'promotions.publish_btn':      '+ Опубликовать акцию',
+    'promotions.empty':            'Акций пока нет',
     // Общее
     'common.save':    'Сохранить',
     'common.cancel':  'Отмена',
@@ -102,6 +109,13 @@ const translations: Record<Locale, Record<string, string>> = {
     'chat.prompt_battery':     'Аккумулятор зарядталмайды',
     'chat.prompt_maintenance': 'ТО керек',
     'chat.placeholder':        'Ақауды сипаттаңыз…',
+    // Акции (PromotionsPage)
+    'promotions.title':            'Клиенттерге арналған акциялар',
+    'promotions.subtitle':         'Акция туралы қарапайым хабарландыру — тек сіздің клиенттеріңізге көрінеді. Платформада жарнама іске қосумен МОТОР әкімшілігі айналысады.',
+    'promotions.title_placeholder':'Тақырып (мысалы: ТО-ға 15% жеңілдік)',
+    'promotions.body_placeholder': 'Акция мәтіні',
+    'promotions.publish_btn':      '+ Акцияны жариялау',
+    'promotions.empty':            'Әзірге акциялар жоқ',
     // Общее
     'common.save':    'Сақтау',
     'common.cancel':  'Болдырмау',
@@ -161,6 +175,13 @@ const translations: Record<Locale, Record<string, string>> = {
     'chat.prompt_battery':     "Battery won't charge",
     'chat.prompt_maintenance': 'Need maintenance',
     'chat.placeholder':        'Describe the issue…',
+    // Promotions (PromotionsPage)
+    'promotions.title':            'Promotions for clients',
+    'promotions.subtitle':         'A simple promotion announcement — visible only to your clients. Launching platform-wide ads is handled by MOTOR administration.',
+    'promotions.title_placeholder':'Title (e.g.: 15% off maintenance)',
+    'promotions.body_placeholder': 'Promotion text',
+    'promotions.publish_btn':      '+ Publish promotion',
+    'promotions.empty':            'No promotions yet',
     'common.save':    'Save',
     'common.cancel':  'Cancel',
     'common.delete':  'Delete',
