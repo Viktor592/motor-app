@@ -1,9 +1,11 @@
 import { useEffect, useState } from 'react';
 import { Trash2 } from 'lucide-react';
 import { api } from '../services/api';
+import { useLocale } from '../services/i18n';
 import s from './AdminPage.module.css';
 
 export default function PromotionsPage() {
+  const { t } = useLocale();
   const [promos, setPromos]     = useState<any[]>([]);
   const [title, setTitle]       = useState('');
   const [body, setBody]         = useState('');
@@ -30,22 +32,22 @@ export default function PromotionsPage() {
 
   return (
     <div className={s.page}>
-      <h1 className={s.h1}>Акции для клиентов</h1>
+      <h1 className={s.h1}>{t('promotions.title')}</h1>
       <p style={{ color: 'var(--dust)', fontSize: 13, marginBottom: 24 }}>
-        Простое объявление об акции — видно только вашим клиентам. Запуском рекламы на платформе занимается администрация МОТОР.
+        {t('promotions.subtitle')}
       </p>
 
       <form onSubmit={create} style={{ maxWidth: 420, display: 'flex', flexDirection: 'column', gap: 10, marginBottom: 32 }}>
-        <input placeholder="Заголовок (например: Скидка 15% на ТО)" value={title} onChange={e => setTitle(e.target.value)}
+        <input placeholder={t('promotions.title_placeholder')} value={title} onChange={e => setTitle(e.target.value)}
           style={{ padding: 10, borderRadius: 8, border: '1px solid var(--wire)', background: 'var(--cage)', color: 'var(--chalk)' }} />
-        <textarea placeholder="Текст акции" value={body} onChange={e => setBody(e.target.value)} rows={3}
+        <textarea placeholder={t('promotions.body_placeholder')} value={body} onChange={e => setBody(e.target.value)} rows={3}
           style={{ padding: 10, borderRadius: 8, border: '1px solid var(--wire)', background: 'var(--cage)', color: 'var(--chalk)', resize: 'vertical' }} />
         <button className={s.tab} disabled={saving} type="submit" style={{ border: '1px solid var(--wire)', borderRadius: 8 }}>
-          {saving ? '…' : '+ Опубликовать акцию'}
+          {saving ? '…' : t('promotions.publish_btn')}
         </button>
       </form>
 
-      {loading ? <div className={s.loading}>Загрузка…</div> : (
+      {loading ? <div className={s.loading}>{t('common.loading')}</div> : (
         <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
           {promos.map(p => (
             <div key={p.id} style={{ display: 'flex', justifyContent: 'space-between', gap: 12,
@@ -60,7 +62,7 @@ export default function PromotionsPage() {
               </button>
             </div>
           ))}
-          {promos.length === 0 && <div style={{ color: 'var(--dust)' }}>Акций пока нет</div>}
+          {promos.length === 0 && <div style={{ color: 'var(--dust)' }}>{t('promotions.empty')}</div>}
         </div>
       )}
     </div>
