@@ -1,14 +1,15 @@
 import { Outlet, NavLink } from 'react-router-dom';
 import { Building2, Users, Megaphone, LogOut } from 'lucide-react';
+import { useLocale } from '../services/i18n';
 import s from '../layouts/AppLayout.module.css';
 
-const NAV = [
-  { to: '/',            icon: Building2, label: 'Автосервисы' },
-  { to: '/users',       icon: Users,     label: 'Пользователи' },
-  { to: '/promotions',  icon: Megaphone, label: 'Акции'        },
-];
-
 export default function SuperAdminLayout() {
+  const { t } = useLocale();
+  const NAV = [
+    { to: '/',            icon: Building2, label: t('super_admin.nav.services')   },
+    { to: '/users',       icon: Users,     label: t('super_admin.nav.users')      },
+    { to: '/promotions',  icon: Megaphone, label: t('super_admin.nav.promotions') },
+  ];
   const name = localStorage.getItem('motor_user_name') ?? '';
 
   return (
@@ -21,7 +22,7 @@ export default function SuperAdminLayout() {
           </div>
           <nav className={s.nav}>
             <div className={s.group}>
-              <div className={s.groupLabel}>Платформа</div>
+              <div className={s.groupLabel}>{t('super_admin.platform_group')}</div>
               {NAV.map(item => {
                 const Icon = item.icon;
                 return (
@@ -39,13 +40,13 @@ export default function SuperAdminLayout() {
           <NavLink to="/profile" className={s.userRow}>
             <span className={s.userAva}>{name.slice(0,1).toUpperCase() || 'S'}</span>
             <span>
-              <div className={s.userName}>{name || 'Супер-админ'}</div>
-              <div className={s.userRole}>Платформа</div>
+              <div className={s.userName}>{name || t('super_admin.name_fallback')}</div>
+              <div className={s.userRole}>{t('super_admin.platform_group')}</div>
             </span>
           </NavLink>
           <button className={s.logoutBtn}
             onClick={() => { localStorage.clear(); window.location.replace('/admin/login'); }}>
-            <LogOut size={13} /> Выйти
+            <LogOut size={13} /> {t('super_admin.logout')}
           </button>
         </div>
       </aside>
