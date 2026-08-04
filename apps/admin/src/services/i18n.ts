@@ -48,6 +48,13 @@ const translations: Record<Locale, Record<string, string>> = {
     'promotions.body_placeholder': 'Текст акции',
     'promotions.publish_btn':      '+ Опубликовать акцию',
     'promotions.empty':            'Акций пока нет',
+    // Меню супер-админа (SuperAdminLayout)
+    'super_admin.nav.services':   'Автосервисы',
+    'super_admin.nav.users':      'Пользователи',
+    'super_admin.nav.promotions': 'Акции',
+    'super_admin.platform_group': 'Платформа',
+    'super_admin.name_fallback':  'Супер-админ',
+    'super_admin.logout':         'Выйти',
     // Общее
     'common.save':    'Сохранить',
     'common.cancel':  'Отмена',
@@ -116,6 +123,13 @@ const translations: Record<Locale, Record<string, string>> = {
     'promotions.body_placeholder': 'Акция мәтіні',
     'promotions.publish_btn':      '+ Акцияны жариялау',
     'promotions.empty':            'Әзірге акциялар жоқ',
+    // Меню супер-админа (SuperAdminLayout)
+    'super_admin.nav.services':   'Автосервистер',
+    'super_admin.nav.users':      'Пайдаланушылар',
+    'super_admin.nav.promotions': 'Акциялар',
+    'super_admin.platform_group': 'Платформа',
+    'super_admin.name_fallback':  'Супер-админ',
+    'super_admin.logout':         'Шығу',
     // Общее
     'common.save':    'Сақтау',
     'common.cancel':  'Болдырмау',
@@ -182,6 +196,13 @@ const translations: Record<Locale, Record<string, string>> = {
     'promotions.body_placeholder': 'Promotion text',
     'promotions.publish_btn':      '+ Publish promotion',
     'promotions.empty':            'No promotions yet',
+    // Super admin menu (SuperAdminLayout)
+    'super_admin.nav.services':   'Auto Shops',
+    'super_admin.nav.users':      'Users',
+    'super_admin.nav.promotions': 'Promotions',
+    'super_admin.platform_group': 'Platform',
+    'super_admin.name_fallback':  'Super Admin',
+    'super_admin.logout':         'Log out',
     'common.save':    'Save',
     'common.cancel':  'Cancel',
     'common.delete':  'Delete',
