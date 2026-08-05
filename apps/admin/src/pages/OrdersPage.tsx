@@ -4,11 +4,13 @@ import { useDispatch, useSelector } from 'react-redux';
 import { fetchOrders } from '../slices/ordersSlice';
 import { AppDispatch, RootState } from '../store';
 import { StatusBadge } from '../components/StatusBadge';
+import { useLocale } from '../services/i18n';
 import s from './OrdersPage.module.css';
 
 const FILTERS = ['Все','NEW','IN_PROGRESS','READY','CLOSED','CANCELLED'];
 
 export default function OrdersPage() {
+  const { t } = useLocale();
   const dispatch = useDispatch<AppDispatch>();
   const { list, loading } = useSelector((st: RootState) => st.orders);
   const [filter, setFilter] = useState('Все');
@@ -31,28 +33,28 @@ export default function OrdersPage() {
     <div className={s.page}>
       <div className={s.header}>
         <div>
-          <div className={s.eye}>// Мои заказы</div>
-          <h1 className={s.h1}>ЗАКАЗЫ</h1>
+          <div className={s.eye}>// {t('orders_page.eyebrow')}</div>
+          <h1 className={s.h1}>{t('orders_page.title')}</h1>
         </div>
       </div>
 
-      <input className={s.search} placeholder='Поиск по номеру, марке, клиенту…' value={search} onChange={e => setSearch(e.target.value)} />
+      <input className={s.search} placeholder={t('orders_page.search_placeholder')} value={search} onChange={e => setSearch(e.target.value)} />
       <div className={s.filters}>
         {FILTERS.map(f => (
           <button key={f} className={`${s.fBtn} ${filter === f ? s.fActive : ''}`}
             onClick={() => setFilter(f)}>
-            {f === 'Все' ? 'Все' : <StatusBadge status={f} />}
+            {f === 'Все' ? t('super_admin_users.all') : <StatusBadge status={f} />}
             {f === 'Все' && <span className={s.fCount}>{list.length}</span>}
           </button>
         ))}
       </div>
 
-      {loading && <p className={s.loading}>Загрузка…</p>}
+      {loading && <p className={s.loading}>{t('common.loading')}</p>}
 
       {!loading && shown.length === 0 && (
         <div className={s.empty}>
-          <p>Нет заказов{filter !== 'Все' ? ' с этим статусом' : ''}</p>
-          <Link to="/booking">Записаться →</Link>
+          <p>{t('orders_page.no_orders')}{filter !== 'Все' ? t('orders_page.with_status') : ''}</p>
+          <Link to="/booking">{t('orders_page.book_link')}</Link>
         </div>
       )}
 
@@ -62,7 +64,7 @@ export default function OrdersPage() {
             <div className={s.rowNum}>{o.orderNumber}</div>
             <div className={s.rowCar}>{o.vehicle.brand} {o.vehicle.model} <span>{o.vehicle.year}</span></div>
             <div className={s.rowSpec}>{
-              { MECHANIC: '🔧 Слесарь', ELECTRICIAN: '⚡ Электрик', DIAGNOSTICS: '🔍 Диагност', PARTS: '📦 Запчасти' }[o.specialistType] ?? o.specialistType
+              { MECHANIC: `🔧 ${t('orders_page.spec_mechanic')}`, ELECTRICIAN: `⚡ ${t('orders_page.spec_electrician')}`, DIAGNOSTICS: `🔍 ${t('orders_page.spec_diagnostics')}`, PARTS: `📦 ${t('orders_page.spec_parts')}` }[o.specialistType] ?? o.specialistType
             }</div>
             {o.slot
               ? <div className={s.rowDate}>{new Date(o.slot.startAt).toLocaleDateString('ru',{day:'2-digit',month:'short'})}</div>
