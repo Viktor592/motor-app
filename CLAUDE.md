@@ -78,6 +78,22 @@ motor-app/
 
 Если скилл не установлен: `claude plugins install mattpocock-skills`.
 
+## Дизайн/тест-скиллы
+
+- **emil-design-eng** (`.claude/skills/emil-design-eng/`) — философия Эмиля
+  Ковальски по UI-полировке, анимациям, микро-взаимодействиям. Срабатывает
+  сама при работе с компонентами/анимациями в `apps/*`. MIT, источник:
+  github.com/emilkowalski/skills.
+- **playwright-skill** (`.claude/skills/playwright-skill/`) — браузерная
+  автоматизация/e2e-тесты через Playwright, актуально при 0 текущих тестах.
+  Перед первым использованием: `cd .claude/skills/playwright-skill && npm
+  run setup` (поставит Chromium). MIT, источник:
+  github.com/lackeyjb/playwright-skill.
+- **Impeccable** — не скопирован в репозиторий: у него свой build-пайплайн
+  под каждого провайдера (claude/cursor/codex), копировать исходники руками
+  ненадёжно. Поставь сам из корня репо: `npx impeccable skills install -y
+  --providers=claude --scope=project`. Источник: github.com/pbakaus/impeccable.
+
 ## Команды
 
 ```bash
