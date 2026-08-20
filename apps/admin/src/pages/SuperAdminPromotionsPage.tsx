@@ -1,9 +1,11 @@
 import { useEffect, useState } from 'react';
 import { Trash2 } from 'lucide-react';
 import { api } from '../services/api';
+import { useLocale } from '../services/i18n';
 import s from './AdminPage.module.css';
 
 export default function SuperAdminPromotionsPage() {
+  const { t } = useLocale();
   const [promos, setPromos]     = useState<any[]>([]);
   const [audience, setAudience] = useState<'CLIENTS' | 'OWNERS'>('CLIENTS');
   const [title, setTitle]       = useState('');
@@ -17,7 +19,7 @@ export default function SuperAdminPromotionsPage() {
   useEffect(() => { load(); }, []);
 
   const onFile = (f: File) => {
-    if (f.size > 3_000_000) { setError('Картинка больше 3МБ — выберите файл поменьше'); return; }
+    if (f.size > 3_000_000) { setError(t('super_admin_promotions.img_too_big')); return; }
     const reader = new FileReader();
     reader.onload = () => setImage(reader.result as string);
     reader.readAsDataURL(f);
@@ -35,10 +37,10 @@ export default function SuperAdminPromotionsPage() {
       const serverMsg = e.response?.data?.error;
       const raw = typeof e.response?.data === 'string' ? e.response.data.slice(0, 200) : null;
       setError(
-        serverMsg ? `Ошибка ${status}: ${serverMsg}` :
-        raw       ? `Ошибка ${status}: ${raw}` :
-        status    ? `Ошибка ${status} (${e.message})` :
-        `Нет ответа от сервера: ${e.message}`
+        serverMsg ? t('super_admin_users.err_status', { status, msg: serverMsg }) :
+        raw       ? t('super_admin_users.err_status', { status, msg: raw }) :
+        status    ? t('super_admin_promotions.err_status_only', { status, msg: e.message }) :
+        t('super_admin_users.err_no_response', { msg: e.message })
       );
     } finally { setSaving(false); }
   };
@@ -51,39 +53,39 @@ export default function SuperAdminPromotionsPage() {
   return (
     <div className={s.page}>
       <div className={s.eye}>SUPERADMIN</div>
-      <h1 className={s.h1}>Реклама и акции платформы</h1>
+      <h1 className={s.h1}>{t('super_admin_promotions.title')}</h1>
       <p style={{ color: 'var(--dust)', fontSize: 13, marginBottom: 24 }}>
-        Запускайте отдельно клиентам автосервисов или самим владельцам автосервисов.
+        {t('super_admin_promotions.subtitle')}
       </p>
 
       <form onSubmit={create} style={{ maxWidth: 420, display: 'flex', flexDirection: 'column', gap: 10, marginBottom: 32 }}>
         <div style={{ display: 'flex', gap: 8 }}>
           <button type="button" className={s.tab} data-active={audience === 'CLIENTS'}
             onClick={() => setAudience('CLIENTS')} style={{ flex: 1, border: '1px solid var(--wire)', borderRadius: 8 }}>
-            👤 Клиентам
+            {t('super_admin_promotions.audience_clients')}
           </button>
           <button type="button" className={s.tab} data-active={audience === 'OWNERS'}
             onClick={() => setAudience('OWNERS')} style={{ flex: 1, border: '1px solid var(--wire)', borderRadius: 8 }}>
-            🏢 Автосервисам
+            {t('super_admin_promotions.audience_owners')}
           </button>
         </div>
-        <input placeholder="Заголовок" value={title} onChange={e => setTitle(e.target.value)}
+        <input placeholder={t('promotions.title_placeholder')} value={title} onChange={e => setTitle(e.target.value)}
           style={{ padding: 10, borderRadius: 8, border: '1px solid var(--wire)', background: 'var(--cage)', color: 'var(--chalk)' }} />
-        <textarea placeholder="Текст акции" value={body} onChange={e => setBody(e.target.value)} rows={3}
+        <textarea placeholder={t('promotions.body_placeholder')} value={body} onChange={e => setBody(e.target.value)} rows={3}
           style={{ padding: 10, borderRadius: 8, border: '1px solid var(--wire)', background: 'var(--cage)', color: 'var(--chalk)', resize: 'vertical' }} />
         <label style={{ fontSize: 13, color: 'var(--dust)' }}>
-          Картинка или GIF (необязательно, до 3МБ)
+          {t('super_admin_promotions.image_hint')}
           <input type="file" accept="image/*" style={{ display: 'block', marginTop: 6 }}
             onChange={e => e.target.files?.[0] && onFile(e.target.files[0])} />
         </label>
-        {image && <img src={image} alt="превью" style={{ maxWidth: '100%', borderRadius: 8, border: '1px solid var(--wire)' }} />}
+        {image && <img src={image} alt="preview" style={{ maxWidth: '100%', borderRadius: 8, border: '1px solid var(--wire)' }} />}
         {error && <div style={{ color: '#e5484d', fontSize: 13 }}>{error}</div>}
         <button className={s.tab} disabled={saving} type="submit" style={{ border: '1px solid var(--wire)', borderRadius: 8 }}>
-          {saving ? '…' : '+ Опубликовать'}
+          {saving ? '…' : t('super_admin_promotions.publish_btn')}
         </button>
       </form>
 
-      {loading ? <div className={s.loading}>Загрузка…</div> : (
+      {loading ? <div className={s.loading}>{t('common.loading')}</div> : (
         <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
           {promos.map(p => (
             <div key={p.id} style={{ display: 'flex', justifyContent: 'space-between', gap: 12,
@@ -91,7 +93,7 @@ export default function SuperAdminPromotionsPage() {
               {p.imageUrl && <img src={p.imageUrl} alt="" style={{ width: 60, height: 60, borderRadius: 8, objectFit: 'cover', flexShrink: 0 }} />}
               <div style={{ flex: 1 }}>
                 <div style={{ fontSize: 10, color: 'var(--ore)', fontWeight: 700, marginBottom: 3 }}>
-                  {p.audience === 'OWNERS' ? '🏢 АВТОСЕРВИСАМ' : '👤 КЛИЕНТАМ'}
+                  {p.audience === 'OWNERS' ? t('super_admin_promotions.badge_owners') : t('super_admin_promotions.badge_clients')}
                 </div>
                 <div style={{ fontWeight: 700, color: 'var(--chalk)', marginBottom: 4 }}>{p.title}</div>
                 <div style={{ fontSize: 13, color: 'var(--ash)' }}>{p.body}</div>
@@ -102,7 +104,7 @@ export default function SuperAdminPromotionsPage() {
               </button>
             </div>
           ))}
-          {promos.length === 0 && <div style={{ color: 'var(--dust)' }}>Акций пока нет</div>}
+          {promos.length === 0 && <div style={{ color: 'var(--dust)' }}>{t('promotions.empty')}</div>}
         </div>
       )}
     </div>
