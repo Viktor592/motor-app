@@ -5,48 +5,49 @@ import {
   BarChart3, FileText, Plug, Users, Gem, Settings, User, LogOut, Megaphone,
 } from 'lucide-react';
 import { connectSocket, disconnectSocket } from '../services/socket';
+import { useLocale } from '../services/i18n';
 import s from './AppLayout.module.css';
 
-const GROUPS = [
-  {
-    label: 'Обзор',
-    items: [{ to: '/', icon: Gauge, label: 'Панель' }],
-  },
-  {
-    label: 'Работа',
-    items: [
-      { to: '/orders',    icon: ClipboardList, label: 'Заказы'   },
-      { to: '/bookings',  icon: CalendarDays,  label: 'Записи'   },
-      { to: '/warehouse', icon: Package,       label: 'Склад'    },
-    ],
-  },
-  {
-    label: 'Финансы',
-    items: [
-      { to: '/finance', icon: Wallet,     label: 'Финансы' },
-      { to: '/pnl',     icon: TrendingUp, label: 'P&L'     },
-      { to: '/report',  icon: BarChart3,  label: 'Отчёты'  },
-    ],
-  },
-  {
-    label: 'Команда и тариф',
-    items: [
-      { to: '/staff',      icon: Users,     label: 'Сотрудники' },
-      { to: '/promotions', icon: Megaphone, label: 'Акции'      },
-      { to: '/plans',      icon: Gem,       label: 'Тариф'      },
-    ],
-  },
-  {
-    label: 'Система',
-    items: [
-      { to: '/edo',         icon: FileText, label: 'ЭДО'         },
-      { to: '/integration', icon: Plug,     label: 'Интеграции'  },
-      { to: '/settings',    icon: Settings, label: 'Настройки'   },
-    ],
-  },
-];
-
 export default function AppLayout() {
+  const { t } = useLocale();
+  const GROUPS = [
+    {
+      label: t('admin_nav.group_overview'),
+      items: [{ to: '/', icon: Gauge, label: t('admin_nav.dashboard') }],
+    },
+    {
+      label: t('admin_nav.group_work'),
+      items: [
+        { to: '/orders',    icon: ClipboardList, label: t('admin_nav.orders')    },
+        { to: '/bookings',  icon: CalendarDays,  label: t('admin_nav.bookings')  },
+        { to: '/warehouse', icon: Package,       label: t('admin_nav.warehouse') },
+      ],
+    },
+    {
+      label: t('admin_nav.group_finance'),
+      items: [
+        { to: '/finance', icon: Wallet,     label: t('admin_nav.group_finance') },
+        { to: '/pnl',     icon: TrendingUp, label: 'P&L'     },
+        { to: '/report',  icon: BarChart3,  label: t('admin_nav.reports') },
+      ],
+    },
+    {
+      label: t('admin_nav.group_team'),
+      items: [
+        { to: '/staff',      icon: Users,     label: t('admin_nav.staff')      },
+        { to: '/promotions', icon: Megaphone, label: t('admin_nav.promotions') },
+        { to: '/plans',      icon: Gem,       label: t('admin_nav.plans')      },
+      ],
+    },
+    {
+      label: t('admin_nav.group_system'),
+      items: [
+        { to: '/edo',         icon: FileText, label: t('admin_nav.edo')         },
+        { to: '/integration', icon: Plug,     label: t('admin_nav.integration') },
+        { to: '/settings',    icon: Settings, label: t('admin_nav.settings')    },
+      ],
+    },
+  ];
   useEffect(() => { connectSocket(); return disconnectSocket; }, []);
   const name = localStorage.getItem('motor_user_name') ?? '';
 
@@ -82,13 +83,13 @@ export default function AppLayout() {
           <NavLink to="/profile" className={({ isActive }) => [s.userRow, isActive ? s.userRowActive : ''].join(' ')}>
             <span className={s.userAva}><User size={15} /></span>
             <span>
-              <div className={s.userName}>{name || 'Владелец'}</div>
-              <div className={s.userRole}>Владелец сервиса</div>
+              <div className={s.userName}>{name || t('admin_nav.owner_fallback')}</div>
+              <div className={s.userRole}>{t('admin_nav.owner_role')}</div>
             </span>
           </NavLink>
           <button className={s.logoutBtn}
             onClick={() => { localStorage.clear(); window.location.replace('/owner/login'); }}>
-            <LogOut size={13} /> Выйти
+            <LogOut size={13} /> {t('super_admin.logout')}
           </button>
         </div>
       </aside>
