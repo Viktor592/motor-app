@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { api } from '../services/api';
 import { Link } from 'react-router-dom';
+import { useLocale } from '../services/i18n';
 import s from './AdminPage.module.css';
 
 interface PriceRule { id: string; category: string; markupPct: number; updatedAt: string; }
@@ -12,20 +13,20 @@ interface Stats {
 interface PostLoad { id: string; name: string; type: string; total: number; booked: number; free: number; }
 interface User { id: string; name: string; phoneMasked: string; role: string; isActive: boolean; createdAt: string; _count: { orders: number }; }
 
-const CATEGORY_LABELS: Record<string, string> = {
-  OIL_FILTERS: '🛢 Масло и фильтры',
-  OEM:         '⭐ Оригинал OEM',
-  AFTERMARKET: '🔩 Аналоги',
-  BRAKES:      '🛑 Тормоза',
-  BODY:        '🚗 Кузов',
-  CHEMICALS:   '🧪 Химия / расходники',
-};
-
-const ROLE_LABELS: Record<string, string> = {
-  CLIENT: 'Клиент', MASTER: 'Мастер', RECEPTIONIST: 'Приёмщик', ADMIN: 'Администратор',
-};
-
 export default function AdminPage() {
+  const { t } = useLocale();
+  const CATEGORY_LABELS: Record<string, string> = {
+    OIL_FILTERS: `🛢 ${t('admin_page.cat.oil_filters')}`,
+    OEM:         `⭐ ${t('admin_page.cat.oem')}`,
+    AFTERMARKET: `🔩 ${t('admin_page.cat.aftermarket')}`,
+    BRAKES:      `🛑 ${t('admin_page.cat.brakes')}`,
+    BODY:        `🚗 ${t('admin_page.cat.body')}`,
+    CHEMICALS:   `🧪 ${t('admin_page.cat.chemicals')}`,
+  };
+  const ROLE_LABELS: Record<string, string> = {
+    CLIENT: t('super_admin_users.role_client'), MASTER: t('super_admin_users.role_master'),
+    RECEPTIONIST: t('super_admin_users.role_receptionist'), ADMIN: t('admin_page.role_admin'),
+  };
   const [tab,        setTab]     = useState<'stats'|'prices'|'users'|'posts'>('stats');
   const [stats,      setStats]   = useState<Stats | null>(null);
   const [rules,      setRules]   = useState<PriceRule[]>([]);
@@ -41,20 +42,20 @@ export default function AdminPage() {
 
   useEffect(() => { loadTab(tab); }, [tab]);
 
-  const loadTab = async (t: string) => {
+  const loadTab = async (tabName: string) => {
     setLoading(true);
     try {
-      if (t === 'stats') {
+      if (tabName === 'stats') {
         const [s, p] = await Promise.all([api.get('/admin/stats'), api.get('/admin/posts/load')]);
         setStats(s.data); setPosts(p.data);
-      } else if (t === 'prices') {
+      } else if (tabName === 'prices') {
         const { data: r } = await api.get('/admin/price-rules');
         setRules(r);
         setEditPct(Object.fromEntries(r.map((x: PriceRule) => [x.category, x.markupPct])));
-      } else if (t === 'users') {
+      } else if (tabName === 'users') {
         const { data: r } = await api.get('/admin/users');
         setUsers(r.users);
-      } else if (t === 'posts') {
+      } else if (tabName === 'posts') {
         const { data: r } = await api.get('/admin/posts/load');
         setPosts(r);
       }
@@ -92,8 +93,8 @@ export default function AdminPage() {
 
   return (
     <div className={s.page}>
-      <div className={s.eye}>// Администрирование</div>
-      <h1 className={s.h1}>ADMIN-ПАНЕЛЬ</h1>
+      <div className={s.eye}>// {t('admin_page.eyebrow')}</div>
+      <h1 className={s.h1}>{t('admin_page.title')}</h1>
 
       {ownerPromos.length > 0 && (
         <div style={{ display: 'flex', flexDirection: 'column', gap: 10, margin: '16px 0' }}>
@@ -114,31 +115,31 @@ export default function AdminPage() {
       {/* Tabs */}
       <div className={s.tabs}>
         {([
-          ['stats',  '📊 Статистика'],
-          ['prices', '💰 Наценки'],
-          ['posts',  '🔧 Загрузка постов'],
-          ['users',  '👥 Пользователи'],
-        ] as const).map(([t, l]) => (
-          <button key={t} className={`${s.tab} ${tab === t ? s.tabActive : ''}`} onClick={() => setTab(t)}>{l}</button>
+          ['stats',  `📊 ${t('admin_page.tab_stats')}`],
+          ['prices', `💰 ${t('admin_page.tab_prices')}`],
+          ['posts',  `🔧 ${t('admin_page.tab_posts')}`],
+          ['users',  `👥 ${t('admin_page.tab_users')}`],
+        ] as const).map(([tabId, l]) => (
+          <button key={tabId} className={`${s.tab} ${tab === tabId ? s.tabActive : ''}`} onClick={() => setTab(tabId)}>{l}</button>
         ))}
       </div>
 
       <div style={{marginBottom:16}}>
-        <Link to='/settings' style={{color:'var(--dust)',fontSize:13,textDecoration:'none'}}>⚙ Настройки сервиса →</Link>
+        <Link to='/settings' style={{color:'var(--dust)',fontSize:13,textDecoration:'none'}}>⚙ {t('admin_page.settings_link')}</Link>
       </div>
-      {loading && <div className={s.loading}>Загрузка…</div>}
+      {loading && <div className={s.loading}>{t('common.loading')}</div>}
 
       {/* Stats */}
       {tab === 'stats' && stats && (
         <>
           <div className={s.statsGrid}>
             {[
-              { label: 'Всего заказов',  val: stats.orders.total,      color: 'var(--chalk)' },
-              { label: 'Сегодня',        val: stats.orders.today,      color: 'var(--blue)' },
-              { label: 'Новых',          val: stats.orders.new,        color: 'var(--ore)' },
-              { label: 'В работе',       val: stats.orders.inProgress, color: 'var(--gold)' },
-              { label: 'Готово',         val: stats.orders.ready,      color: 'var(--green)' },
-              { label: 'Клиентов',       val: stats.clients.total,     color: 'var(--teal)' },
+              { label: t('admin_page.stat_total_orders'), val: stats.orders.total,      color: 'var(--chalk)' },
+              { label: t('admin_page.stat_today'),        val: stats.orders.today,      color: 'var(--blue)' },
+              { label: t('admin_page.stat_new'),          val: stats.orders.new,        color: 'var(--ore)' },
+              { label: t('order.status.IN_PROGRESS'),     val: stats.orders.inProgress, color: 'var(--gold)' },
+              { label: t('admin_page.stat_ready'),        val: stats.orders.ready,      color: 'var(--green)' },
+              { label: t('admin_page.stat_clients'),      val: stats.clients.total,     color: 'var(--teal)' },
             ].map(({ label, val, color }) => (
               <div key={label} className={s.statCard}>
                 <div className={s.statVal} style={{ color }}>{val.toLocaleString('ru')}</div>
@@ -147,7 +148,7 @@ export default function AdminPage() {
             ))}
           </div>
           <div className={s.revenueCard}>
-            <div className={s.revenueLabel}>Выручка (закрытые заказы)</div>
+            <div className={s.revenueLabel}>{t('admin_page.revenue_label')}</div>
             <div className={s.revenueVal}>{stats.revenue.total.toLocaleString('ru')} ₽</div>
           </div>
         </>
@@ -157,9 +158,9 @@ export default function AdminPage() {
       {tab === 'prices' && (
         <div className={s.rulesTable}>
           <div className={s.rulesHead}>
-            <span>Категория</span>
-            <span>Наценка %</span>
-            <span>Итог. множитель</span>
+            <span>{t('admin_page.th_category')}</span>
+            <span>{t('admin_page.th_markup')}</span>
+            <span>{t('admin_page.th_multiplier')}</span>
             <span></span>
           </div>
           {rules.map(r => (
@@ -180,12 +181,12 @@ export default function AdminPage() {
                 onClick={() => saveRule(r.category)}
                 disabled={saving === r.category || editPct[r.category] === r.markupPct}
               >
-                {saving === r.category ? '…' : '✓ Сохранить'}
+                {saving === r.category ? '…' : `✓ ${t('admin_page.save_btn')}`}
               </button>
             </div>
           ))}
           <div className={s.rulesHint}>
-            Изменения применяются к новым сметам. Существующие заказы не пересчитываются автоматически.
+            {t('admin_page.rules_hint')}
           </div>
         </div>
       )}
@@ -202,8 +203,8 @@ export default function AdminPage() {
                   <div className={s.postBarFill} style={{ width: pct + '%', background: pct > 80 ? 'var(--red)' : pct > 50 ? 'var(--gold)' : 'var(--green)' }} />
                 </div>
                 <div className={s.postMeta}>
-                  <span style={{ color: 'var(--green)' }}>{p.free} свободно</span>
-                  <span style={{ color: 'var(--dust)' }}>{p.booked}/{p.total} занято</span>
+                  <span style={{ color: 'var(--green)' }}>{p.free} {t('admin_page.free_label')}</span>
+                  <span style={{ color: 'var(--dust)' }}>{p.booked}/{p.total} {t('admin_page.booked_label')}</span>
                 </div>
               </div>
             );
@@ -216,17 +217,17 @@ export default function AdminPage() {
         <>
           <input
             className={s.search}
-            placeholder="Поиск по имени или телефону…"
+            placeholder={t('admin_page.search_placeholder')}
             value={userSearch}
             onChange={e => setSearch(e.target.value)}
           />
           <div className={s.usersTable}>
             <div className={s.usersHead}>
-              <span>Пользователь</span>
-              <span>Роль</span>
-              <span>Заказов</span>
-              <span>Статус</span>
-              <span>Действия</span>
+              <span>{t('admin_page.th_user')}</span>
+              <span>{t('super_admin_users.th_role')}</span>
+              <span>{t('admin_page.th_orders')}</span>
+              <span>{t('super_admin_users.th_status')}</span>
+              <span>{t('super_admin_tenants.th_actions')}</span>
             </div>
             {filteredUsers.map(u => (
               <div key={u.id} className={`${s.userRow} ${!u.isActive ? s.userInactive : ''}`}>
@@ -245,10 +246,10 @@ export default function AdminPage() {
                 </select>
                 <span className={s.userOrders}>{u._count.orders}</span>
                 <span className={`${s.userStatus} ${u.isActive ? s.userActive : s.userBlocked}`}>
-                  {u.isActive ? '● Активен' : '○ Заблокирован'}
+                  {u.isActive ? `● ${t('admin_page.status_active')}` : `○ ${t('admin_page.status_blocked')}`}
                 </span>
                 <button className={s.toggleBtn} onClick={() => toggleUser(u.id)}>
-                  {u.isActive ? 'Заблокировать' : 'Активировать'}
+                  {u.isActive ? t('admin_page.block_btn') : t('admin_page.activate_btn')}
                 </button>
               </div>
             ))}
