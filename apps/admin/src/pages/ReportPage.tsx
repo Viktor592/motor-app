@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import styles from './ReportPage.module.css';
 import { api } from '../services/api';
+import { useLocale } from '../services/i18n';
 
 // ── Types ──────────────────────────────────────────────────────
 interface Kpi {
@@ -65,6 +66,7 @@ function Sparkline({ data, valueKey, color = 'var(--accent)' }: {
 }
 
 export default function ReportPage() {
+  const { t } = useLocale();
   const [kpi, setKpi]       = useState<Kpi | null>(null);
   const [report, setReport] = useState<Report | null>(null);
   const [period, setPeriod] = useState('month');
@@ -86,81 +88,86 @@ export default function ReportPage() {
   useEffect(() => { loadKpi(); }, [loadKpi]);
   useEffect(() => { loadReport(); }, [loadReport]);
 
+  const PERIOD_LABELS: Record<string, string> = {
+    week: t('report.period.week'), month: t('report.period.month'),
+    quarter: t('report.period.quarter'), year: t('report.period.year'),
+  };
+
   return (
     <div className={styles.page}>
       <div className={styles.header}>
         <div>
-          <h1 className={styles.title}>Аналитика</h1>
-          <p className={styles.sub}>Сводные отчёты и KPI</p>
+          <h1 className={styles.title}>{t('report.title')}</h1>
+          <p className={styles.sub}>{t('report.sub')}</p>
         </div>
         <div className={styles.periodRow}>
           {(['week','month','quarter','year'] as const).map(p => (
             <button key={p} className={`${styles.pBtn} ${period === p ? styles.pBtnActive : ''}`}
               onClick={() => setPeriod(p)}>
-              {p === 'week' ? 'Нед.' : p === 'month' ? 'Мес.' : p === 'quarter' ? 'Квартал' : 'Год'}
+              {PERIOD_LABELS[p]}
             </button>
           ))}
         </div>
       </div>
 
-      {/* ── KPI Сегодня ── */}
+      {/* KPI */}
       {kpi && (
         <div className={styles.kpiGrid}>
           <div className={styles.kpiCard}>
-            <div className={styles.kpiLabel}>Сегодня заказов</div>
+            <div className={styles.kpiLabel}>{t('report.kpi.today_orders')}</div>
             <div className={styles.kpiValue}>{kpi.today.orders}</div>
             <div className={styles.kpiSub}>{fmt(kpi.today.revenue)}</div>
           </div>
           <div className={styles.kpiCard}>
-            <div className={styles.kpiLabel}>За неделю</div>
+            <div className={styles.kpiLabel}>{t('report.kpi.week')}</div>
             <div className={styles.kpiValue}>{fmt(kpi.week.revenue)}</div>
-            <div className={styles.kpiSub}>{kpi.week.orders} заказов</div>
+            <div className={styles.kpiSub}>{kpi.week.orders} {t('report.kpi.week_orders')}</div>
           </div>
           <div className={styles.kpiCard}>
-            <div className={styles.kpiLabel}>За месяц</div>
+            <div className={styles.kpiLabel}>{t('report.kpi.month')}</div>
             <div className={styles.kpiValue}>{fmt(kpi.month.revenue)}</div>
-            <div className={styles.kpiSub}>{kpi.month.orders} заказов</div>
+            <div className={styles.kpiSub}>{kpi.month.orders} {t('report.kpi.week_orders')}</div>
           </div>
           <div className={styles.kpiCard}>
-            <div className={styles.kpiLabel}>В работе сейчас</div>
+            <div className={styles.kpiLabel}>{t('report.kpi.active')}</div>
             <div className={styles.kpiValue} style={{ color: '#2563eb' }}>{kpi.active}</div>
-            <div className={styles.kpiSub}>активных заказов</div>
+            <div className={styles.kpiSub}>{t('report.kpi.active_sub')}</div>
           </div>
           <div className={styles.kpiCard}>
-            <div className={styles.kpiLabel}>Ждут подтверждения</div>
+            <div className={styles.kpiLabel}>{t('report.kpi.pending')}</div>
             <div className={styles.kpiValue} style={{ color: '#d97706' }}>{kpi.pendingBookings}</div>
-            <div className={styles.kpiSub}>онлайн-записей</div>
+            <div className={styles.kpiSub}>{t('report.kpi.pending_sub')}</div>
           </div>
           <div className={styles.kpiCard}>
-            <div className={styles.kpiLabel}>Касса</div>
+            <div className={styles.kpiLabel}>{t('report.kpi.cashbox')}</div>
             <div className={styles.kpiValue} style={{ color: kpi.shiftOpen ? '#16a34a' : '#dc2626' }}>
-              {kpi.shiftOpen ? '🔓 Открыта' : '🔒 Закрыта'}
+              {kpi.shiftOpen ? t('report.kpi.shift_open') : t('report.kpi.shift_closed')}
             </div>
-            <div className={styles.kpiSub}>текущая смена</div>
+            <div className={styles.kpiSub}>{t('report.kpi.shift_sub')}</div>
           </div>
         </div>
       )}
 
-      {loading ? <div className={styles.loading}>Загрузка отчёта…</div> : report && (
+      {loading ? <div className={styles.loading}>{t('report.loading')}</div> : report && (
         <>
-          {/* ── Финансовое резюме ── */}
+          {/* Финансы */}
           <div className={styles.section}>
             <div className={styles.sectionHead}>
-              <h2 className={styles.sectionTitle}>Финансы за период</h2>
+              <h2 className={styles.sectionTitle}>{t('report.finance_title')}</h2>
               {report.summary.growthPct !== null && (
                 <span className={`${styles.growthBadge} ${report.summary.growthPct >= 0 ? styles.growthPos : styles.growthNeg}`}>
-                  {report.summary.growthPct >= 0 ? '↑' : '↓'} {Math.abs(report.summary.growthPct)}% к прошлому периоду
+                  {report.summary.growthPct >= 0 ? '↑' : '↓'} {Math.abs(report.summary.growthPct)}% {t('report.vs_prev')}
                 </span>
               )}
             </div>
             <div className={styles.finGrid}>
               {[
-                { label: 'Выручка',         value: report.summary.revenue,    color: '#2563eb', sub: `Прошлый: ${fmt(report.summary.prevRevenue)}` },
-                { label: 'Себестоимость',   value: report.summary.cogs,       color: '#6b7280', sub: '' },
-                { label: 'Валовая прибыль', value: report.summary.revenue - report.summary.cogs, color: '#16a34a', sub: `Маржа ${report.summary.grossMarginPct}%` },
-                { label: 'Расходы',         value: report.summary.expenses,   color: '#dc2626', sub: '' },
-                { label: 'Чистая прибыль',  value: report.summary.netProfit,  color: report.summary.netProfit >= 0 ? '#16a34a' : '#dc2626', sub: `Маржа ${report.summary.netMarginPct}%` },
-                { label: 'Средний чек',     value: report.summary.avgCheck,   color: '#7c3aed', sub: `${fmtN(report.summary.totalOrders)} заказов` },
+                { label: t('report.fin.revenue'),   value: report.summary.revenue,                               color: '#2563eb', sub: `${t('report.fin.prev')} ${fmt(report.summary.prevRevenue)}` },
+                { label: t('report.fin.cogs'),      value: report.summary.cogs,                                  color: '#6b7280', sub: '' },
+                { label: t('report.fin.gross'),     value: report.summary.revenue - report.summary.cogs,         color: '#16a34a', sub: `${t('report.fin.margin_pct')} ${report.summary.grossMarginPct}%` },
+                { label: t('report.fin.expenses'),  value: report.summary.expenses,                              color: '#dc2626', sub: '' },
+                { label: t('report.fin.net'),       value: report.summary.netProfit,                             color: report.summary.netProfit >= 0 ? '#16a34a' : '#dc2626', sub: `${t('report.fin.margin_pct')} ${report.summary.netMarginPct}%` },
+                { label: t('report.fin.avg_check'), value: report.summary.avgCheck,                              color: '#7c3aed', sub: `${fmtN(report.summary.totalOrders)} ${t('report.fin.orders_count')}` },
               ].map(m => (
                 <div key={m.label} className={styles.finCard}>
                   <div className={styles.finLabel}>{m.label}</div>
@@ -171,20 +178,20 @@ export default function ReportPage() {
             </div>
           </div>
 
-          {/* ── Динамика выручки ── */}
+          {/* Динамика выручки */}
           {report.daily.length > 1 && (
             <div className={styles.section}>
-              <h2 className={styles.sectionTitle}>Динамика выручки</h2>
+              <h2 className={styles.sectionTitle}>{t('report.revenue_dynamics')}</h2>
               <div className={styles.sparkWrap}>
                 <Sparkline data={report.daily} valueKey="revenue" />
                 <div className={styles.sparkMeta}>
-                  <span className={styles.sparkMax}>Макс: {fmt(Math.max(...report.daily.map(d => d.revenue)))}</span>
-                  <span className={styles.sparkMin}>Мин: {fmt(Math.min(...report.daily.map(d => d.revenue)))}</span>
+                  <span className={styles.sparkMax}>{t('report.max')} {fmt(Math.max(...report.daily.map(d => d.revenue)))}</span>
+                  <span className={styles.sparkMin}>{t('report.min')} {fmt(Math.min(...report.daily.map(d => d.revenue)))}</span>
                 </div>
               </div>
               <div className={styles.dailyTable}>
                 <table className={styles.table}>
-                  <thead><tr><th>Дата</th><th>Заказов</th><th>Выручка</th></tr></thead>
+                  <thead><tr><th>{t('report.th_date')}</th><th>{t('report.th_orders')}</th><th>{t('report.th_revenue')}</th></tr></thead>
                   <tbody>
                     {report.daily.slice(-14).reverse().map(d => (
                       <tr key={d.date}>
@@ -199,13 +206,13 @@ export default function ReportPage() {
             </div>
           )}
 
-          {/* ── Загрузка по дням недели ── */}
+          {/* Загрузка по дням */}
           <div className={styles.twoCol}>
             <div className={styles.section}>
-              <h2 className={styles.sectionTitle}>Загрузка по дням недели</h2>
+              <h2 className={styles.sectionTitle}>{t('report.weekday_load')}</h2>
               <MiniBar data={report.byWeekday} valueKey="orders" labelKey="day" color="#2563eb" />
               <table className={styles.table} style={{ marginTop: 12 }}>
-                <thead><tr><th>День</th><th>Заказов</th><th>Выручка</th></tr></thead>
+                <thead><tr><th>{t('report.th_day')}</th><th>{t('report.th_orders')}</th><th>{t('report.th_revenue')}</th></tr></thead>
                 <tbody>
                   {report.byWeekday.map(d => (
                     <tr key={d.day}>
@@ -218,37 +225,37 @@ export default function ReportPage() {
               </table>
             </div>
 
-            {/* ── Топ услуги ── */}
+            {/* Топ услуги */}
             <div className={styles.section}>
-              <h2 className={styles.sectionTitle}>Топ-10 услуг</h2>
+              <h2 className={styles.sectionTitle}>{t('report.top_services')}</h2>
               <div className={styles.topList}>
-                {report.topServices.map((s, i) => (
-                  <div key={s.name} className={styles.topRow}>
+                {report.topServices.map((svc, i) => (
+                  <div key={svc.name} className={styles.topRow}>
                     <span className={styles.topRank}>#{i + 1}</span>
                     <div className={styles.topInfo}>
-                      <div className={styles.topName}>{s.name}</div>
+                      <div className={styles.topName}>{svc.name}</div>
                       <div className={styles.topBar}>
                         <div className={styles.topBarFill}
-                          style={{ width: `${Math.round(s.revenue / (report.topServices[0]?.revenue || 1) * 100)}%` }} />
+                          style={{ width: `${Math.round(svc.revenue / (report.topServices[0]?.revenue || 1) * 100)}%` }} />
                       </div>
                     </div>
                     <div className={styles.topNums}>
-                      <div className={styles.topRevenue}>{fmt(s.revenue)}</div>
-                      <div className={styles.topCount}>{s.count} раз</div>
+                      <div className={styles.topRevenue}>{fmt(svc.revenue)}</div>
+                      <div className={styles.topCount}>{svc.count} {t('report.times')}</div>
                     </div>
                   </div>
                 ))}
-                {report.topServices.length === 0 && <div className={styles.empty}>Нет данных</div>}
+                {report.topServices.length === 0 && <div className={styles.empty}>{t('report.no_data')}</div>}
               </div>
             </div>
           </div>
 
-          {/* ── Топ мастера ── */}
+          {/* Топ мастера */}
           <div className={styles.section}>
-            <h2 className={styles.sectionTitle}>Рейтинг мастеров</h2>
+            <h2 className={styles.sectionTitle}>{t('report.top_masters')}</h2>
             <table className={styles.table}>
               <thead>
-                <tr><th>#</th><th>Мастер</th><th>Заказов</th><th>Выручка</th><th>Ср. чек</th><th>Доля</th></tr>
+                <tr><th>#</th><th>{t('report.th_master')}</th><th>{t('report.th_orders')}</th><th>{t('report.th_revenue')}</th><th>{t('report.th_avg_check')}</th><th>{t('report.th_share')}</th></tr>
               </thead>
               <tbody>
                 {report.topMasters.map((m, i) => {
@@ -269,7 +276,7 @@ export default function ReportPage() {
                     </tr>
                   );
                 })}
-                {report.topMasters.length === 0 && <tr><td colSpan={6} className={styles.empty}>Нет данных</td></tr>}
+                {report.topMasters.length === 0 && <tr><td colSpan={6} className={styles.empty}>{t('report.no_data')}</td></tr>}
               </tbody>
             </table>
           </div>
