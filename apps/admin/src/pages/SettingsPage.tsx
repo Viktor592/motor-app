@@ -11,28 +11,28 @@ interface HoursSettings   { start: number; end: number; workDays: number[] }
 interface NotifSettings   { newOrdersToTelegram: boolean; statusToClient: boolean; dailyReport: boolean; }
 interface Post            { id: string; name: string; type: string; isActive: boolean; }
 
-const TAB_LABELS: Record<Tab, string> = {
-  service:       '🏢 Сервис',
-  posts:         '🔧 Посты',
-  hours:         '🕘 Часы работы',
-  notifications: '🔔 Уведомления',
-  export:        '📤 Экспорт',
-  appearance:    '🎨 Внешний вид',
+const TAB_LABEL_KEYS: Record<Tab, string> = {
+  service:       'settings.tab.service',
+  posts:         'settings.tab.posts',
+  hours:         'settings.tab.hours',
+  notifications: 'settings.tab.notifications',
+  export:        'settings.tab.export',
+  appearance:    'settings.tab.appearance',
 };
 
 const POST_TYPES = [
-  { value: 'MECHANIC',    label: '🔧 Слесарный'   },
-  { value: 'ELECTRICIAN', label: '⚡ Электрик'     },
-  { value: 'DIAGNOSTICS', label: '🔍 Диагностика'  },
+  { value: 'MECHANIC',    labelKey: 'settings.post_type.mechanic'    },
+  { value: 'ELECTRICIAN', labelKey: 'settings.post_type.electrician' },
+  { value: 'DIAGNOSTICS', labelKey: 'settings.post_type.diagnostics' },
 ];
 
-const DAY_NAMES = ['Вс', 'Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб'];
+const DAY_KEYS = ['settings.day.sun', 'settings.day.mon', 'settings.day.tue', 'settings.day.wed', 'settings.day.thu', 'settings.day.fri', 'settings.day.sat'];
 
 export default function SettingsPage() {
   const [tab,    setTab]   = useState<Tab>('service');
   const [saving, setSaving]= useState(false);
   const { theme, setTheme, isDark } = useTheme();
-  const { locale, setLocale, locales } = useLocale();
+  const { locale, setLocale, locales, t } = useLocale();
   const [saved,  setSaved] = useState('');
 
   // Service
@@ -58,26 +58,26 @@ export default function SettingsPage() {
     api.get('/settings/posts').then(r => setPosts(r.data)).catch(() => {});
   }, []);
 
-  const showSaved = (msg = 'Сохранено') => { setSaved(msg); setTimeout(() => setSaved(''), 2500); };
+  const showSaved = (msg = t('settings.saved')) => { setSaved(msg); setTimeout(() => setSaved(''), 2500); };
 
   const saveService = async () => {
     setSaving(true);
     try { await api.patch('/settings/service', svc); showSaved(); }
-    catch { showSaved('Ошибка'); }
+    catch { showSaved(t('settings.error')); }
     finally { setSaving(false); }
   };
 
   const saveHours = async () => {
     setSaving(true);
     try { await api.patch('/settings/hours', hrs); showSaved(); }
-    catch { showSaved('Ошибка'); }
+    catch { showSaved(t('settings.error')); }
     finally { setSaving(false); }
   };
 
   const saveNotif = async () => {
     setSaving(true);
     try { await api.patch('/settings/notifications', notif); showSaved(); }
-    catch { showSaved('Ошибка'); }
+    catch { showSaved(t('settings.error')); }
     finally { setSaving(false); }
   };
 
@@ -98,9 +98,9 @@ export default function SettingsPage() {
   };
 
   const deletePost = async (id: string) => {
-    if (!confirm('Удалить пост? Все незабронированные слоты будут удалены.')) return;
+    if (!confirm(t('settings.posts.confirm_delete'))) return;
     try { await api.delete(`/settings/posts/${id}`); setPosts(p => p.filter(x => x.id !== id)); }
-    catch (e: any) { alert(e.response?.data?.error ?? 'Ошибка'); }
+    catch (e: any) { alert(e.response?.data?.error ?? t('settings.error')); }
   };
 
   const toggleDay = (day: number) => {
@@ -114,36 +114,36 @@ export default function SettingsPage() {
 
   return (
     <div className={s.page}>
-      <div className={s.eye}>// Администрирование</div>
-      <h1 className={s.h1}>НАСТРОЙКИ</h1>
+      <div className={s.eye}>// {t('settings.eyebrow')}</div>
+      <h1 className={s.h1}>{t('settings.title')}</h1>
 
       <div className={s.layout}>
         {/* Sidebar tabs */}
         <div className={s.sidebar}>
-          {(Object.keys(TAB_LABELS) as Tab[]).map(t => (
-            <button key={t}
-              className={`${s.tabBtn} ${tab === t ? s.tabActive : ''}`}
-              onClick={() => setTab(t)}
+          {(Object.keys(TAB_LABEL_KEYS) as Tab[]).map(tabKey => (
+            <button key={tabKey}
+              className={`${s.tabBtn} ${tab === tabKey ? s.tabActive : ''}`}
+              onClick={() => setTab(tabKey)}
             >
-              {TAB_LABELS[t]}
+              {t(TAB_LABEL_KEYS[tabKey])}
             </button>
           ))}
         </div>
 
         {/* Content */}
         <div className={s.content}>
-          {saved && <div className={s.savedBanner}>{saved === 'Ошибка' ? `❌ ${saved}` : `✅ ${saved}`}</div>}
+          {saved && <div className={s.savedBanner}>{saved === t('settings.error') ? `❌ ${saved}` : `✅ ${saved}`}</div>}
 
           {/* ── Сервис ── */}
           {tab === 'service' && (
             <div className={s.section}>
-              <h2 className={s.sectionTitle}>Данные автосервиса</h2>
+              <h2 className={s.sectionTitle}>{t('settings.service.title')}</h2>
               {([
-                { label: 'Название',  key: 'name',    ph: 'Автосервис "Гараж"', req: true },
-                { label: 'Город',     key: 'city',    ph: 'Москва'              },
-                { label: 'Телефон',   key: 'phone',   ph: '+7 (999) 000-00-00'  },
-                { label: 'Адрес',     key: 'address', ph: 'ул. Гаражная, 1'     },
-                { label: 'Сайт',      key: 'website', ph: 'https://motor-app.ru' },
+                { label: t('settings.service.field.name'),    key: 'name',    ph: 'Автосервис "Гараж"', req: true },
+                { label: t('settings.service.field.city'),    key: 'city',    ph: 'Москва'              },
+                { label: t('settings.service.field.phone'),   key: 'phone',   ph: '+7 (999) 000-00-00'  },
+                { label: t('settings.service.field.address'), key: 'address', ph: 'ул. Гаражная, 1'     },
+                { label: t('settings.service.field.website'), key: 'website', ph: 'https://motor-app.ru' },
               ] as any[]).map(f => (
                 <div key={f.key} className={s.field}>
                   <label className={s.label}>{f.label}{f.req && <span className={s.req}> *</span>}</label>
@@ -153,7 +153,7 @@ export default function SettingsPage() {
                 </div>
               ))}
               <button className={s.saveBtn} onClick={saveService} disabled={saving}>
-                {saving ? 'Сохраняем…' : '✓ Сохранить'}
+                {saving ? t('settings.saving') : t('settings.save_btn')}
               </button>
             </div>
           )}
@@ -161,33 +161,36 @@ export default function SettingsPage() {
           {/* ── Посты ── */}
           {tab === 'posts' && (
             <div className={s.section}>
-              <h2 className={s.sectionTitle}>Рабочие посты</h2>
+              <h2 className={s.sectionTitle}>{t('settings.posts.title')}</h2>
               <div className={s.postList}>
-                {posts.map(p => (
+                {posts.map(p => {
+                  const pType = POST_TYPES.find(pt => pt.value === p.type);
+                  return (
                   <div key={p.id} className={`${s.postCard} ${!p.isActive ? s.postInactive : ''}`}>
                     <div className={s.postInfo}>
                       <div className={s.postName}>{p.name}</div>
-                      <div className={s.postType}>{POST_TYPES.find(t => t.value === p.type)?.label ?? p.type}</div>
+                      <div className={s.postType}>{pType ? t(pType.labelKey) : p.type}</div>
                     </div>
                     <div className={s.postActions}>
                       <button className={s.toggleBtn} onClick={() => togglePost(p.id, p.isActive)}>
-                        {p.isActive ? 'Деактивировать' : 'Активировать'}
+                        {p.isActive ? t('settings.posts.deactivate') : t('settings.posts.activate')}
                       </button>
                       <button className={s.delBtn} onClick={() => deletePost(p.id)}>✕</button>
                     </div>
                   </div>
-                ))}
+                  );
+                })}
               </div>
               <div className={s.addPostRow}>
-                <input className={s.input} placeholder="Название нового поста"
+                <input className={s.input} placeholder={t('settings.posts.new_name_ph')}
                   value={newPost.name} onChange={e => setNewPost(p => ({ ...p, name: e.target.value }))}
                   onKeyDown={e => e.key === 'Enter' && addPost()} style={{ flex: 1 }} />
                 <select className={s.select} value={newPost.type}
                   onChange={e => setNewPost(p => ({ ...p, type: e.target.value }))}>
-                  {POST_TYPES.map(t => <option key={t.value} value={t.value}>{t.label}</option>)}
+                  {POST_TYPES.map(pt => <option key={pt.value} value={pt.value}>{t(pt.labelKey)}</option>)}
                 </select>
                 <button className={s.saveBtn} onClick={addPost} disabled={addingPost || !newPost.name.trim()}>
-                  {addingPost ? '…' : '+ Добавить'}
+                  {addingPost ? '…' : t('settings.posts.add')}
                 </button>
               </div>
             </div>
@@ -196,10 +199,10 @@ export default function SettingsPage() {
           {/* ── Часы работы ── */}
           {tab === 'hours' && (
             <div className={s.section}>
-              <h2 className={s.sectionTitle}>Режим работы</h2>
+              <h2 className={s.sectionTitle}>{t('settings.hours.title')}</h2>
               <div className={s.hoursRow}>
                 <div className={s.field} style={{ flex: 1 }}>
-                  <label className={s.label}>Начало работы</label>
+                  <label className={s.label}>{t('settings.hours.start')}</label>
                   <select className={s.select} value={hrs.start}
                     onChange={e => setHrs(h => ({ ...h, start: parseInt(e.target.value) }))}>
                     {Array.from({ length: 24 }, (_, i) => (
@@ -208,7 +211,7 @@ export default function SettingsPage() {
                   </select>
                 </div>
                 <div className={s.field} style={{ flex: 1 }}>
-                  <label className={s.label}>Конец работы</label>
+                  <label className={s.label}>{t('settings.hours.end')}</label>
                   <select className={s.select} value={hrs.end}
                     onChange={e => setHrs(h => ({ ...h, end: parseInt(e.target.value) }))}>
                     {Array.from({ length: 24 }, (_, i) => (
@@ -218,20 +221,20 @@ export default function SettingsPage() {
                 </div>
               </div>
               <div className={s.field}>
-                <label className={s.label}>Рабочие дни</label>
+                <label className={s.label}>{t('settings.hours.work_days')}</label>
                 <div className={s.daysRow}>
-                  {DAY_NAMES.map((d, i) => (
+                  {DAY_KEYS.map((dKey, i) => (
                     <button key={i}
                       className={`${s.dayBtn} ${hrs.workDays.includes(i) ? s.dayActive : ''}`}
                       onClick={() => toggleDay(i)}
                     >
-                      {d}
+                      {t(dKey)}
                     </button>
                   ))}
                 </div>
               </div>
               <button className={s.saveBtn} onClick={saveHours} disabled={saving}>
-                {saving ? 'Сохраняем…' : '✓ Сохранить'}
+                {saving ? t('settings.saving') : t('settings.save_btn')}
               </button>
             </div>
           )}
@@ -239,31 +242,31 @@ export default function SettingsPage() {
           {/* ── Уведомления ── */}
           {tab === 'notifications' && (
             <div className={s.section}>
-              <h2 className={s.sectionTitle}>Уведомления</h2>
+              <h2 className={s.sectionTitle}>{t('settings.notif.title')}</h2>
               <div className={s.telegramInfo}>
-                <div className={s.telegramTitle}>🤖 Telegram-бот</div>
+                <div className={s.telegramTitle}>{t('settings.notif.telegram_bot')}</div>
                 <p className={s.telegramText}>
-                  Для получения уведомлений в Telegram:
+                  {t('settings.notif.telegram_intro')}
                 </p>
                 <ol className={s.telegramSteps}>
-                  <li>Найдите бота: <code>@{process.env.TELEGRAM_BOT_USERNAME || 'motor_service_bot'}</code></li>
-                  <li>Нажмите /start</li>
-                  <li>Введите номер телефона в формате +79001234567</li>
+                  <li>{t('settings.notif.step_find_bot')} <code>@{process.env.TELEGRAM_BOT_USERNAME || 'motor_service_bot'}</code></li>
+                  <li>{t('settings.notif.step_start')}</li>
+                  <li>{t('settings.notif.step_phone')}</li>
                 </ol>
                 <div className={s.envNote}>
-                  Задайте TELEGRAM_BOT_TOKEN в .env для активации бота
+                  {t('settings.notif.env_note')}
                 </div>
               </div>
               <div className={s.toggleList}>
                 {([
-                  { key: 'newOrdersToTelegram', label: 'Новые заказы → Telegram персоналу',   sub: 'Мастера и приёмщики получают уведомление'    },
-                  { key: 'statusToClient',       label: 'Статусы заказа → клиенту',           sub: 'Push или Telegram при смене статуса'         },
-                  { key: 'dailyReport',          label: 'Ежедневный отчёт администратору',    sub: 'Итоги дня в 21:00 в Telegram'                },
-                ] as const).map(({ key, label, sub }) => (
+                  { key: 'newOrdersToTelegram', labelKey: 'settings.notif.new_orders_label', subKey: 'settings.notif.new_orders_sub' },
+                  { key: 'statusToClient',       labelKey: 'settings.notif.status_label',     subKey: 'settings.notif.status_sub'     },
+                  { key: 'dailyReport',          labelKey: 'settings.notif.daily_label',       subKey: 'settings.notif.daily_sub'       },
+                ] as const).map(({ key, labelKey, subKey }) => (
                   <div key={key} className={s.toggleRow}>
                     <div>
-                      <div className={s.toggleLabel}>{label}</div>
-                      <div className={s.toggleSub}>{sub}</div>
+                      <div className={s.toggleLabel}>{t(labelKey)}</div>
+                      <div className={s.toggleSub}>{t(subKey)}</div>
                     </div>
                     <button
                       className={`${s.toggle} ${notif[key] ? s.toggleOn : ''}`}
@@ -275,7 +278,7 @@ export default function SettingsPage() {
                 ))}
               </div>
               <button className={s.saveBtn} onClick={saveNotif} disabled={saving}>
-                {saving ? 'Сохраняем…' : '✓ Сохранить'}
+                {saving ? t('settings.saving') : t('settings.save_btn')}
               </button>
             </div>
           )}
@@ -283,30 +286,30 @@ export default function SettingsPage() {
           {/* ── Экспорт ── */}
           {tab === 'appearance' && (
             <div className={s.section}>
-              <h2 className={s.sectionTitle}>🎨 Внешний вид</h2>
+              <h2 className={s.sectionTitle}>{t('settings.appearance.title')}</h2>
 
               <div className={s.field}>
-                <label className={s.label}>Тема оформления</label>
+                <label className={s.label}>{t('settings.appearance.theme_label')}</label>
                 <div className={s.themeGrid}>
                   {([
-                    { id: 'dark',   icon: '🌙', name: 'Тёмная'   },
-                    { id: 'light',  icon: '☀️', name: 'Светлая'  },
-                    { id: 'system', icon: '💻', name: 'Системная' },
-                  ] as const).map(t => (
+                    { id: 'dark',   icon: '🌙', nameKey: 'settings.appearance.theme.dark'   },
+                    { id: 'light',  icon: '☀️', nameKey: 'settings.appearance.theme.light'  },
+                    { id: 'system', icon: '💻', nameKey: 'settings.appearance.theme.system' },
+                  ] as const).map(th => (
                     <button
-                      key={t.id}
-                      className={`${s.themeCard} ${theme === t.id ? s.themeCardActive : ''}`}
-                      onClick={() => setTheme(t.id)}
+                      key={th.id}
+                      className={`${s.themeCard} ${theme === th.id ? s.themeCardActive : ''}`}
+                      onClick={() => setTheme(th.id)}
                     >
-                      <span className={s.themeIcon}>{t.icon}</span>
-                      <span className={s.themeName}>{t.name}</span>
+                      <span className={s.themeIcon}>{th.icon}</span>
+                      <span className={s.themeName}>{t(th.nameKey)}</span>
                     </button>
                   ))}
                 </div>
               </div>
 
               <div className={s.field}>
-                <label className={s.label}>Язык интерфейса</label>
+                <label className={s.label}>{t('settings.appearance.language_label')}</label>
                 <div className={s.localeGrid}>
                   {locales.map(l => (
                     <button
@@ -326,20 +329,20 @@ export default function SettingsPage() {
           {/* ── Экспорт ── */}
           {tab === 'export' && (
             <div className={s.section}>
-              <h2 className={s.sectionTitle}>Экспорт данных</h2>
+              <h2 className={s.sectionTitle}>{t('settings.export.title')}</h2>
               <div className={s.exportGrid}>
                 <div className={s.exportCard}>
                   <div className={s.exportIcon}>👥</div>
-                  <div className={s.exportTitle}>Клиентская база</div>
-                  <div className={s.exportDesc}>Все клиенты с автомобилями, историей заказов и выручкой</div>
+                  <div className={s.exportTitle}>{t('settings.export.clients_title')}</div>
+                  <div className={s.exportDesc}>{t('settings.export.clients_desc')}</div>
                   <a href="/api/v1/export/clients/xlsx" className={s.exportBtn} target="_blank" rel="noreferrer">
-                    📥 Скачать .xlsx
+                    {t('settings.export.download_xlsx')}
                   </a>
                 </div>
                 <div className={s.exportCard}>
                   <div className={s.exportIcon}>📋</div>
-                  <div className={s.exportTitle}>Заказы за период</div>
-                  <div className={s.exportDesc}>Заказы с суммами, мастерами, прибылью</div>
+                  <div className={s.exportTitle}>{t('settings.export.orders_title')}</div>
+                  <div className={s.exportDesc}>{t('settings.export.orders_desc')}</div>
                   <div className={s.exportDates}>
                     <input type="date" className={s.dateInput} value={expFrom} onChange={e => setExpFrom(e.target.value)} />
                     <span className={s.dateSep}>—</span>
@@ -350,7 +353,7 @@ export default function SettingsPage() {
                     className={s.exportBtn}
                     target="_blank" rel="noreferrer"
                   >
-                    📥 Скачать .xlsx
+                    {t('settings.export.download_xlsx')}
                   </a>
                 </div>
               </div>
