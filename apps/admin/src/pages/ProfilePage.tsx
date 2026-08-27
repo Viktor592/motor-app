@@ -11,14 +11,10 @@ interface Vehicle {
   year: number; mileage?: number; plateNum?: string;
 }
 
-const ROLE_LABEL: Record<string, string> = {
-  CLIENT: 'Клиент', MASTER: 'Мастер', RECEPTIONIST: 'Приёмщик', ADMIN: 'Администратор', SUPERADMIN: 'Супер-админ',
-};
-
 export default function ProfilePage() {
   const dispatch = useDispatch<AppDispatch>();
   const { name, role } = useSelector((st: RootState) => st.auth);
-  const { locale, setLocale, locales } = useLocale();
+  const { locale, setLocale, locales, t } = useLocale();
 
   const [vehicles,   setVehicles]  = useState<Vehicle[]>([]);
   const [avatarUrl,  setAvatarUrl] = useState<string | null>(null);
@@ -134,7 +130,7 @@ export default function ProfilePage() {
         </label>
         <div>
           <div className={s.heroName}>{name}</div>
-          <div className={s.heroRole}>{ROLE_LABEL[role ?? ''] ?? role}</div>
+          <div className={s.heroRole}>{t(`profile.role.${(role ?? '').toLowerCase()}`)}</div>
           {avatarUrl
             ? <button onClick={removeAvatar} disabled={avatarBusy} style={{ background: 'none', border: 'none', color: 'var(--dust)', fontSize: 11.5, cursor: 'pointer', padding: 0, marginTop: 4 }}>Удалить фото</button>
             : <div style={{ fontSize: 11.5, color: 'var(--dust)', marginTop: 4 }}>Нажмите на кружок, чтобы добавить фото</div>}
