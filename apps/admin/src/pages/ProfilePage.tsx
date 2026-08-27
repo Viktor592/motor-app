@@ -30,7 +30,7 @@ export default function ProfilePage() {
   }, []);
 
   const onAvatarFile = async (file: File) => {
-    if (file.size > 400_000) { alert('Фото слишком большое — выберите файл до 400КБ'); return; }
+    if (file.size > 400_000) { alert(t('profile.err.photo_too_big')); return; }
     const reader = new FileReader();
     reader.onload = async () => {
       setAvatarBusy(true);
@@ -38,7 +38,7 @@ export default function ProfilePage() {
         const { data } = await api.patch('/auth/avatar', { avatarUrl: reader.result as string });
         setAvatarUrl(data.avatarUrl);
       } catch (err: any) {
-        alert(err.response?.data?.error ?? 'Не удалось сохранить фото. Попробуйте файл поменьше.');
+        alert(err.response?.data?.error ?? t('profile.err.photo_save_failed'));
       } finally { setAvatarBusy(false); }
     };
     reader.readAsDataURL(file);
@@ -62,20 +62,20 @@ export default function ProfilePage() {
     setEmailSaving(true); setEmailMsg('');
     try {
       await api.patch('/auth/email', { email: email.trim() || null });
-      setEmailMsg('✓ Email сохранён');
+      setEmailMsg(`✓ ${t('profile.email_saved')}`);
     } catch (e: any) {
-      setEmailMsg(e.response?.data?.error ?? 'Не удалось сохранить email');
+      setEmailMsg(e.response?.data?.error ?? t('profile.err.email_save_failed'));
     } finally { setEmailSaving(false); }
   };
 
   const changePassword = async () => {
-    if (newPwd.length < 6) { setPwdMsg('Новый пароль должен быть от 6 символов'); return; }
+    if (newPwd.length < 6) { setPwdMsg(t('profile.err.pwd_too_short')); return; }
     setPwdSaving(true); setPwdMsg('');
     try {
       await api.patch('/auth/password', { currentPassword: curPwd || undefined, newPassword: newPwd });
-      setPwdMsg('✓ Пароль изменён'); setCurPwd(''); setNewPwd('');
+      setPwdMsg(`✓ ${t('profile.pwd_changed')}`); setCurPwd(''); setNewPwd('');
     } catch (e: any) {
-      setPwdMsg(e.response?.data?.error ?? 'Не удалось сменить пароль');
+      setPwdMsg(e.response?.data?.error ?? t('profile.err.pwd_change_failed'));
     } finally { setPwdSaving(false); }
   };
 
@@ -109,7 +109,7 @@ export default function ProfilePage() {
   };
 
   const deleteVehicle = async (id: string) => {
-    if (!confirm('Удалить автомобиль?')) return;
+    if (!confirm(t('profile.confirm_delete_vehicle'))) return;
     try {
       await api.delete(`/users/vehicles/${id}`);
       setVehicles(prev => prev.filter(v => v.id !== id));
@@ -118,8 +118,8 @@ export default function ProfilePage() {
 
   return (
     <div className={s.page}>
-      <div className={s.eye}>// Профиль</div>
-      <h1 className={s.h1}>ПРОФИЛЬ</h1>
+      <div className={s.eye}>// {t('profile.eye_label')}</div>
+      <h1 className={s.h1}>{t('profile.title')}</h1>
 
       {/* Hero */}
       <div className={s.hero}>
@@ -132,25 +132,25 @@ export default function ProfilePage() {
           <div className={s.heroName}>{name}</div>
           <div className={s.heroRole}>{t(`profile.role.${(role ?? '').toLowerCase()}`)}</div>
           {avatarUrl
-            ? <button onClick={removeAvatar} disabled={avatarBusy} style={{ background: 'none', border: 'none', color: 'var(--dust)', fontSize: 11.5, cursor: 'pointer', padding: 0, marginTop: 4 }}>Удалить фото</button>
-            : <div style={{ fontSize: 11.5, color: 'var(--dust)', marginTop: 4 }}>Нажмите на кружок, чтобы добавить фото</div>}
+            ? <button onClick={removeAvatar} disabled={avatarBusy} style={{ background: 'none', border: 'none', color: 'var(--dust)', fontSize: 11.5, cursor: 'pointer', padding: 0, marginTop: 4 }}>{t('profile.remove_photo')}</button>
+            : <div style={{ fontSize: 11.5, color: 'var(--dust)', marginTop: 4 }}>{t('profile.add_photo_hint')}</div>}
         </div>
       </div>
 
       {/* Имя */}
       <div className={s.section}>
-        <div className={s.sTitle}>ИМЯ</div>
+        <div className={s.sTitle}>{t('profile.name_section')}</div>
         <div className={s.nameRow}>
           <input className={s.input} value={editName}
             onChange={e => setEditName(e.target.value)}
-            placeholder="Ваше имя"
+            placeholder={t('profile.name_placeholder')}
             onKeyDown={e => e.key === 'Enter' && saveName()}
           />
           <button className={s.saveBtn}
             onClick={saveName}
             disabled={savingName || editName === name || editName.length < 2}
           >
-            {savingName ? '…' : '✓ Сохранить'}
+            {savingName ? '…' : t('profile.save_name_btn')}
           </button>
         </div>
       </div>
@@ -159,9 +159,9 @@ export default function ProfilePage() {
       {role === 'CLIENT' && (
         <div className={s.section}>
           <div className={s.sHead}>
-            <div className={s.sTitle}>МОИ АВТОМОБИЛИ</div>
+            <div className={s.sTitle}>{t('profile.my_vehicles')}</div>
             <button className={s.addBtn} onClick={() => setShowForm(!showForm)}>
-              {showForm ? '✕ Отмена' : '+ Добавить'}
+              {showForm ? t('profile.cancel') : t('profile.add')}
             </button>
           </div>
 
@@ -170,11 +170,11 @@ export default function ProfilePage() {
             <form className={s.vForm} onSubmit={addVehicle}>
               <div className={s.vFormGrid}>
                 {([
-                  { key: 'brand',    label: 'МАРКА',   ph: 'Toyota',    type: 'text'   },
-                  { key: 'model',    label: 'МОДЕЛЬ',  ph: 'Camry',     type: 'text'   },
-                  { key: 'year',     label: 'ГОД',     ph: '2021',      type: 'number' },
-                  { key: 'mileage',  label: 'ПРОБЕГ',  ph: '50000',     type: 'number' },
-                  { key: 'plateNum', label: 'ГОЗНАК',  ph: 'А123ВС799', type: 'text'   },
+                  { key: 'brand',    label: t('profile.field.brand'),   ph: 'Toyota',    type: 'text'   },
+                  { key: 'model',    label: t('profile.field.model'),   ph: 'Camry',     type: 'text'   },
+                  { key: 'year',     label: t('profile.field.year'),    ph: '2021',      type: 'number' },
+                  { key: 'mileage',  label: t('profile.field.mileage'), ph: '50000',     type: 'number' },
+                  { key: 'plateNum', label: t('profile.field.plate'),   ph: 'А123ВС799', type: 'text'   },
                 ] as const).map(f => (
                   <div key={f.key} className={s.vField}>
                     <label className={s.vLabel}>{f.label}</label>
@@ -189,7 +189,7 @@ export default function ProfilePage() {
                 ))}
               </div>
               <button className={s.confirmBtn} type="submit" disabled={addingV}>
-                {addingV ? 'Добавляем…' : '+ Добавить автомобиль'}
+                {addingV ? t('profile.adding_vehicle') : t('profile.add_vehicle_btn')}
               </button>
             </form>
           )}
@@ -197,8 +197,8 @@ export default function ProfilePage() {
           {/* Список */}
           {vehicles.length === 0 && !showForm && (
             <div className={s.empty}>
-              <p>Нет автомобилей</p>
-              <button className={s.addBtn} onClick={() => setShowForm(true)}>Добавить →</button>
+              <p>{t('profile.no_vehicles')}</p>
+              <button className={s.addBtn} onClick={() => setShowForm(true)}>{t('profile.add_arrow')}</button>
             </div>
           )}
           <div className={s.vList}>
@@ -208,7 +208,7 @@ export default function ProfilePage() {
                   <div className={s.vName}>{v.brand} {v.model}</div>
                   <div className={s.vMeta}>
                     <span>{v.year}</span>
-                    {v.mileage && <span>{v.mileage.toLocaleString('ru')} км</span>}
+                    {v.mileage && <span>{v.mileage.toLocaleString('ru')} {t('profile.km')}</span>}
                     {v.plateNum && <span>{v.plateNum}</span>}
                   </div>
                 </div>
@@ -221,22 +221,22 @@ export default function ProfilePage() {
 
       {/* Безопасность */}
       <div className={s.section}>
-        <div className={s.sTitle}>БЕЗОПАСНОСТЬ</div>
+        <div className={s.sTitle}>{t('profile.security')}</div>
         <div className={s.nameRow} style={{ marginBottom: 10 }}>
-          <input className={s.input} type="email" placeholder="Email для восстановления пароля"
+          <input className={s.input} type="email" placeholder={t('profile.email_placeholder')}
             value={email} onChange={e => setEmail(e.target.value)} />
           <button className={s.saveBtn} onClick={saveEmail} disabled={emailSaving}>
-            {emailSaving ? '…' : '✓ Сохранить email'}
+            {emailSaving ? '…' : t('profile.save_email_btn')}
           </button>
         </div>
         {emailMsg && <p style={{ fontSize: 12.5, color: emailMsg.startsWith('✓') ? 'var(--green)' : 'var(--red)', marginBottom: 10 }}>{emailMsg}</p>}
         <div className={s.nameRow} style={{ flexWrap: 'wrap' }}>
-          <input className={s.input} type="password" placeholder="Текущий пароль (если есть)"
+          <input className={s.input} type="password" placeholder={t('profile.current_pwd_placeholder')}
             value={curPwd} onChange={e => setCurPwd(e.target.value)} style={{ minWidth: 160 }} />
-          <input className={s.input} type="password" placeholder="Новый пароль"
+          <input className={s.input} type="password" placeholder={t('profile.new_pwd_placeholder')}
             value={newPwd} onChange={e => setNewPwd(e.target.value)} style={{ minWidth: 160 }} />
           <button className={s.saveBtn} onClick={changePassword} disabled={pwdSaving || newPwd.length < 6}>
-            {pwdSaving ? '…' : '✓ Сменить пароль'}
+            {pwdSaving ? '…' : t('profile.change_pwd_btn')}
           </button>
         </div>
         {pwdMsg && <p style={{ fontSize: 12.5, color: pwdMsg.startsWith('✓') ? 'var(--green)' : 'var(--red)', marginTop: 6 }}>{pwdMsg}</p>}
@@ -244,7 +244,7 @@ export default function ProfilePage() {
 
       {/* Язык интерфейса */}
       <div className={s.section}>
-        <div className={s.sTitle}>ЯЗЫК ИНТЕРФЕЙСА</div>
+        <div className={s.sTitle}>{t('profile.language')}</div>
         <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
           {locales.map(l => (
             <button
@@ -266,12 +266,12 @@ export default function ProfilePage() {
 
       {/* Инфо */}
       <div className={s.section}>
-        <div className={s.sTitle}>О СИСТЕМЕ</div>
+        <div className={s.sTitle}>{t('profile.about_system')}</div>
         <div className={s.infoCard}>
           {[
-            ['Версия', '1.0.0'],
-            ['AI-движок', 'Claude Sonnet 4.6'],
-            ['Компания', 'МОТОР-СИСТЕМА'],
+            [t('profile.info.version'), '1.0.0'],
+            [t('profile.info.ai_engine'), 'Claude Sonnet 4.6'],
+            [t('profile.info.company'), 'МОТОР-СИСТЕМА'],
           ].map(([k, v]) => (
             <div key={k} className={s.infoRow}>
               <span>{k}</span><b>{v}</b>
@@ -281,7 +281,7 @@ export default function ProfilePage() {
       </div>
 
       <button className={s.logoutBtn} onClick={() => dispatch(logout())}>
-        Выйти из аккаунта
+        {t('profile.logout')}
       </button>
     </div>
   );
