@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import styles from './IntegrationPage.module.css';
 import { api } from '../services/api';
+import { useLocale } from '../services/i18n';
 
 type System = 'NONE' | 'ONS_1C' | 'OPTIM_GARAGE';
 
@@ -21,31 +22,32 @@ interface SyncLog {
 
 const SYSTEMS = [
   {
-    id:    'NONE' as System,
-    name:  'Не подключено',
-    icon:  '🔌',
-    desc:  'Работаем без внешней системы учёта',
-    color: '#6b7280',
+    id:      'NONE' as System,
+    nameKey: 'integration.system.none.name',
+    icon:    '🔌',
+    descKey: 'integration.system.none.desc',
+    color:   '#6b7280',
   },
   {
-    id:    'ONS_1C' as System,
-    name:  '1С:Предприятие',
-    icon:  '🏢',
-    desc:  'Интеграция через HTTP-сервис 1С. Передача заказов, клиентов, платежей.',
-    color: '#d97706',
-    badge: '1С',
+    id:      'ONS_1C' as System,
+    nameKey: 'integration.system.onec.name',
+    icon:    '🏢',
+    descKey: 'integration.system.onec.desc',
+    color:   '#d97706',
+    badge:   '1С',
   },
   {
-    id:    'OPTIM_GARAGE' as System,
-    name:  'Оптим Гараж',
-    icon:  '🔧',
-    desc:  'Российская система управления автосервисом. Синхронизация заказов и клиентов.',
-    color: '#2563eb',
-    badge: 'OG',
+    id:      'OPTIM_GARAGE' as System,
+    nameKey: 'integration.system.optim.name',
+    icon:    '🔧',
+    descKey: 'integration.system.optim.desc',
+    color:   '#2563eb',
+    badge:   'OG',
   },
 ];
 
 export default function IntegrationPage() {
+  const { t } = useLocale();
   const [settings, setSettings]   = useState<Settings>({ system: 'NONE', autoSync: false });
   const [loading, setLoading]     = useState(true);
   const [saving, setSaving]       = useState(false);
@@ -78,7 +80,7 @@ export default function IntegrationPage() {
     setTestResult(null);
     try {
       await api.put('/integration/settings', settings);
-      alert('✅ Настройки сохранены');
+      alert(`✅ ${t('integration.settings_saved')}`);
     } finally { setSaving(false); }
   };
 
@@ -87,9 +89,9 @@ export default function IntegrationPage() {
     setTestResult(null);
     try {
       const { data } = await api.post('/integration/test', {});
-      setTestResult({ ok: data.ok, msg: data.ok ? 'Соединение успешно' : 'Соединение не установлено' });
+      setTestResult({ ok: data.ok, msg: data.ok ? t('integration.test_success') : t('integration.test_failed') });
     } catch (e: any) {
-      setTestResult({ ok: false, msg: e.message ?? 'Ошибка соединения' });
+      setTestResult({ ok: false, msg: e.message ?? t('integration.connection_error') });
     } finally { setTesting(false); }
   };
 
@@ -97,17 +99,17 @@ export default function IntegrationPage() {
     setSyncing(true);
     try {
       const { data } = await api.post('/integration/sync/bulk', {});
-      alert(`✅ Синхронизировано: ${data.synced} заказов. Ошибок: ${data.errors}`);
+      alert(`✅ ${t('integration.sync_result', { synced: data.synced, errors: data.errors })}`);
       loadLogs();
     } catch (e: any) {
-      alert(`❌ Ошибка: ${e.message}`);
+      alert(`❌ ${t('integration.sync_error', { msg: e.message })}`);
     } finally { setSyncing(false); }
   };
 
   const syncPriceList = async () => {
     try {
       const { data } = await api.get('/integration/price-list');
-      alert(`✅ Обновлено ${data.updated} позиций прайс-листа`);
+      alert(`✅ ${t('integration.pricelist_updated', { count: data.updated })}`);
     } catch (e: any) {
       alert(`❌ ${e.message}`);
     }
@@ -115,20 +117,20 @@ export default function IntegrationPage() {
 
   const upd = (key: keyof Settings, val: any) => setSettings(s => ({ ...s, [key]: val }));
 
-  if (loading) return <div className={styles.loading}>Загрузка…</div>;
+  if (loading) return <div className={styles.loading}>{t('edo.loading')}</div>;
 
   return (
     <div className={styles.page}>
       <div className={styles.header}>
         <div>
-          <h1 className={styles.title}>Интеграции</h1>
-          <p className={styles.sub}>Подключение к системам учёта</p>
+          <h1 className={styles.title}>{t('integration.title')}</h1>
+          <p className={styles.sub}>{t('integration.subtitle')}</p>
         </div>
         <div className={styles.tabs}>
-          {(['settings', 'logs'] as const).map(t => (
-            <button key={t} className={`${styles.tab} ${tab === t ? styles.tabActive : ''}`}
-              onClick={() => setTab(t)}>
-              {t === 'settings' ? '⚙️ Настройки' : '📋 Журнал синхронизации'}
+          {(['settings', 'logs'] as const).map(tabKey => (
+            <button key={tabKey} className={`${styles.tab} ${tab === tabKey ? styles.tabActive : ''}`}
+              onClick={() => setTab(tabKey)}>
+              {tabKey === 'settings' ? t('integration.tab.settings') : t('integration.tab.logs')}
             </button>
           ))}
         </div>
@@ -138,7 +140,7 @@ export default function IntegrationPage() {
         <>
           {/* Выбор системы */}
           <div className={styles.section}>
-            <h2 className={styles.sectionTitle}>Система учёта</h2>
+            <h2 className={styles.sectionTitle}>{t('integration.section.system_title')}</h2>
             <div className={styles.systemGrid}>
               {SYSTEMS.map(sys => (
                 <div
@@ -154,8 +156,8 @@ export default function IntegrationPage() {
                     )}
                     {settings.system === sys.id && <span className={styles.checkmark}>✓</span>}
                   </div>
-                  <div className={styles.systemName}>{sys.name}</div>
-                  <div className={styles.systemDesc}>{sys.desc}</div>
+                  <div className={styles.systemName}>{t(sys.nameKey)}</div>
+                  <div className={styles.systemDesc}>{t(sys.descKey)}</div>
                 </div>
               ))}
             </div>
@@ -164,25 +166,25 @@ export default function IntegrationPage() {
           {/* Настройки 1С */}
           {settings.system === 'ONS_1C' && (
             <div className={styles.section}>
-              <h2 className={styles.sectionTitle}>🏢 Настройки 1С:Предприятие</h2>
+              <h2 className={styles.sectionTitle}>{t('integration.section.onec_title')}</h2>
               <div className={styles.infoBox}>
-                <strong>Как настроить:</strong> В конфигураторе 1С создайте HTTP-сервис с именем <code>motor</code>.
-                Добавьте методы: <code>POST /order</code>, <code>POST /client</code>, <code>GET /price-list</code>.
-                Опубликуйте на веб-сервере. URL будет вида <code>http://server/base/hs/motor/</code>
+                <strong>{t('integration.onec_info_strong')}</strong> {t('integration.onec_info_step1')} <code>motor</code>
+                {t('integration.onec_info_step2')} <code>POST /order</code>, <code>POST /client</code>, <code>GET /price-list</code>
+                {t('integration.onec_info_step3')} <code>http://server/base/hs/motor/</code>
               </div>
               <div className={styles.formGrid}>
                 <div className={styles.field}>
-                  <label className={styles.label}>URL HTTP-сервиса 1С</label>
+                  <label className={styles.label}>{t('integration.field.onec_url')}</label>
                   <input className={styles.input} placeholder="http://192.168.1.10/Автосервис/hs/motor/"
                     value={settings.oneC_url ?? ''} onChange={e => upd('oneC_url', e.target.value)} />
                 </div>
                 <div className={styles.field}>
-                  <label className={styles.label}>Пользователь 1С</label>
+                  <label className={styles.label}>{t('integration.field.onec_user')}</label>
                   <input className={styles.input} placeholder="Администратор"
                     value={settings.oneC_user ?? ''} onChange={e => upd('oneC_user', e.target.value)} />
                 </div>
                 <div className={styles.field}>
-                  <label className={styles.label}>Пароль</label>
+                  <label className={styles.label}>{t('integration.field.onec_pass')}</label>
                   <input className={styles.input} type="password" placeholder="••••••"
                     value={settings.oneC_pass ?? ''} onChange={e => upd('oneC_pass', e.target.value)} />
                 </div>
@@ -193,19 +195,18 @@ export default function IntegrationPage() {
           {/* Настройки Оптим Гараж */}
           {settings.system === 'OPTIM_GARAGE' && (
             <div className={styles.section}>
-              <h2 className={styles.sectionTitle}>🔧 Настройки Оптим Гараж</h2>
+              <h2 className={styles.sectionTitle}>{t('integration.section.optim_title')}</h2>
               <div className={styles.infoBox}>
-                <strong>Как получить API-ключ:</strong> Войдите в Оптим Гараж → Настройки → API-интеграции → Создать ключ.
-                URL оставьте пустым для облачной версии.
+                <strong>{t('integration.optim_info_strong')}</strong>{t('integration.optim_info_rest')}
               </div>
               <div className={styles.formGrid}>
                 <div className={styles.field}>
-                  <label className={styles.label}>API-ключ Оптим Гараж</label>
+                  <label className={styles.label}>{t('integration.field.optim_key')}</label>
                   <input className={styles.input} placeholder="og_live_xxxxxxxxxxxxxxxx"
                     value={settings.optimApiKey ?? ''} onChange={e => upd('optimApiKey', e.target.value)} />
                 </div>
                 <div className={styles.field}>
-                  <label className={styles.label}>URL (для self-hosted, необязательно)</label>
+                  <label className={styles.label}>{t('integration.field.optim_url')}</label>
                   <input className={styles.input} placeholder="https://api.optimgarage.ru/v1"
                     value={settings.optimUrl ?? ''} onChange={e => upd('optimUrl', e.target.value)} />
                 </div>
@@ -216,15 +217,15 @@ export default function IntegrationPage() {
           {/* Общие настройки */}
           {settings.system !== 'NONE' && (
             <div className={styles.section}>
-              <h2 className={styles.sectionTitle}>Параметры синхронизации</h2>
+              <h2 className={styles.sectionTitle}>{t('integration.section.sync_params')}</h2>
               <label className={styles.checkboxRow}>
                 <input type="checkbox" checked={settings.autoSync}
                   onChange={e => upd('autoSync', e.target.checked)} />
-                <span>Автоматическая синхронизация при закрытии заказа</span>
+                <span>{t('integration.auto_sync_label')}</span>
               </label>
               {settings.lastSyncAt && (
                 <div className={styles.lastSync}>
-                  Последняя синхронизация: {new Date(settings.lastSyncAt).toLocaleString('ru-RU')}
+                  {t('integration.last_sync')} {new Date(settings.lastSyncAt).toLocaleString('ru-RU')}
                 </div>
               )}
             </div>
@@ -233,18 +234,18 @@ export default function IntegrationPage() {
           {/* Кнопки */}
           <div className={styles.actions}>
             <button className={styles.btnPrimary} onClick={save} disabled={saving}>
-              {saving ? 'Сохраняю…' : '💾 Сохранить настройки'}
+              {saving ? t('integration.saving') : t('integration.save_btn')}
             </button>
             {settings.system !== 'NONE' && (
               <>
                 <button className={styles.btnSecondary} onClick={testConnection} disabled={testing}>
-                  {testing ? 'Проверяю…' : '🔌 Тест соединения'}
+                  {testing ? t('integration.testing') : t('integration.test_btn')}
                 </button>
                 <button className={styles.btnSecondary} onClick={syncBulk} disabled={syncing}>
-                  {syncing ? 'Синхронизирую…' : '🔄 Синхронизировать заказы'}
+                  {syncing ? t('integration.syncing') : t('integration.sync_orders_btn')}
                 </button>
                 <button className={styles.btnSecondary} onClick={syncPriceList}>
-                  📋 Обновить прайс-лист
+                  {t('integration.update_pricelist_btn')}
                 </button>
               </>
             )}
@@ -261,11 +262,11 @@ export default function IntegrationPage() {
       {tab === 'logs' && (
         <div className={styles.section}>
           <div className={styles.logsHeader}>
-            <span className={styles.logsTotal}>Записей: {logsTotal}</span>
+            <span className={styles.logsTotal}>{t('integration.logs_count', { count: logsTotal })}</span>
           </div>
           <table className={styles.table}>
             <thead>
-              <tr><th>Время</th><th>Система</th><th>Тип</th><th>Статус</th><th>Сообщение</th></tr>
+              <tr><th>{t('integration.th.time')}</th><th>{t('integration.th.system')}</th><th>{t('integration.th.type')}</th><th>{t('integration.th.status')}</th><th>{t('integration.th.message')}</th></tr>
             </thead>
             <tbody>
               {logs.map(l => (
@@ -275,7 +276,7 @@ export default function IntegrationPage() {
                   </td>
                   <td>
                     <span className={styles.systemTag}>
-                      {l.system === 'ONS_1C' ? '🏢 1С' : l.system === 'OPTIM_GARAGE' ? '🔧 Оптим' : l.system}
+                      {l.system === 'ONS_1C' ? t('integration.system_tag.onec') : l.system === 'OPTIM_GARAGE' ? t('integration.system_tag.optim') : l.system}
                     </span>
                   </td>
                   <td>{l.entityType}</td>
@@ -287,7 +288,7 @@ export default function IntegrationPage() {
                   <td className={styles.logMsg}>{l.message ?? '—'}</td>
                 </tr>
               ))}
-              {logs.length === 0 && <tr><td colSpan={5} className={styles.empty}>Синхронизаций не было</td></tr>}
+              {logs.length === 0 && <tr><td colSpan={5} className={styles.empty}>{t('integration.no_syncs')}</td></tr>}
             </tbody>
           </table>
         </div>
