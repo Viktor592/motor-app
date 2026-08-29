@@ -4,10 +4,11 @@ import { api } from '../services/api';
 import { getSocket, joinOrder, leaveOrder } from '../services/socket';
 import { StatusBadge } from '../components/StatusBadge';
 import s from './DiagnosticsPage.module.css';
+import { useLocale } from '../services/i18n';
 
 interface PipelineStep {
   step:   number;
-  name:   string;
+  nameKey: string;
   status: 'waiting' | 'running' | 'done' | 'error';
   data?:  Record<string, any>;
 }
@@ -20,19 +21,20 @@ interface OrderData {
 }
 
 const STEPS_INIT: PipelineStep[] = [
-  { step: 1, name: 'Приёмщик',  status: 'waiting' },
-  { step: 2, name: 'Диагност',  status: 'waiting' },
-  { step: 3, name: 'Оценщик',   status: 'waiting' },
+  { step: 1, nameKey: 'diagnostics.step.receptionist',  status: 'waiting' },
+  { step: 2, nameKey: 'diagnostics.step.diagnostician',  status: 'waiting' },
+  { step: 3, nameKey: 'diagnostics.step.appraiser',      status: 'waiting' },
 ];
 
-const URGENCY_LABEL: Record<string, { label: string; color: string }> = {
-  critical: { label: '🔴 Критично',  color: 'var(--red)'   },
-  high:     { label: '🟠 Высокая',   color: 'var(--ore)'   },
-  medium:   { label: '🟡 Средняя',   color: 'var(--gold)'  },
-  low:      { label: '🟢 Низкая',    color: 'var(--green)' },
+const URGENCY_KEYS: Record<string, { labelKey: string; color: string }> = {
+  critical: { labelKey: 'diagnostics.urgency.critical', color: 'var(--red)'   },
+  high:     { labelKey: 'diagnostics.urgency.high',     color: 'var(--ore)'   },
+  medium:   { labelKey: 'diagnostics.urgency.medium',   color: 'var(--gold)'  },
+  low:      { labelKey: 'diagnostics.urgency.low',      color: 'var(--green)' },
 };
 
 export default function DiagnosticsPage() {
+  const { t } = useLocale();
   const { orderId } = useParams<{ orderId: string }>();
   const navigate    = useNavigate();
 
@@ -92,7 +94,7 @@ export default function DiagnosticsPage() {
       await api.post(`/pipeline/${orderId}/run`);
     } catch (e: any) {
       setRunning(false);
-      alert(e.response?.data?.error ?? 'Ошибка запуска пайплайна');
+      alert(e.response?.data?.error ?? t('diagnostics.pipeline_error'));
     }
   };
 
@@ -105,12 +107,12 @@ export default function DiagnosticsPage() {
       });
       window.location.href = r.data.confirmationUrl;
     } catch (e: any) {
-      alert(e.response?.data?.error ?? 'Ошибка оплаты');
+      alert(e.response?.data?.error ?? t('diagnostics.payment_error'));
     } finally { setPaying(false); }
   };
 
-  if (loading) return <div className={s.loading}>Загрузка…</div>;
-  if (!order)  return <div className={s.loading}>Заказ не найден</div>;
+  if (loading) return <div className={s.loading}>{t('edo.loading')}</div>;
+  if (!order)  return <div className={s.loading}>{t('diagnostics.order_not_found')}</div>;
 
   const diag    = order.aiDiagResult;
   const parsed  = order.complaintParsed;
@@ -122,7 +124,7 @@ export default function DiagnosticsPage() {
 
       <div className={s.header}>
         <div>
-          <div className={s.eye}>// AI-ДИАГНОСТИКА</div>
+          <div className={s.eye}>{t('diagnostics.eyebrow')}</div>
           <h1 className={s.h1}>{order.vehicle.brand} {order.vehicle.model} <em>{order.vehicle.year}</em></h1>
         </div>
         <StatusBadge status={order.status} />
@@ -140,8 +142,8 @@ export default function DiagnosticsPage() {
                 {step.status === 'error'   && '✕'}
               </div>
               <div className={s.stepInfo}>
-                <div className={s.stepName}>Агент «{step.name}»</div>
-                {step.status === 'running' && <div className={s.stepStatus}>Обрабатывает…</div>}
+                <div className={s.stepName}>{t('diagnostics.agent_label', { name: t(step.nameKey) })}</div>
+                {step.status === 'running' && <div className={s.stepStatus}>{t('diagnostics.processing')}</div>}
                 {step.status === 'done' && step.data && (
                   <div className={s.stepData}>
                     {Object.entries(step.data).map(([k, v]) => (
@@ -149,7 +151,7 @@ export default function DiagnosticsPage() {
                     ))}
                   </div>
                 )}
-                {step.status === 'error' && <div className={s.stepErr}>Ошибка</div>}
+                {step.status === 'error' && <div className={s.stepErr}>{t('settings.error')}</div>}
               </div>
             </div>
             {i < steps.length - 1 && <div className={`${s.arrow} ${step.status === 'done' ? s.arrowDone : ''}`}>→</div>}
@@ -160,9 +162,9 @@ export default function DiagnosticsPage() {
       {/* Run button */}
       {!hasResult && (
         <div className={s.runWrap}>
-          <p className={s.runHint}>Жалоба: <em>«{order.complaintRaw.slice(0, 120)}…»</em></p>
+          <p className={s.runHint}>{t('diagnostics.complaint_label')} <em>«{order.complaintRaw.slice(0, 120)}…»</em></p>
           <button className={s.runBtn} onClick={runPipeline} disabled={running}>
-            {running ? '⏳ Агенты работают…' : '🚀 Запустить AI-диагностику'}
+            {running ? t('diagnostics.agents_working') : t('diagnostics.start_btn')}
           </button>
         </div>
       )}
@@ -172,10 +174,10 @@ export default function DiagnosticsPage() {
         <>
           {/* Tabs */}
           <div className={s.tabs}>
-            {(['diag', 'items', 'payment'] as const).map(t => (
-              <button key={t} className={`${s.tab} ${activeTab === t ? s.tabActive : ''}`}
-                onClick={() => setTab(t)}>
-                {{ diag: '🔍 Гипотезы', items: '🔩 Смета', payment: '💳 Оплата' }[t]}
+            {(['diag', 'items', 'payment'] as const).map(tabKey => (
+              <button key={tabKey} className={`${s.tab} ${activeTab === tabKey ? s.tabActive : ''}`}
+                onClick={() => setTab(tabKey)}>
+                {{ diag: t('diagnostics.tab.diag'), items: t('diagnostics.tab.items'), payment: t('diagnostics.tab.payment') }[tabKey]}
               </button>
             ))}
           </div>
@@ -186,24 +188,24 @@ export default function DiagnosticsPage() {
               {parsed && (
                 <div className={s.parsedRow}>
                   <div className={s.parsedChip}>
-                    <span>Система</span><b>{parsed.affectedSystem}</b>
+                    <span>{t('diagnostics.system_label')}</span><b>{parsed.affectedSystem}</b>
                   </div>
                   {parsed.urgency && (
                     <div className={s.parsedChip}>
-                      <span>Срочность</span>
-                      <b style={{ color: URGENCY_LABEL[parsed.urgency]?.color }}>
-                        {URGENCY_LABEL[parsed.urgency]?.label ?? parsed.urgency}
+                      <span>{t('diagnostics.urgency_label')}</span>
+                      <b style={{ color: URGENCY_KEYS[parsed.urgency]?.color }}>
+                        {URGENCY_KEYS[parsed.urgency] ? t(URGENCY_KEYS[parsed.urgency].labelKey) : parsed.urgency}
                       </b>
                     </div>
                   )}
                   <div className={s.parsedChip}>
-                    <span>Время работ</span><b>~{parsed.estimatedTime} мин</b>
+                    <span>{t('diagnostics.work_time_label')}</span><b>~{parsed.estimatedTime} {t('diagnostics.min_suffix')}</b>
                   </div>
                 </div>
               )}
 
               <div className={s.verd}>
-                <div className={s.verdLabel}>Вердикт</div>
+                <div className={s.verdLabel}>{t('diagnostics.verdict')}</div>
                 <p className={s.verdText}>{diag.totalProbable}</p>
               </div>
 
@@ -229,14 +231,14 @@ export default function DiagnosticsPage() {
                       </div>
                     )}
                     <div className={s.hypoTime}>
-                      ⏱ {h.laborMin}–{h.laborMax} мин работы
+                      ⏱ {h.laborMin}–{h.laborMax} {t('diagnostics.work_time_suffix')}
                     </div>
                   </div>
                 ))}
               </div>
 
               <div className={s.estimateRange}>
-                <span className={s.erLabel}>Предварительная смета</span>
+                <span className={s.erLabel}>{t('diagnostics.estimate_label')}</span>
                 <span className={s.erVal}>
                   {diag.minEstimate.toLocaleString('ru')} – {diag.maxEstimate.toLocaleString('ru')} ₽
                 </span>
@@ -249,11 +251,11 @@ export default function DiagnosticsPage() {
             <div className={s.tabContent}>
               <div className={s.itemsTable}>
                 <div className={s.itemsHead}>
-                  <span>Наименование</span>
-                  <span>Арт.</span>
-                  <span className={s.right}>Кол.</span>
-                  <span className={s.right}>Цена</span>
-                  <span className={s.right}>Сумма</span>
+                  <span>{t('diagnostics.th.name')}</span>
+                  <span>{t('diagnostics.th.article')}</span>
+                  <span className={s.right}>{t('diagnostics.th.qty')}</span>
+                  <span className={s.right}>{t('diagnostics.th.price')}</span>
+                  <span className={s.right}>{t('diagnostics.th.sum')}</span>
                 </div>
                 {order.items.map((item: any, i: number) => (
                   <div key={i} className={s.itemRow}>
@@ -267,7 +269,7 @@ export default function DiagnosticsPage() {
               </div>
               {order.totalRetail && (
                 <div className={s.total}>
-                  <span>ИТОГО К ОПЛАТЕ</span>
+                  <span>{t('diagnostics.total_due')}</span>
                   <span className={s.totalVal}>{Number(order.totalRetail).toLocaleString('ru')} ₽</span>
                 </div>
               )}
@@ -281,32 +283,32 @@ export default function DiagnosticsPage() {
                 <div className={s.payAmount}>
                   {Number(order.totalRetail).toLocaleString('ru')} ₽
                 </div>
-                <p className={s.paySub}>Заказ {order.orderNumber} · автосервис МОТОР</p>
+                <p className={s.paySub}>{t('diagnostics.order_prefix', { number: order.orderNumber })}</p>
 
                 {order.status === 'CLOSED' ? (
-                  <div className={s.paidBadge}>✅ Оплачено</div>
+                  <div className={s.paidBadge}>{t('diagnostics.paid_badge')}</div>
                 ) : order.status === 'CONFIRMED' ? (
                   <button className={s.payBtn} onClick={startPayment} disabled={paying}>
-                    {paying ? 'Переход к оплате…' : '💳 Оплатить через ЮКасса'}
+                    {paying ? t('diagnostics.pay_transition') : t('diagnostics.pay_btn')}
                   </button>
                 ) : (
                   <p className={s.payNote}>
-                    Оплата будет доступна после подтверждения заказа менеджером.
-                    <br/>Текущий статус: <StatusBadge status={order.status} />
+                    {t('diagnostics.pay_note')}
+                    <br/>{t('diagnostics.current_status')} <StatusBadge status={order.status} />
                   </p>
                 )}
 
                 <div className={s.payMethods}>
-                  <span>Карта</span><span>СБП</span><span>ЮMoney</span><span>SberPay</span>
+                  <span>{t('diagnostics.pay_method_card')}</span><span>СБП</span><span>ЮMoney</span><span>SberPay</span>
                 </div>
-                <p className={s.paySecure}>🔒 Защищённый платёж · PCI DSS · ЮКасса</p>
+                <p className={s.paySecure}>{t('diagnostics.pay_secure')}</p>
               </div>
             </div>
           )}
 
           {/* Перезапустить */}
           <button className={s.rerunBtn} onClick={runPipeline} disabled={running}>
-            {running ? '⏳ Работают агенты…' : '↺ Перезапустить диагностику'}
+            {running ? t('diagnostics.agents_running_short') : t('diagnostics.rerun_btn')}
           </button>
         </>
       )}
