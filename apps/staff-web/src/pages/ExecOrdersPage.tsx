@@ -22,7 +22,7 @@ export default function ExecOrdersPage() {
     { status: 'READY',       label: t('exec.col.ready'),     color: 'var(--green)' },
   ];
 
-  useEffect(() => { dispatch(fetchOrders()); }, []);
+  useEffect(() => { dispatch(fetchOrders({})); }, []);
 
   return (
     <div className={s.page}>

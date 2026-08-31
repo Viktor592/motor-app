@@ -19,7 +19,7 @@ export default function HomePage() {
   const [promos, setPromos] = useState<{ id: string; title: string; body: string; imageUrl?: string }[]>([]);
   const [myBookings, setMyBookings] = useState<any[]>([]);
 
-  useEffect(() => { dispatch(fetchOrders()); }, []);
+  useEffect(() => { dispatch(fetchOrders({})); }, []);
   useEffect(() => { api.get('/saas/promotions').then(r => setPromos(r.data.promotions)).catch(() => {}); }, []);
   useEffect(() => { api.get('/booking/mine').then(r => setMyBookings(r.data.bookings)).catch(() => {}); }, []);
 

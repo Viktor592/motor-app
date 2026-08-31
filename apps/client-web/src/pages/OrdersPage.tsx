@@ -18,7 +18,7 @@ export default function OrdersPage() {
   const [filter, setFilter] = useState('ALL');
   const [search, setSearch] = useState('');
 
-  useEffect(() => { dispatch(fetchOrders()); }, []);
+  useEffect(() => { dispatch(fetchOrders({})); }, []);
 
   const shown = list.filter(o => {
     const matchStatus = filter === 'ALL' || o.status === filter;
