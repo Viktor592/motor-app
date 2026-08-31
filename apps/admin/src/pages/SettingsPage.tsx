@@ -249,7 +249,7 @@ export default function SettingsPage() {
                   {t('settings.notif.telegram_intro')}
                 </p>
                 <ol className={s.telegramSteps}>
-                  <li>{t('settings.notif.step_find_bot')} <code>@{process.env.TELEGRAM_BOT_USERNAME || 'motor_service_bot'}</code></li>
+                  <li>{t('settings.notif.step_find_bot')} <code>@{import.meta.env.VITE_TELEGRAM_BOT_USERNAME || 'motor_service_bot'}</code></li>
                   <li>{t('settings.notif.step_start')}</li>
                   <li>{t('settings.notif.step_phone')}</li>
                 </ol>
