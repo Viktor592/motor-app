@@ -31,7 +31,7 @@ export default function PlansPage() {
     Promise.all([
       api.get('/saas/billing/plans'),
       api.get('/saas/me'),
-    ]).then(([p, i]) => { setPlans(p); setInfo(i); }).finally(() => setLoading(false));
+    ]).then(([p, i]) => { setPlans(p.data); setInfo(i.data); }).finally(() => setLoading(false));
   }, []);
 
   const upgrade = async (planId: string) => {
