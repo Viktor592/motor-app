@@ -202,16 +202,6 @@ const translations: Record<Locale, Record<string, string>> = {
     // Профиль (ProfilePage) — заголовки разделов
     'profile.eye_label':       'Профиль',
     'profile.role.client':       'Клиент',
-    'profile.role.master':       'Шебер',
-    'profile.role.receptionist': 'Қабылдаушы',
-    'profile.role.admin':        'Әкімші',
-    'nav.client.home':    'Басты бет',
-    'nav.client.booking': 'Жазылу',
-    'nav.client.orders':  'Тапсырыстар',
-    'nav.client.parts':   'Қосалқы бөлшектер',
-    'nav.client.chat':    'AI-чат',
-    'nav.client.profile': 'Профиль',
-    'profile.role.client':       'Клиент',
     'profile.role.master':       'Мастер',
     'profile.role.receptionist': 'Приёмщик',
     'profile.role.admin':        'Администратор',
@@ -512,6 +502,16 @@ const translations: Record<Locale, Record<string, string>> = {
     'auth.save_btn':           'Сақтау →',
     // Профиль (ProfilePage) — заголовки разделов
     'profile.eye_label':       'Профиль',
+    'profile.role.client':       'Клиент',
+    'profile.role.master':       'Шебер',
+    'profile.role.receptionist': 'Қабылдаушы',
+    'profile.role.admin':        'Әкімші',
+    'nav.client.home':    'Басты бет',
+    'nav.client.booking': 'Жазылу',
+    'nav.client.orders':  'Тапсырыстар',
+    'nav.client.parts':   'Қосалқы бөлшектер',
+    'nav.client.chat':    'AI-чат',
+    'nav.client.profile': 'Профиль',
     'profile.title':           'ПРОФИЛЬ',
     'profile.name_section':    'АТЫ',
     'profile.my_vehicles':     'МЕНІҢ КӨЛІКТЕРІМ',
@@ -920,7 +920,7 @@ export function setLocale(locale: Locale) {
 
 export function onLocaleChange(fn: () => void) {
   listeners.add(fn);
-  return () => listeners.delete(fn);
+  return () => { listeners.delete(fn); };
 }
 
 // ── Основная функция перевода ─────────────────────────────────

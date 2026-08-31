@@ -828,7 +828,7 @@ export function setLocale(locale: Locale) {
 
 export function onLocaleChange(fn: () => void) {
   listeners.add(fn);
-  return () => listeners.delete(fn);
+  return () => { listeners.delete(fn); };
 }
 
 // ── Основная функция перевода ─────────────────────────────────
