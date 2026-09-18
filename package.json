@@ -2,18 +2,24 @@
   "name": "motor-app",
   "version": "1.0.0",
   "private": true,
-  "workspaces": [
-    "packages/*"
-  ],
   "scripts": {
-    "android": "yarn workspace @motor/mobile android",
-    "ios": "yarn workspace @motor/mobile ios",
-    "web": "yarn workspace @motor/web dev",
-    "start:mobile": "yarn workspace @motor/mobile start",
-    "lint": "yarn workspaces run lint",
-    "ts": "yarn workspaces run ts"
-  },
-  "devDependencies": {
-    "typescript": "^5.3.3"
+    "dev:backend": "npm --prefix backend run dev",
+    "dev:saas": "npm --prefix apps/saas run dev",
+    "dev:client-web": "npm --prefix apps/client-web run dev",
+    "dev:staff-web": "npm --prefix apps/staff-web run dev",
+    "dev:admin": "npm --prefix apps/admin run dev",
+    "build:backend": "npm --prefix backend run build",
+    "build:saas": "npm --prefix apps/saas run build",
+    "build:client-web": "npm --prefix apps/client-web run build",
+    "build:staff-web": "npm --prefix apps/staff-web run build",
+    "build:admin": "npm --prefix apps/admin run build",
+    "build:web": "npm run build:saas && npm run build:client-web && npm run build:staff-web && npm run build:admin",
+    "mobile:client": "npm --prefix apps/client-mobile run start",
+    "mobile:staff": "npm --prefix apps/staff-mobile run start",
+    "android:client": "npm --prefix apps/client-mobile run android",
+    "android:staff": "npm --prefix apps/staff-mobile run android",
+    "ios:client": "npm --prefix apps/client-mobile run ios",
+    "ios:staff": "npm --prefix apps/staff-mobile run ios",
+    "install:all": "npm --prefix backend install && npm --prefix apps/saas install && npm --prefix apps/client-web install && npm --prefix apps/staff-web install && npm --prefix apps/admin install && npm --prefix apps/client-mobile install && npm --prefix apps/staff-mobile install"
   }
 }

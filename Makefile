@@ -1,21 +1,38 @@
-.PHONY: dev build seed up down logs clean
+.PHONY: dev-backend dev-saas dev-client-web dev-staff-web dev-admin dev-all \
+	up down restart logs logs-all \
+	db-migrate db-generate db-seed db-studio db-reset \
+	install build build-backend build-web \
+	build-saas build-client-web build-staff-web build-admin \
+	clean mobile-client mobile-staff android-client android-staff ios-client ios-staff
 
 # ── Разработка ──────────────────────────────────────────
 dev-backend:
 	cd backend && npm run dev
 
-dev-web:
-	cd web && npm run dev
+dev-saas:
+	cd apps/saas && npm run dev
+
+dev-client-web:
+	cd apps/client-web && npm run dev
+
+dev-staff-web:
+	cd apps/staff-web && npm run dev
+
+dev-admin:
+	cd apps/admin && npm run dev
 
 dev-all:
 	@echo "Запуск всего стека в разработке..."
-	$(MAKE) -j3 dev-backend dev-web
+	$(MAKE) -j4 dev-backend dev-client-web dev-staff-web dev-admin
 
 # ── Docker ──────────────────────────────────────────────
 up:
 	docker compose up -d --build
 	@echo "\n✅ Стек запущен:"
-	@echo "   Web:     http://localhost:5173"
+	@echo "   SaaS:    http://localhost:80"
+	@echo "   Client:  http://localhost:3001"
+	@echo "   Staff:   http://localhost:3002"
+	@echo "   Admin:   http://localhost:3003"
 	@echo "   API:     http://localhost:3000"
 	@echo "   Health:  http://localhost:3000/health\n"
 
@@ -50,15 +67,31 @@ db-reset:
 # ── Установка зависимостей ──────────────────────────────
 install:
 	cd backend && npm install
-	cd web && npm install
-	cd mobile && npm install
+	cd apps/saas && npm install
+	cd apps/client-web && npm install
+	cd apps/staff-web && npm install
+	cd apps/admin && npm install
+	cd apps/client-mobile && npm install
+	cd apps/staff-mobile && npm install
 
 # ── Сборка ─────────────────────────────────────────────
 build-backend:
 	cd backend && npm run build
 
+build-saas:
+	cd apps/saas && npm run build
+
+build-client-web:
+	cd apps/client-web && npm run build
+
+build-staff-web:
+	cd apps/staff-web && npm run build
+
+build-admin:
+	cd apps/admin && npm run build
+
 build-web:
-	cd web && npm run build
+	$(MAKE) build-saas build-client-web build-staff-web build-admin
 
 build:
 	$(MAKE) build-backend build-web
@@ -66,14 +99,23 @@ build:
 # ── Очистка ─────────────────────────────────────────────
 clean:
 	docker compose down -v
-	rm -rf backend/dist web/dist
+	rm -rf backend/dist apps/*/dist
 
-# ── Мобильное ───────────────────────────────────────────
-android:
-	cd mobile && npx react-native run-android
+# ── Мобильное (Expo) ────────────────────────────────────
+mobile-client:
+	cd apps/client-mobile && npm start
 
-ios:
-	cd mobile && npx react-native run-ios
+mobile-staff:
+	cd apps/staff-mobile && npm start
 
-mobile-start:
-	cd mobile && npx react-native start --reset-cache
+android-client:
+	cd apps/client-mobile && npm run android
+
+android-staff:
+	cd apps/staff-mobile && npm run android
+
+ios-client:
+	cd apps/client-mobile && npm run ios
+
+ios-staff:
+	cd apps/staff-mobile && npm run ios
